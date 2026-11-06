@@ -42,7 +42,7 @@ def _panel(title: str, unit: str, lines: list[tuple[str, str, list]]) -> dict | 
 
 def _circuits(tables: list[dict]) -> list[str]:
     found = {cell.split("/")[0] for table in tables for (cell, _) in table if "/" in cell}
-    found.discard("memory")
+    found -= {"memory", "imports"}
     ordered = [circuit for circuit in CIRCUIT_ORDER if circuit in found]
     return ordered + sorted(found - set(ordered))
 
@@ -86,8 +86,7 @@ def panels(results: list[dict]) -> dict[str, list[dict]]:
             )
         )
     ]
-    first = circuits[0] if circuits else ""
-    imports = _panel("Imports", "instructions", _backend_lines(tables, first, "imports"))
+    imports = _panel("Imports", "instructions", _backend_lines(tables, "imports", "imports"))
     chosen["imports"] = [imports] if imports else []
     memory = _panel(
         "Peak resident memory",

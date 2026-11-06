@@ -52,8 +52,8 @@ def test_an_unknown_version_is_an_error_and_not_a_guess(version):
         ("compile", 1000, 1000, False),
         ("gates.device", 700, 701, True),
         ("depth.top", 90, 90, False),
-        ("peak_kb", 1000, 1009, False),
-        ("peak_kb", 1000, 1010, True),
+        ("peak_kb", 1000, 1004, False),
+        ("peak_kb", 1000, 1005, True),
     ],
 )
 def test_what_counts_as_a_step(metric, before, after, expected):
@@ -85,6 +85,16 @@ def test_steps_are_found_between_consecutive_builds_in_build_order():
 
 def test_a_cell_missing_from_one_build_is_not_a_step():
     assert find_steps([result("0.8.1", cell(1000)), result("0.9.0")]) == []
+
+
+def test_imports_are_one_figure_per_backend_however_many_cells_carry_them():
+    def carrying(net):
+        return [
+            {"name": f"{circuit}/qjit", "imports": {"net": net}} for circuit in ("qft", "grover")
+        ]
+
+    steps = find_steps([result("0.8.1", *carrying(1000)), result("0.9.0", *carrying(2000))])
+    assert [(s.cell, s.metric) for s in steps] == [("imports/qjit", "imports")]
 
 
 def test_a_step_names_every_package_that_moved():

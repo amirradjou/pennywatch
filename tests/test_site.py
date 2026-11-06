@@ -87,6 +87,14 @@ def test_steps_carry_their_numbers_and_explanation():
     assert row["explanation"]["text"] == "#1"
 
 
+def test_imports_are_one_chart_with_a_line_per_backend():
+    data = site.page_data([result("0.9.0", 100)], [], [])
+    panel = data["stable"]["panels"]["imports"][0]
+    assert panel["title"] == "Imports"
+    assert [series["key"] for series in panel["series"]] == ["qjit"]
+    assert panel["series"][0]["values"] == [7]
+
+
 def test_gaps_keep_a_short_reason_only():
     gap = {"stack": {"pennylane-catalyst": "0.16.0.dev1"}, "problems": ["x" * 1000, "b", "c", "d"]}
     gaps = site.page_data([], [], [], gaps=[gap])["gaps"]

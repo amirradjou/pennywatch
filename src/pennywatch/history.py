@@ -15,8 +15,8 @@ from pathlib import Path
 from pennywatch.untrusted import clean_name
 
 COUNTED_STEP_PCT = 0.5
-# Set from measured noise: see the README's limits.
-MEMORY_STEP_PCT = 1.0
+# About five times the widest spread measured across layouts, 0.08%.
+MEMORY_STEP_PCT = 0.5
 # How close a second measurement of a step has to come to the first: this many percentage points,
 # or this share of the step, whichever is more.
 CONFIRM_TOLERANCE_POINTS = 0.25
@@ -34,14 +34,21 @@ def version_key(version: str) -> tuple[int, int, int, float]:
     return (int(major), int(minor), int(patch), float("inf") if dev is None else int(dev))
 
 
+def _imports_name(cell: dict) -> str:
+    """Imports belong to a backend, not a circuit, and every cell on it carries the same figure."""
+    return f"imports/{cell['name'].split('/')[1]}"
+
+
 def metrics_of(result: dict) -> dict[tuple[str, str], float]:
     """Every number in a result that a build can change, by cell and metric."""
     metrics: dict[tuple[str, str], float] = {}
     for cell in result["cells"]:
         name = cell["name"]
-        for metric in ("instructions", "compile", "imports"):
+        for metric in ("instructions", "compile"):
             if metric in cell:
                 metrics[(name, metric)] = cell[metric]["net"]
+        if "imports" in cell:
+            metrics[(_imports_name(cell), "imports")] = cell["imports"]["net"]
         for level, counts in (cell.get("gates") or {}).items():
             for field in ("gates", "depth"):
                 if field in counts:
@@ -55,9 +62,11 @@ def runs_of(result: dict) -> dict[tuple[str, str], list[int]]:
     """The separate runs behind each counted metric, where a result has more than one."""
     runs: dict[tuple[str, str], list[int]] = {}
     for cell in result["cells"]:
-        for metric in ("instructions", "compile", "imports"):
+        for metric in ("instructions", "compile"):
             if metric in cell and cell[metric].get("runs"):
                 runs[(cell["name"], metric)] = cell[metric]["runs"]
+        if "imports" in cell and cell["imports"].get("runs"):
+            runs[(_imports_name(cell), "imports")] = cell["imports"]["runs"]
     for entry in result.get("memory") or []:
         if entry["max_rss_kb"].get("runs"):
             runs[(f"memory/{entry['backend']}", "peak_kb")] = entry["max_rss_kb"]["runs"]
