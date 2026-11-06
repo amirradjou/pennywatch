@@ -123,7 +123,10 @@ def explanation_entry(saved: dict) -> tuple[str, dict]:
         return key, {"text": f"{culprits[0]['subject'][:120]}{also}", "url": culprits[0].get("url")}
     if bisect.get("verdict"):
         return key, {"text": str(bisect["verdict"])[:160], "url": None}
-    count = sum(len(changes) for changes in (saved.get("candidates") or {}).values())
+    counts = saved.get("candidate_counts") or {
+        name: len(rows) for name, rows in (saved.get("candidates") or {}).items()
+    }
+    count = sum(counts.values())
     return key, {"text": f"{count} candidates, not narrowed further", "url": None}
 
 

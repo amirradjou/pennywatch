@@ -28,6 +28,7 @@ TOP_FUNCTIONS = 15
 MIN_CULPRIT_SHARE = 0.1
 COUNTED_STEP = 0.005
 MAX_CULPRITS = 6
+SAVED_CANDIDATES = 30
 # A bisect only makes sense if the newest PennyLane alone gives most of the step.
 BISECT_MIN_SHARE = 0.5
 ARCHIVE_LIMIT_BYTES = 200 * 1024 * 1024
@@ -446,6 +447,10 @@ def bisect_pennylane(
     return outcome
 
 
+def _saved_candidate(row: dict) -> dict:
+    return {key: row[key] for key in ("score", "subject", "pull_request", "url") if key in row}
+
+
 @dataclass
 class Explanation:
     cell: str
@@ -464,6 +469,12 @@ class Explanation:
             data[side].pop("functions")
             data[side].pop("calls")
             data[side]["net"] = getattr(self, side).net
+        # The whole list, with every commit's files, is hundreds of kilobytes per explanation.
+        data["candidate_counts"] = {name: len(rows) for name, rows in self.candidates.items()}
+        data["candidates"] = {
+            name: [_saved_candidate(row) for row in rows[:SAVED_CANDIDATES]]
+            for name, rows in self.candidates.items()
+        }
         return data
 
 

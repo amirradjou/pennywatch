@@ -398,3 +398,21 @@ def test_saving_drops_the_bulky_tables_and_keeps_the_answer(tmp_path):
     text = path.read_text()
     assert '"net": 2' in text
     assert '"calls"' not in text
+
+
+def test_saving_keeps_the_likeliest_candidates_and_how_many_there_were(tmp_path):
+    rows = [{"score": 0, "subject": f"s{i}", "url": "u", "files": ["a.py"]} for i in range(100)]
+    explanation = explain.Explanation(
+        "qft/default",
+        "instructions",
+        _side("a", [1]),
+        _side("b", [2]),
+        [],
+        [],
+        [],
+        {"pennylane": rows},
+    )
+    saved = explanation.to_dict()
+    assert saved["candidate_counts"] == {"pennylane": 100}
+    assert len(saved["candidates"]["pennylane"]) == explain.SAVED_CANDIDATES
+    assert "files" not in saved["candidates"]["pennylane"][0]

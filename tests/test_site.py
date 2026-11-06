@@ -170,6 +170,11 @@ def test_with_no_bisect_it_says_how_many_candidates_there_are():
     assert entry["text"] == "3 candidates, not narrowed further"
 
 
+def test_the_count_of_candidates_survives_the_list_being_cut_short():
+    saved = _saved(candidate_counts={"pennylane": 591, "pennylane-catalyst": 411})
+    assert site.explanation_entry(saved)[1]["text"] == "1002 candidates, not narrowed further"
+
+
 def test_saved_explanations_are_matched_to_their_steps(tmp_path):
     (tmp_path / "a.json").write_text(json.dumps(_saved()))
     explanations = site.load_explanations(tmp_path)
