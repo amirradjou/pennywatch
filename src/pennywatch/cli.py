@@ -9,6 +9,7 @@ from pennywatch import (
     builds,
     compare,
     container,
+    explain,
     history,
     measure,
     publish,
@@ -77,6 +78,15 @@ def _parser() -> argparse.ArgumentParser:
     accept = commands.add_parser("accept", help="check measured results and store them")
     accept.add_argument("artifacts", type=Path)
     accept.add_argument("--into", type=Path, required=True)
+
+    why = commands.add_parser("explain", help="narrow a change down to its pull requests")
+    why.add_argument("before", help="Catalyst version before the change")
+    why.add_argument("after", help="Catalyst version after the change")
+    why.add_argument("--cell", required=True)
+    why.add_argument("--metric", default="instructions", choices=["instructions", "compile"])
+    why.add_argument("--bisect", action="store_true", help="also bisect PennyLane commit by commit")
+    why.add_argument("--cpus", default="0,1")
+    why.add_argument("--out", type=Path, default=Path("results/explanations"))
 
     page = commands.add_parser("site", help="build the public page")
     page.add_argument("--stable", type=Path, default=Path("results/stable"))
@@ -165,6 +175,20 @@ def site_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def explain_command(args: argparse.Namespace) -> int:
+    explanation = explain.explain(
+        stacks.Stack(args.before),
+        stacks.Stack(args.after),
+        args.cell,
+        metric=args.metric,
+        cpus=tuple(int(cpu) for cpu in args.cpus.split(",")),
+        bisect=args.bisect,
+    )
+    print(explain.render(explanation))
+    print(f"Saved to {explain.save(explanation, args.out)}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "run":
@@ -179,6 +203,8 @@ def main(argv: list[str] | None = None) -> int:
         return steps_command(args)
     if args.command == "site":
         return site_command(args)
+    if args.command == "explain":
+        return explain_command(args)
     if args.command == "pending":
         print(json.dumps(builds.pending(publish.done_builds(args.data), args.since, args.limit)))
         return 0

@@ -1,0 +1,477 @@
+"""Why did a metric change between two builds?
+
+Each package is narrowed as far as it allows. Everything that merged between the two builds is the
+candidate list. The functions that moved rank it, and PennyLane, being pure Python, can be bisected
+commit by commit. A wrong answer is possible at every stage, so the output says how far it got.
+"""
+
+import io
+import json
+import shutil
+import subprocess
+import tarfile
+import tempfile
+import urllib.request
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from statistics import median
+
+from pennywatch import cachegrind, container, history, measure, stacks, upstream
+from pennywatch.measure import Job
+from pennywatch.suite import SUITES, Cell
+
+LAYOUTS = 3
+TOP_FUNCTIONS = 15
+# A bisect only makes sense if the newest PennyLane alone gives most of the step.
+BISECT_MIN_SHARE = 0.5
+OVERLAY_LIMIT_BYTES = 200 * 1024 * 1024
+
+
+@dataclass
+class Side:
+    """One build's numbers for one cell."""
+
+    stack: str
+    runs: list[int]
+    functions: dict[str, int] = field(default_factory=dict)
+    calls: dict[str, int] = field(default_factory=dict)
+
+    @property
+    def net(self) -> int:
+        return int(median(self.runs))
+
+
+def find_cell(name: str, suite: str = "full") -> Cell:
+    for cell in SUITES[suite]:
+        if cell.name == name:
+            return cell
+    raise SystemExit(f"no cell {name} in suite {suite}")
+
+
+def _job(cell: Cell, role: str, repeat: int = 0) -> Job:
+    return Job(role, cell.backend, cell.wires, cell.circuit, cell.rounds, repeat=repeat)
+
+
+def _workspace() -> Path:
+    stacks.cache_dir().mkdir(parents=True, exist_ok=True)
+    workspace = Path(tempfile.mkdtemp(prefix="explain-", dir=stacks.cache_dir()))
+    workspace.chmod(0o755)
+    return workspace
+
+
+def _usable_calls(sentinel: dict | None) -> dict[str, int]:
+    """Calls per function, as written by the code under test: anything odd is dropped."""
+    calls = (sentinel or {}).get("calls")
+    if not isinstance(calls, dict):
+        return {}
+    return {
+        str(name)[:300]: count
+        for name, count in calls.items()
+        if isinstance(count, int) and not isinstance(count, bool)
+    }
+
+
+def counted_role(metric: str) -> str:
+    return {"instructions": "full", "compile": "compile", "imports": "imports"}[metric]
+
+
+def measure_side(
+    image: str,
+    stack_dir: Path,
+    stack_name: str,
+    cell: Cell,
+    cpus: list[int],
+    metric: str = "instructions",
+    overlay: Path | None = None,
+    profile: bool = True,
+) -> Side:
+    """Run a cell across layouts, with the functions of the first layout and a Python profile."""
+    workspace = _workspace()
+    role = counted_role(metric)
+    try:
+        runner = measure.Runner(
+            image, stack_dir, workspace, cpus, overlay=overlay, keep_functions=True
+        )
+        jobs = [_job(cell, role, repeat=layout) for layout in range(LAYOUTS)]
+        extra = [_job(cell, "profile")] if profile else []
+        outcomes = runner.run_all(jobs + extra)
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+    problems = [
+        f"{job.label}: {problem}"
+        for job, outcome in outcomes.items()
+        if (problem := measure.validate_outcome(outcome))
+    ]
+    if problems:
+        raise MeasurementFailed("; ".join(problems))
+    side = Side(stack_name, [outcomes[job].counts.total for job in jobs])
+    side.functions = outcomes[jobs[0]].functions or {}
+    if profile:
+        side.calls = _usable_calls(outcomes[extra[0]].sentinel)
+    return side
+
+
+class MeasurementFailed(RuntimeError):
+    """A run of a build or a commit gave no usable number."""
+
+
+def call_changes(before: dict[str, int], after: dict[str, int], top: int) -> list[list]:
+    moved = [
+        [name, before.get(name, 0), after.get(name, 0)]
+        for name in before.keys() | after.keys()
+        if before.get(name, 0) != after.get(name, 0)
+    ]
+    moved.sort(key=lambda row: (-abs(row[2] - row[1]), row[0]))
+    return moved[:top]
+
+
+def rank_candidates(
+    merged: list[upstream.Merged], moved_calls: list[list]
+) -> list[tuple[int, upstream.Merged]]:
+    """Most likely first: a pull request scores the calls that moved in the files it touched. Ties
+    keep merge order. This is a pointer for a person to check, not a verdict."""
+    weight: dict[str, int] = {}
+    for name, before, after in moved_calls:
+        path = name.rsplit(":", 1)[0]
+        weight[path] = weight.get(path, 0) + abs(after - before)
+    scored = [(sum(weight.get(path, 0) for path in change.files), change) for change in merged]
+    return sorted(scored, key=lambda item: -item[0])
+
+
+def candidates(before: dict[str, str], after: dict[str, str]) -> dict[str, list[upstream.Merged]]:
+    """What merged between two stacks, per package whose version moved."""
+    found = {}
+    for package, repo in upstream.REPOS.items():
+        old, new = before.get(package), after.get(package)
+        if old == new or old is None or new is None:
+            continue
+        found[package] = upstream.merged_between(
+            repo, upstream.commit_of(repo, old), upstream.commit_of(repo, new)
+        )
+    return found
+
+
+def fetch_overlay(commit: str) -> Path:
+    """PennyLane's Python files at one commit, from GitHub's archive, unpacked once into the cache.
+    Bytecode gets compiled offline, as for a stack, so no measured run pays for writing it."""
+    target = stacks.cache_dir() / "overlays" / commit
+    if target.is_dir():
+        return target
+    url = f"https://github.com/{upstream.REPOS['pennylane'].slug}/archive/{commit}.tar.gz"
+    with urllib.request.urlopen(url, timeout=120) as response:
+        archive = response.read(OVERLAY_LIMIT_BYTES)
+    partial = Path(tempfile.mkdtemp(prefix=f"{commit[:12]}.", dir=_overlays_dir()))
+    partial.chmod(0o755)
+    unpack_package(archive, partial)
+    subprocess.run(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--cpus=2",
+            "--network=none",
+            *container.HARDENING,
+            container.user_flag(),
+            "-e",
+            "HOME=/tmp",
+            f"--volume={partial}:/overlay",
+            container.ensure_image(),
+            "python",
+            "-I",
+            "-S",
+            "-m",
+            "compileall",
+            "-q",
+            "/overlay",
+        ],
+        check=True,
+    )
+    partial.rename(target)
+    return target
+
+
+def _overlays_dir() -> Path:
+    path = stacks.cache_dir() / "overlays"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def unpack_package(archive: bytes, target: Path, package: str = "pennylane") -> None:
+    """Only regular files inside the package's own directory come out of the archive."""
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
+        for member in tar.getmembers():
+            _, _, inside = member.name.partition("/")
+            if not member.isfile() or not inside.startswith(f"{package}/"):
+                continue
+            if ".." in Path(inside).parts:
+                continue
+            destination = target / inside
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            source = tar.extractfile(member)
+            if source is not None:
+                destination.write_bytes(source.read())
+
+
+def bisect_commits(commits: list[str], low: float, high: float, measure_commit) -> dict:
+    """Find the commit where a metric moved from about `low` to about `high`.
+
+    `commits` run oldest to newest, the last being the newer build. `measure_commit` gives a number,
+    or None for a commit that can't be measured, which gets stepped around as `git bisect skip`
+    does. If several commits each moved it part of the way, this finds one of them, and the result
+    says how much of the step that commit accounts for."""
+    midpoint = (low + high) / 2
+    moved_past = (lambda value: value >= midpoint) if high >= low else (lambda v: v <= midpoint)
+    left, right = -1, len(commits) - 1  # left: not yet moved. right: moved.
+    tried: list[dict] = []
+    values: dict[int, float | None] = {}
+
+    def value_at(index: int) -> float | None:
+        if index not in values:
+            values[index] = measure_commit(commits[index])
+            tried.append({"commit": commits[index], "value": values[index]})
+        return values[index]
+
+    while right - left > 1:
+        middle = (left + right) // 2
+        probe = middle
+        while probe < right and value_at(probe) is None:
+            probe += 1
+        if probe == right:
+            # Nothing between the middle and the right edge can be measured, so look left of it.
+            probe = middle - 1
+            while probe > left and value_at(probe) is None:
+                probe -= 1
+            if probe == left:
+                return {"found": None, "range": commits[left + 1 : right + 1], "tried": tried}
+            if moved_past(values[probe]):
+                right = probe
+            else:
+                return {"found": None, "range": commits[probe + 1 : right + 1], "tried": tried}
+            continue
+        if moved_past(values[probe]):
+            right = probe
+        else:
+            left = probe
+    before_value = low if left < 0 else values[left]
+    after_value = values.get(right)
+    if after_value is None:
+        after_value = value_at(right)
+    return {
+        "found": commits[right],
+        "before": before_value,
+        "after": after_value,
+        "share_of_step": None
+        if after_value is None or high == low
+        else (after_value - before_value) / (high - low),
+        "tried": tried,
+    }
+
+
+def bisect_pennylane(
+    image: str,
+    stack_dir: Path,
+    cell: Cell,
+    merged: list[upstream.Merged],
+    low: float,
+    high: float,
+    last_commit: str,
+    cpus: list[int],
+    metric: str,
+) -> dict:
+    """Bisect PennyLane alone on top of the older stack, so nothing else can be the cause."""
+
+    def run(commit: str) -> float | None:
+        try:
+            overlay = fetch_overlay(commit)
+            side = measure_side(
+                image, stack_dir, commit[:12], cell, cpus, metric, overlay=overlay, profile=False
+            )
+        except (MeasurementFailed, OSError, subprocess.CalledProcessError) as error:
+            print(f"{commit[:12]} can't be measured: {str(error)[:160]}")
+            return None
+        print(f"{commit[:12]} {side.net:,}", flush=True)
+        return side.net
+
+    newest = run(last_commit)
+    if newest is None:
+        return {"verdict": "The newer PennyLane doesn't run on the older stack, so no bisect."}
+    share = (newest - low) / (high - low) if high != low else 0.0
+    if share < BISECT_MIN_SHARE:
+        return {
+            "verdict": f"PennyLane alone gives {share:.0%} of the step, so the cause is elsewhere: "
+            "another package or the third-party ones.",
+            "pennylane_alone": newest,
+        }
+    commits = [change.commit for change in merged]
+    if not commits or commits[-1] != last_commit:
+        commits.append(last_commit)
+    outcome = bisect_commits(commits, low, newest, run)
+    outcome["pennylane_alone"] = newest
+    outcome["pennylane_share"] = share
+    return outcome
+
+
+@dataclass
+class Explanation:
+    cell: str
+    metric: str
+    before: Side
+    after: Side
+    packages: list[str]
+    python_functions: list
+    c_functions: list
+    candidates: dict[str, list[dict]]
+    bisect: dict | None = None
+
+    def to_dict(self) -> dict:
+        data = asdict(self)
+        for side in ("before", "after"):
+            data[side].pop("functions")
+            data[side].pop("calls")
+            data[side]["net"] = getattr(self, side).net
+        return data
+
+
+def explain(
+    before: stacks.Stack,
+    after: stacks.Stack,
+    cell_name: str,
+    metric: str = "instructions",
+    cpus: tuple[int, ...] = (0, 1),
+    bisect: bool = False,
+    suite: str = "full",
+) -> Explanation:
+    cell = find_cell(cell_name, suite)
+    image = container.ensure_image()
+    versions, sides, directories = {}, {}, {}
+    for name, stack in (("before", before), ("after", after)):
+        if not stack.lock_path.exists():
+            stacks.write_lock(stack, image)
+        versions[name] = stacks.locked_versions(stack.lock_path)
+        directories[name] = stacks.install(stack, image)
+        sides[name] = measure_side(image, directories[name], stack.id, cell, list(cpus), metric)
+    moved_calls = call_changes(sides["before"].calls, sides["after"].calls, 200)
+    merged = candidates(versions["before"], versions["after"])
+    changed = {
+        name: {"before": versions["before"][name], "after": versions["after"][name]}
+        for name in versions["before"].keys() & versions["after"].keys()
+        if versions["before"][name] != versions["after"][name]
+    }
+    ranked = {
+        package: [
+            {"score": score, **asdict(change)}
+            for score, change in rank_candidates(changes, moved_calls)
+        ]
+        for package, changes in merged.items()
+    }
+    bisected = None
+    if bisect and "pennylane" in merged:
+        repo = upstream.REPOS["pennylane"]
+        bisected = bisect_pennylane(
+            image,
+            directories["before"],
+            cell,
+            merged["pennylane"],
+            sides["before"].net,
+            sides["after"].net,
+            upstream.commit_of(repo, versions["after"]["pennylane"]),
+            list(cpus),
+            metric,
+        )
+        found = bisected.get("found")
+        if found:
+            hit = next((c for c in merged["pennylane"] if c.commit == found), None)
+            bisected["pull_request"] = hit.pull_request if hit else None
+            bisected["url"] = hit.url if hit else None
+            bisected["subject"] = hit.subject if hit else None
+    return Explanation(
+        cell_name,
+        metric,
+        sides["before"],
+        sides["after"],
+        [f"{name} {v['before']} → {v['after']}" for name, v in sorted(changed.items())],
+        call_changes(sides["before"].calls, sides["after"].calls, TOP_FUNCTIONS),
+        [
+            list(row)
+            for row in cachegrind.function_changes(
+                sides["before"].functions, sides["after"].functions, TOP_FUNCTIONS
+            )
+        ],
+        ranked,
+        bisected,
+    )
+
+
+def _signed(value: int) -> str:
+    return f"{value:+,}"
+
+
+def render(explanation: Explanation) -> str:
+    before, after = explanation.before, explanation.after
+    change = history.change_pct(before.net, after.net) or 0.0
+    lines = [
+        f"## {explanation.cell}, {explanation.metric}: {before.stack} → {after.stack}",
+        "",
+        f"Re-measured across {LAYOUTS} memory layouts: {before.net:,} → {after.net:,} "
+        f"(**{change:+.2f}%**). Runs: {before.runs} → {after.runs}.",
+        "",
+    ]
+    if explanation.packages:
+        lines += ["**Packages that moved:** " + ", ".join(explanation.packages), ""]
+    if explanation.bisect:
+        bisected = explanation.bisect
+        if bisected.get("found"):
+            share = bisected.get("share_of_step")
+            portion = "" if share is None else f", {share:.0%} of what PennyLane alone gives"
+            lines += [
+                f"**Bisected to:** {bisected.get('subject')} ({bisected.get('url')}): "
+                f"{bisected['before']:,.0f} → {bisected['after']:,.0f}{portion}.",
+                "",
+            ]
+        else:
+            lines += [f"**Bisect:** {bisected.get('verdict', 'no single commit found')}", ""]
+    if explanation.python_functions:
+        lines += [
+            "| Python function | Calls before | Calls after | Moved |",
+            "|---|---:|---:|---:|",
+        ]
+        lines += [
+            f"| `{name}` | {old:,} | {new:,} | {_signed(new - old)} |"
+            for name, old, new in explanation.python_functions
+        ]
+        lines.append("")
+    if explanation.c_functions:
+        lines += ["| Native function | Before | After | Moved |", "|---|---:|---:|---:|"]
+        lines += [
+            f"| `{name[:80]}` | {old:,} | {new:,} | {_signed(new - old)} |"
+            for name, old, new in explanation.c_functions
+        ]
+        lines.append("")
+    for package, changes in explanation.candidates.items():
+        lines.append(
+            f"**{package}:** {len(changes)} commits between the builds. Most likely first:"
+        )
+        lines.append("")
+        lines += [
+            f"- {change['subject'][:100]} ({change['url']})"
+            + (f", touches moved code: {change['score']:,} calls" if change["score"] else "")
+            for change in changes[:12]
+        ]
+        lines.append("")
+    if "pennylane-catalyst" in explanation.candidates:
+        lines += [
+            "Catalyst is too heavy to build per commit, so for its changes this stops at the "
+            "candidates.",
+            "",
+        ]
+    return "\n".join(lines)
+
+
+def save(explanation: Explanation, directory: Path) -> Path:
+    directory.mkdir(parents=True, exist_ok=True)
+    before = explanation.before.stack.removeprefix("catalyst-")
+    after = explanation.after.stack.removeprefix("catalyst-")
+    name = f"{before}--{after}--{explanation.cell.replace('/', '-')}--{explanation.metric}"
+    path = directory / f"{name}.json"
+    path.write_text(json.dumps(explanation.to_dict(), indent=1, ensure_ascii=False) + "\n")
+    return path

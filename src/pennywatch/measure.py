@@ -41,13 +41,14 @@ VALGRIND = [
     "--log-file=/out/valgrind.%p.log",
 ]
 PYTHON = ["/stack/bin/python", "-P", "-s", "-m", "pennywatch.harness.workload"]
+UNCOUNTED_MODES = ("native", "profile")
 
 
 @dataclass(frozen=True)
 class Job:
     """One measured process."""
 
-    role: str  # imports | compile | full | canary | native | memory
+    role: str  # imports | compile | full | canary | native | memory | profile
     backend: str
     wires: int
     circuit: str = "qft"  # the imports baseline never builds it, but the workload wants a name
@@ -75,6 +76,7 @@ class Outcome:
     sentinel: dict | None = None
     error: str | None = None
     elapsed_s: float = 0.0
+    functions: dict[str, int] | None = None
 
 
 def workload_args(job: Job) -> list[str]:
@@ -108,7 +110,7 @@ def validate_outcome(outcome: Outcome) -> str | None:
     versions = sentinel.get("versions", {})
     if not isinstance(versions, dict) or not all(isinstance(v, str) for v in versions.values()):
         return "the sentinel's versions are malformed"
-    if job.mode in ("full", "native"):
+    if job.mode in ("full", "native", "profile"):
         result = sentinel.get("result")
         if result is None:
             return "the sentinel has no result"
@@ -146,11 +148,21 @@ def run_keeping_tail(argv: list[str], timeout: float) -> tuple[int, str]:
 class Runner:
     """Runs jobs in containers, at most one per CPU slot."""
 
-    def __init__(self, image: str, stack_dir: Path, workspace: Path, cpus: list[int]):
+    def __init__(
+        self,
+        image: str,
+        stack_dir: Path,
+        workspace: Path,
+        cpus: list[int],
+        overlay: Path | None = None,
+        keep_functions: bool = False,
+    ):
         self.image = image
         self.stack_dir = stack_dir
         self.workspace = workspace
         self.cpus = cpus
+        self.overlay = overlay
+        self.keep_functions = keep_functions
         self.source = workspace / "src"
         package = self.source / "pennywatch"
         # A clean copy, because a __pycache__ left in the checkout would change what Python does at
@@ -164,7 +176,7 @@ class Runner:
         output = self.workspace / "runs" / job.label
         output.mkdir(parents=True)
         command = [*PYTHON, *workload_args(job)]
-        if job.mode != "native":
+        if job.mode not in UNCOUNTED_MODES:
             command = [*VALGRIND, *command]
         if job.busy:
             command = container.with_spinners(command)
@@ -173,7 +185,9 @@ class Runner:
             "docker",
             "run",
             f"--name={name}",
-            *container.sandbox_args(cpu, self.stack_dir, self.source, output, layout=job.repeat),
+            *container.sandbox_args(
+                cpu, self.stack_dir, self.source, output, layout=job.repeat, overlay=self.overlay
+            ),
             self.image,
             *command,
         ]
@@ -188,8 +202,10 @@ class Runner:
             outcome.error = f"exit {code}: {tail.strip()[-400:]}"
             return outcome
         outcome.sentinel = untrusted.read_sentinel(output / "sentinel.json")
-        if job.mode != "native":
+        if job.mode not in UNCOUNTED_MODES:
             outcome.counts = cachegrind.collect(output)
+            if self.keep_functions:
+                outcome.functions = cachegrind.collect_functions(output)
         return outcome
 
     def run_all(self, jobs: list[Job]) -> dict[Job, Outcome]:

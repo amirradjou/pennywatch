@@ -55,6 +55,25 @@ def test_cachegrind_counts_the_compiler_and_the_link_step_separately(runner):
     assert counts.total == counts.python + counts.compiler + counts.other
 
 
+def test_the_profile_counts_python_calls_and_keeps_the_right_answer(runner):
+    cell = SUITES["smoke"][0]
+    job = measure.Job("profile", cell.backend, cell.wires, cell.circuit, cell.rounds)
+    outcome = runner.run_all([job])[job]
+    assert measure.validate_outcome(outcome) is None
+    assert outcome.counts is None
+    calls = outcome.sentinel["calls"]
+    assert any(name.startswith("pennylane/") for name in calls)
+    assert all(isinstance(count, int) for count in calls.values())
+
+
+def test_peak_memory_runs_outside_valgrind_with_the_right_answer(runner):
+    job = measure.plan_memory(10, 1)[0]
+    outcome = runner.run_all([job])[job]
+    assert measure.validate_outcome(outcome) is None
+    assert outcome.counts is None
+    assert outcome.sentinel["max_rss_kb"] > 0
+
+
 def test_a_process_that_dies_is_not_a_measurement(runner):
     job = measure.Job("full", "lightning", 6, "no-such-circuit", 1)
     outcome = runner.run_all([job])[job]

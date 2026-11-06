@@ -8,6 +8,7 @@ Modes:
   compile  counts only Catalyst's compile (qjit only)
   full     counts only compiling, if any, and running the circuit
   native   not for Valgrind: wall-clock time, peak memory and gate counts
+  profile  not for Valgrind: how many times each Python function ran, for explaining a change
 """
 
 from pennywatch.harness import instrument
@@ -26,11 +27,16 @@ from importlib import metadata
 
 DEVICES = {"default": "default.qubit", "lightning": "lightning.qubit", "qjit": "lightning.qubit"}
 CIRCUITS = ("grover", "memory", "qft", "qpe", "sampling", "trotter", "variational")
+# Rarely-called functions can't explain a change of millions of instructions, and the sentinel's
+# size is limited.
+MIN_PROFILED_CALLS = 5
 
 
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", required=True, choices=["imports", "compile", "full", "native"])
+    parser.add_argument(
+        "--mode", required=True, choices=["imports", "compile", "full", "native", "profile"]
+    )
     parser.add_argument("--circuit", required=True, choices=CIRCUITS)
     parser.add_argument("--backend", required=True, choices=sorted(DEVICES))
     parser.add_argument("--wires", required=True, type=int)
@@ -63,6 +69,26 @@ def native_report(qml, adapter, args, circuit, qnode, program, seed) -> dict:
         report["gates"]["qjit"] = adapter.qjit_counts(qml, qnode, circuit, seed)
     report["bare_qnode_specs"] = adapter.bare_qnode_specs(qml, qnode, arguments)
     return report
+
+
+def profile_report(adapter, qml, args, circuit, program, seed) -> dict:
+    """Calls per Python function, which is what's left to go on where Cachegrind only sees the
+    interpreter. Compiling happens when qjit is applied, so that's inside the profile too."""
+    import cProfile
+    import pstats
+
+    profiler = cProfile.Profile()
+    profiler.enable()
+    function = adapter.jit(qml, program, circuit, seed) if args.backend == "qjit" else program
+    result = function()
+    profiler.disable()
+
+    calls: dict[str, int] = {}
+    for (path, _, name), (_, total, _, _, _) in pstats.Stats(profiler).stats.items():
+        short = path.split("site-packages/", 1)[-1]
+        if total >= MIN_PROFILED_CALLS:
+            calls[f"{short}:{name}"] = calls.get(f"{short}:{name}", 0) + total
+    return {"result": circuit.answer(result), "calls": calls}
 
 
 def settle_collector() -> None:
@@ -112,6 +138,8 @@ def main(argv=None) -> None:
             result = function()
             instrument.stop()
             report["result"] = circuit.answer(result)
+        elif args.mode == "profile":
+            report |= profile_report(adapter, qml, args, circuit, program, seed)
         else:
             report |= native_report(qml, adapter, args, circuit, qnode, program, seed)
 
