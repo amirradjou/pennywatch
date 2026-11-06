@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>pennywatch</title>
+<link rel="icon" href="data:,">
 <meta name="description" content="An independent performance history of PennyLane, Lightning and Catalyst: the same circuits on every build, and what changed.">
 <style>
 :root {
@@ -92,6 +93,7 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.875rem; }
   </label>
   <label>Builds
     <select id="track">
+      <option value="all">All</option>
       <option value="stable">Stable releases</option>
       <option value="nightly">Dev builds</option>
     </select>
@@ -411,8 +413,6 @@ stepBetween.append(el("option", { value: "all" }, "Every build"));
 const transitions = [...new Set(DATA.steps.map(transition))];
 for (const name of [...transitions].reverse()) stepBetween.append(el("option", { value: name }, name));
 if (transitions.length) stepBetween.value = transitions[transitions.length - 1];
-if (!DATA.nightly.builds.length) $("track").value = "stable";
-if (!DATA.stable.builds.length && DATA.nightly.builds.length) $("track").value = "nightly";
 stepMetric.value = DATA.steps.some((row) => row.metric === "instructions") ? "instructions" : "all";
 for (const id of ["metric", "track", "scale"]) $(id).addEventListener("change", drawHistory);
 stepMetric.addEventListener("change", drawSteps);

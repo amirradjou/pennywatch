@@ -163,6 +163,7 @@ def page_data(
     explanations: dict | None = None,
 ) -> dict:
     return {
+        "all": _track(stable + nightly),
         "stable": _track(stable),
         "nightly": _track(nightly),
         "steps": step_rows(steps, explanations),

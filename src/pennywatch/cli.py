@@ -186,8 +186,9 @@ def site_command(args: argparse.Namespace) -> int:
     nightly = history.load_results(_json_files(nightly_dir))
     gaps_dir = nightly_dir / "rejected" if nightly_dir else None
     gaps = [json.loads(path.read_text()) for path in _json_files(gaps_dir)]
+    # As one history: the step from the last release to the first dev build counts too.
     steps = history.confirm_steps(
-        history.find_steps(stable) + history.find_steps(nightly),
+        history.find_steps(stable + nightly),
         history.load_results(_json_files(args.second_set)),
     )
     explanations = site.load_explanations(args.explanations)

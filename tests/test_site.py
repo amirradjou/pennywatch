@@ -38,6 +38,13 @@ def test_builds_come_in_build_order_with_their_versions():
     assert data["stable"]["builds"][0]["measured"] == "2026-11-06"
 
 
+def test_all_builds_run_as_one_history_from_stable_into_dev():
+    data = site.page_data([result("0.15.0", 2)], [result("0.16.0.dev1", 3)], [])
+    assert [build["catalyst"] for build in data["all"]["builds"]] == ["0.15.0", "0.16.0.dev1"]
+    assert [build["catalyst"] for build in data["stable"]["builds"]] == ["0.15.0"]
+    assert [build["catalyst"] for build in data["nightly"]["builds"]] == ["0.16.0.dev1"]
+
+
 def test_each_circuit_is_one_chart_with_one_line_per_backend_that_has_values():
     data = site.page_data([result("0.9.0", 100), result("0.10.0", 110)], [], [])
     panel = data["stable"]["panels"]["instructions"][0]

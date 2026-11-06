@@ -89,6 +89,34 @@ def _with_stack(tmp_path, version, net):
     return str(path)
 
 
+def test_the_page_counts_the_step_from_the_last_release_to_the_first_dev_build(tmp_path):
+    stable, data = tmp_path / "stable", tmp_path / "data"
+    stable.mkdir()
+    (data / "nightly").mkdir(parents=True)
+    _with_stack(stable, "0.15.0", 100)
+    _with_stack(data / "nightly", "0.16.0.dev1", 200)
+    assert (
+        cli.main(
+            [
+                "site",
+                "--stable",
+                str(stable),
+                "--data",
+                str(data),
+                "--second-set",
+                str(tmp_path / "none"),
+                "--explanations",
+                str(tmp_path / "none"),
+                "--out",
+                str(tmp_path / "site"),
+            ]
+        )
+        == 0
+    )
+    html = (tmp_path / "site" / "index.html").read_text()
+    assert '"before_stack":"0.15.0","after_stack":"0.16.0.dev1"' in html
+
+
 def test_steps_can_be_limited_to_the_newest_two_builds(tmp_path, capsys):
     paths = [
         _with_stack(tmp_path, "0.16.0.dev1", 100),
