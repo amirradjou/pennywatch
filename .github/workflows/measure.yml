@@ -2,7 +2,7 @@ name: Measure
 
 # Runs the suite on several runners at once, to see whether counts agree between them. The answer
 # decides how builds get compared. A private repo has 2,000 minutes a month, and each runner here
-# takes about half an hour, so this runs by hand and not on every push.
+# takes up to an hour, so this runs by hand and not on every push.
 on:
   workflow_dispatch:
     inputs:
@@ -10,8 +10,11 @@ on:
         description: Catalyst version
         default: "0.15.0"
       repeats:
-        description: Runs per cell
-        default: "1"
+        description: Runs per cell, each under a different memory layout
+        default: "3"
+      suite:
+        description: Which suite
+        default: full
   # A workflow can't be dispatched until it's on the default branch, so pushing to measure/* also
   # starts it.
   push:
@@ -24,7 +27,8 @@ permissions:
 
 env:
   STACK: ${{ inputs.stack || '0.15.0' }}
-  REPEATS: ${{ inputs.repeats || '1' }}
+  REPEATS: ${{ inputs.repeats || '3' }}
+  SUITE: ${{ inputs.suite || 'full' }}
 
 jobs:
   measure:
@@ -34,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [a, b, c, d, e]
+        runner: [a, b, c, d]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -42,7 +46,7 @@ jobs:
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
       - name: Measure
         run: >-
-          uv run pennywatch run --stack "$STACK" --repeats "$REPEATS" --no-busy-check
+          uv run pennywatch run --stack "$STACK" --suite "$SUITE" --repeats "$REPEATS" --no-busy-check
           --out "results/runner-${{ matrix.runner }}.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()

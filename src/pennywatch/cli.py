@@ -5,7 +5,17 @@ import json
 import sys
 from pathlib import Path
 
-from pennywatch import builds, compare, container, history, measure, publish, report, stacks
+from pennywatch import (
+    builds,
+    compare,
+    container,
+    history,
+    measure,
+    publish,
+    report,
+    site,
+    stacks,
+)
 from pennywatch.suite import MEMORY_WIRES, SUITES, Cell
 
 DEFAULT_STACK = "0.15.0"
@@ -22,7 +32,12 @@ def _parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--suite", default="m0", choices=sorted(SUITES))
     run.add_argument("--cells", help="only these cells of the suite, comma-separated")
-    run.add_argument("--repeats", type=int, default=3, help="runs per cell (default: %(default)s)")
+    run.add_argument(
+        "--repeats",
+        type=int,
+        default=3,
+        help="runs per cell, each under a different memory layout (default: %(default)s)",
+    )
     run.add_argument(
         "--cpus",
         default="0,1",
@@ -62,6 +77,12 @@ def _parser() -> argparse.ArgumentParser:
     accept = commands.add_parser("accept", help="check measured results and store them")
     accept.add_argument("artifacts", type=Path)
     accept.add_argument("--into", type=Path, required=True)
+
+    page = commands.add_parser("site", help="build the public page")
+    page.add_argument("--stable", type=Path, default=Path("results/stable"))
+    page.add_argument("--second-set", type=Path, default=Path("results/stable-repeat"))
+    page.add_argument("--data", type=Path, help="the data branch's checkout, with nightly results")
+    page.add_argument("--out", type=Path, default=Path("site"))
     return parser
 
 
@@ -126,6 +147,24 @@ def steps_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _json_files(directory: Path | None) -> list[Path]:
+    return sorted(directory.glob("*.json")) if directory and directory.is_dir() else []
+
+
+def site_command(args: argparse.Namespace) -> int:
+    stable = history.load_results(_json_files(args.stable))
+    nightly_dir = args.data / "nightly" if args.data else None
+    nightly = history.load_results(_json_files(nightly_dir))
+    gaps_dir = nightly_dir / "rejected" if nightly_dir else None
+    gaps = [json.loads(path.read_text()) for path in _json_files(gaps_dir)]
+    steps = history.confirm_steps(
+        history.find_steps(stable) + history.find_steps(nightly),
+        history.load_results(_json_files(args.second_set)),
+    )
+    print(site.write(site.page_data(stable, nightly, steps, gaps), args.out))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "run":
@@ -138,6 +177,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "steps":
         return steps_command(args)
+    if args.command == "site":
+        return site_command(args)
     if args.command == "pending":
         print(json.dumps(builds.pending(publish.done_builds(args.data), args.since, args.limit)))
         return 0

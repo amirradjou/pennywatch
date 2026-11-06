@@ -25,7 +25,7 @@ def stability_row(result: dict) -> str:
     typical = median(c["instructions"]["spread_pct"] for c in cells)
     spread = worst["instructions"]["spread_pct"]
     return (
-        f"{result['repeats']} runs of each of {len(cells)} cells: typically "
+        f"{result['repeats']} memory layouts for each of {len(cells)} cells: typically "
         f"{_pct(typical, 4)} apart, at worst **{_pct(spread, 4)}** ({worst['name']}, of "
         f"{_billions(worst['instructions']['net'])}), counted from after the imports"
     )

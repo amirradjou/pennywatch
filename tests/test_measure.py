@@ -39,8 +39,8 @@ def test_only_qjit_measures_compile_separately():
     assert not any(j.role == "compile" for j in measure.plan_cell_jobs(QFT, 2, 721))
 
 
-def test_baselines_are_per_backend_and_size_not_per_circuit():
-    cells = [QFT, Cell("grover", "lightning", 18, 12), QJIT]
+def test_baselines_are_per_backend_at_its_largest_size():
+    cells = [QFT, Cell("qpe", "lightning", 12, 3), QJIT]
     jobs = measure.plan_baselines(cells, repeats=2)
     assert {(job.backend, job.wires) for job in jobs} == {("lightning", 18), ("qjit", 18)}
     assert len(jobs) == 4
@@ -258,3 +258,36 @@ def test_a_change_to_tracked_code_makes_it_dirty(tmp_path):
     _git_repository(tmp_path)
     (tmp_path / "code.py").write_text("x = 2\n")
     assert measure.git_revision(tmp_path)["dirty"] is True
+
+
+def test_each_repeat_of_a_cell_runs_under_its_own_layout(tmp_path):
+    def padding(job):
+        args = measure.container.sandbox_args(0, tmp_path, tmp_path, tmp_path, layout=job.repeat)
+        return next(arg for arg in args if arg.startswith("PENNYWATCH_LAYOUT="))
+
+    jobs = [full_job(repeat=repeat) for repeat in range(3)]
+    assert len({padding(job) for job in jobs}) == 3
+
+
+def test_a_layout_is_the_same_on_every_machine_and_every_night():
+    assert measure.container.layout_padding(0) == "x" * 16
+    assert measure.container.layout_padding(2) == "x" * 64
+
+
+def test_the_canary_is_judged_against_the_full_run_on_its_own_layout():
+    # The layouts differ by far more than the canary adds, so the median would hide it.
+    jobs = measure.plan_cell_jobs(QFT, repeats=3, device_gates=700)
+    counts = {0: 1_000_000_000, 1: 1_100_000_000, 2: 1_200_000_000}
+    outcomes = {
+        job: Outcome(
+            job,
+            counts=Counts(python=1_010_000_000 if job.role == "canary" else counts[job.repeat]),
+            sentinel={},
+        )
+        for job in jobs
+    }
+    native = Outcome(measure.native_job(QFT), sentinel={})
+    summary = measure.summarise_cell(QFT, outcomes, jobs, [], native)
+    assert summary["instructions"]["net"] == 1_100_000_000
+    assert summary["canary"]["delta"] == 10_000_000
+    assert summary["canary"]["detected"]

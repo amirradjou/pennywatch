@@ -59,6 +59,16 @@ def test_what_counts_as_a_step(metric, before, after, expected):
     assert is_step(metric, before, after) is expected
 
 
+def test_runs_that_overlap_are_not_a_step_however_far_apart_the_medians_are():
+    assert is_step("instructions", 1000, 1010, [990, 1000, 1005], [1004, 1010, 1020]) is False
+    assert is_step("instructions", 1000, 1010, [999, 1000, 1001], [1009, 1010, 1011]) is True
+
+
+def test_a_single_run_on_either_side_has_only_the_threshold_to_clear():
+    assert is_step("instructions", 1000, 1010, [1000], [1010]) is True
+    assert is_step("instructions", 1000, 1010) is True
+
+
 def test_steps_are_found_between_consecutive_builds_in_build_order():
     results = [
         result("0.10.0", cell(1100)),
@@ -106,6 +116,18 @@ def test_a_second_measurement_confirms_the_same_change():
     second = [result("0.8.1", cell(2000)), result("0.9.0", cell(2200))]
     steps = history.confirm_steps(find_steps(first), second)
     assert [s.confirmed for s in steps] == [True]
+
+
+def test_a_second_measurement_within_a_quarter_of_the_step_confirms():
+    first = [result("0.8.1", cell(1000)), result("0.9.0", cell(1200))]
+    second = [result("0.8.1", cell(1000)), result("0.9.0", cell(1160))]
+    assert history.confirm_steps(find_steps(first), second)[0].confirmed is True
+
+
+def test_a_second_measurement_the_other_way_does_not_confirm():
+    first = [result("0.8.1", cell(1000)), result("0.9.0", cell(1100))]
+    second = [result("0.8.1", cell(1000)), result("0.9.0", cell(900))]
+    assert history.confirm_steps(find_steps(first), second)[0].confirmed is False
 
 
 def test_a_second_measurement_showing_something_else_does_not_confirm():

@@ -173,7 +173,7 @@ class Runner:
             "docker",
             "run",
             f"--name={name}",
-            *container.sandbox_args(cpu, self.stack_dir, self.source, output),
+            *container.sandbox_args(cpu, self.stack_dir, self.source, output, layout=job.repeat),
             self.image,
             *command,
         ]
@@ -273,11 +273,14 @@ def canary_gates(device_gates: int) -> int:
 
 
 def plan_baselines(cells: list[Cell], repeats: int) -> list[Job]:
-    """What the imports and creating the device cost, once per backend and size. They aren't part of
-    any other count, so this is a figure in its own right and not a baseline."""
+    """What the imports and creating the device cost, per backend, at the suite's largest size.
+    They aren't part of any other count, so this is a figure in its own right and not a baseline."""
+    widest: dict[str, int] = {}
+    for cell in cells:
+        widest[cell.backend] = max(widest.get(cell.backend, 0), cell.wires)
     return [
         Job("imports", backend, wires, repeat=repeat)
-        for backend, wires in sorted({(cell.backend, cell.wires) for cell in cells})
+        for backend, wires in sorted(widest.items())
         for repeat in range(repeats)
     ]
 
@@ -356,10 +359,15 @@ def summarise_cell(
             ],
         }
 
+    # Compared with the full run on the same layout, since layouts differ by more than its 1%.
     canary = next(job for job in jobs if job.role == "canary")
-    if outcomes[canary].counts:
+    paired = next(job for job in full if job.repeat == canary.repeat)
+    if outcomes[canary].counts and outcomes[paired].counts:
         summary["canary"] = analysis.canary_verdict(
-            outcomes[canary].counts.total, runs, canary.extra_gates, cell.backend
+            outcomes[canary].counts.total,
+            outcomes[paired].counts.total,
+            canary.extra_gates,
+            cell.backend,
         )
     return summary
 
@@ -423,9 +431,7 @@ def run_suite(
     for cell in cells:
         jobs = [job for job in outcomes if _belongs_to(job, cell)]
         baselines = [
-            job
-            for job in outcomes
-            if job.role == "imports" and (job.backend, job.wires) == (cell.backend, cell.wires)
+            job for job in outcomes if job.role == "imports" and job.backend == cell.backend
         ]
         summaries.append(
             summarise_cell(cell, outcomes, jobs, baselines, outcomes[native_job(cell)])

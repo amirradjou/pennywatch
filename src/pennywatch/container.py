@@ -30,6 +30,16 @@ MEASURE_ENV = {
 
 HARDENING = ["--cap-drop=ALL", "--security-opt=no-new-privileges"]
 
+LAYOUT_VARIABLE = "PENNYWATCH_LAYOUT"
+
+
+def layout_padding(layout: int) -> str:
+    """Padding for an environment variable, which shifts the process's memory layout and nothing
+    else. Layout changes what the code does: CPython's method cache and the order of sets of objects
+    follow addresses. Adding 16 bytes here moved one cell by 0.58%, while repeat runs under one
+    layout agreed to 0.005%. So runs of a cell differ in layout, or their agreement means little."""
+    return "x" * (16 + 24 * layout)
+
 
 def image_tag() -> str:
     """Named after its inputs, so an edited Dockerfile can't pass for the image built before."""
@@ -65,11 +75,17 @@ def user_flag() -> str:
     return f"--user={os.getuid()}:{os.getgid()}"
 
 
-def sandbox_args(cpu: int, stack: Path, source: Path, output: Path) -> list[str]:
+def sandbox_args(
+    cpu: int, stack: Path, source: Path, output: Path, layout: int = 0, overlay: Path | None = None
+) -> list[str]:
     """No network, no secrets, read-only everywhere except scratch, because this runs nightly code
     from TestPyPI. One CPU per process: with --cpuset the process also sees only one, so thread
     pools and CPU-count checks come out the same on every machine."""
-    environment = [flag for item in MEASURE_ENV.items() for flag in ("-e", "=".join(item))]
+    variables = MEASURE_ENV | {LAYOUT_VARIABLE: layout_padding(layout)}
+    if overlay is not None:
+        variables["PYTHONPATH"] = f"/overlay:{MEASURE_ENV['PYTHONPATH']}"
+    environment = [flag for item in variables.items() for flag in ("-e", "=".join(item))]
+    mounts = [f"--volume={overlay}:/overlay:ro"] if overlay is not None else []
     return [
         "--rm",
         "--cpus=1",
@@ -87,6 +103,7 @@ def sandbox_args(cpu: int, stack: Path, source: Path, output: Path) -> list[str]
         f"--volume={stack}:/stack:ro",
         f"--volume={source}:/src:ro",
         f"--volume={output}:/out",
+        *mounts,
     ]
 
 

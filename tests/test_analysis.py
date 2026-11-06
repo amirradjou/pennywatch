@@ -20,36 +20,33 @@ def test_a_single_run_has_no_noise_of_its_own():
 
 
 def test_canary_well_above_the_noise_is_detected():
-    runs = [1_000_000_000, 1_000_900_000, 1_000_000_000]
-    verdict = analysis.canary_verdict(1_010_000_000, runs, 7, "qjit")
+    verdict = analysis.canary_verdict(1_010_000_000, 1_000_000_000, 7, "qjit")
     assert verdict["detected"]
     assert verdict["delta"] == 10_000_000
-    assert verdict["noise"] == 900_000
-    assert verdict["noise_ratio"] == pytest.approx(10_000_000 / 900_000)
+    assert verdict["noise"] == analysis.NOISE_FLOOR["qjit"]
+    assert verdict["noise_ratio"] == pytest.approx(10_000_000 / analysis.NOISE_FLOOR["qjit"])
     assert verdict["delta_pct"] == pytest.approx(1.0)
     assert verdict["extra_gates"] == 7
 
 
 def test_canary_lost_in_the_noise_is_missed():
-    runs = [1_000_000_000, 1_001_000_000, 1_000_000_000]
-    assert not analysis.canary_verdict(1_004_000_000, runs, 7, "qjit")["detected"]
+    assert not analysis.canary_verdict(1_001_000_000, 1_000_000_000, 7, "qjit")["detected"]
 
 
 def test_a_canary_that_got_cheaper_is_missed():
-    assert not analysis.canary_verdict(900_000_000, [1_000_000_000] * 2, 7, "default")["detected"]
+    assert not analysis.canary_verdict(900_000_000, 1_000_000_000, 7, "default")["detected"]
 
 
-def test_runs_that_agree_exactly_do_not_make_any_canary_detected():
-    runs = [1_000_000_000, 1_000_000_000]
-    assert not analysis.canary_verdict(1_000_000_001, runs, 1, "default")["detected"]
+def test_a_canary_of_one_extra_instruction_is_missed():
+    assert not analysis.canary_verdict(1_000_000_001, 1_000_000_000, 1, "default")["detected"]
 
 
-def test_a_single_run_judges_the_canary_against_the_floor_for_its_backend():
-    run = [1_000_000_000]
-    assert analysis.canary_verdict(1_000_000_000 + 5_000_000, run, 3, "lightning")["detected"]
-    assert not analysis.canary_verdict(1_000_000_000 + 1_000_000, run, 3, "lightning")["detected"]
-    assert analysis.canary_verdict(1_000_000_000 + 7_500_000, run, 3, "qjit")["detected"]
-    assert not analysis.canary_verdict(1_000_000_000 + 3_000_000, run, 3, "qjit")["detected"]
+def test_the_floor_depends_on_the_backend():
+    run = 1_000_000_000
+    assert analysis.canary_verdict(run + 5_000_000, run, 3, "lightning")["detected"]
+    assert not analysis.canary_verdict(run + 1_000_000, run, 3, "lightning")["detected"]
+    assert analysis.canary_verdict(run + 7_500_000, run, 3, "qjit")["detected"]
+    assert not analysis.canary_verdict(run + 3_000_000, run, 3, "qjit")["detected"]
 
 
 def test_relative_range():

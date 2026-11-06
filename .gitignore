@@ -22,6 +22,9 @@ __pycache__/
 coverage/
 htmlcov/
 
+# browser test output
+.playwright-mcp/
+
 # editors / OS
 .idea/
 .vscode/*

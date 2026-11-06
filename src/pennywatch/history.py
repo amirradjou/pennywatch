@@ -1,8 +1,9 @@
 """Results across builds, and the steps between them.
 
 A step is a change between two consecutive builds that is big enough to mean something. Gate counts
-are exact, so any change is a step. Counted metrics have a threshold well above their noise. A step
-counts as confirmed when a second, separate set of results shows the same change.
+are exact, so any change is a step. Counted metrics have a threshold, and the runs of the two builds
+mustn't overlap: runs differ in memory layout, and a code change that does nothing can still shift
+the layout. A step counts as confirmed when a second, separate set of results shows the same change.
 """
 
 import json
@@ -14,8 +15,10 @@ from pathlib import Path
 COUNTED_STEP_PCT = 0.5
 # Set from measured noise: see the README's limits.
 MEMORY_STEP_PCT = 1.0
-# How close a second measurement of a step has to come to the first, in percentage points.
-CONFIRM_TOLERANCE_POINTS = 0.05
+# How close a second measurement of a step has to come to the first: this many percentage points,
+# or this share of the step, whichever is more.
+CONFIRM_TOLERANCE_POINTS = 0.25
+CONFIRM_TOLERANCE_SHARE = 0.25
 
 _VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:[.-]dev(\d+))?$")
 
@@ -46,7 +49,32 @@ def metrics_of(result: dict) -> dict[tuple[str, str], float]:
     return metrics
 
 
-def is_step(metric: str, before: float, after: float) -> bool:
+def runs_of(result: dict) -> dict[tuple[str, str], list[int]]:
+    """The separate runs behind each counted metric, where a result has more than one."""
+    runs: dict[tuple[str, str], list[int]] = {}
+    for cell in result["cells"]:
+        for metric in ("instructions", "compile", "imports"):
+            if metric in cell and cell[metric].get("runs"):
+                runs[(cell["name"], metric)] = cell[metric]["runs"]
+    for entry in result.get("memory") or []:
+        if entry["max_rss_kb"].get("runs"):
+            runs[(f"memory/{entry['backend']}", "peak_kb")] = entry["max_rss_kb"]["runs"]
+    return runs
+
+
+def _ranges_overlap(before: list[int] | None, after: list[int] | None) -> bool:
+    if not before or not after:
+        return False
+    return min(after) <= max(before) and min(before) <= max(after)
+
+
+def is_step(
+    metric: str,
+    before: float,
+    after: float,
+    before_runs: list[int] | None = None,
+    after_runs: list[int] | None = None,
+) -> bool:
     if before == after:
         return False
     if metric.startswith(("gates.", "depth.")):
@@ -54,7 +82,9 @@ def is_step(metric: str, before: float, after: float) -> bool:
     if not before:
         return True
     limit = MEMORY_STEP_PCT if metric == "peak_kb" else COUNTED_STEP_PCT
-    return abs(after - before) / before * 100 >= limit
+    if abs(after - before) / before * 100 < limit:
+        return False
+    return not _ranges_overlap(before_runs, after_runs)
 
 
 def change_pct(before: float, after: float) -> float | None:
@@ -115,12 +145,14 @@ def find_steps(results: list[dict]) -> list[Step]:
 
 
 def _confirmed(step: Step, second: dict[str, dict]) -> bool | None:
-    """Whether a second set of results shows the same change. None if it lacks either build."""
+    """Whether a second set of results shows a step too, the same way round and about the same size.
+    None if it lacks either build."""
     if step.before_stack not in second or step.after_stack not in second:
         return None
     key = (step.cell, step.metric)
-    before = metrics_of(second[step.before_stack]).get(key)
-    after = metrics_of(second[step.after_stack]).get(key)
+    first, last = second[step.before_stack], second[step.after_stack]
+    before = metrics_of(first).get(key)
+    after = metrics_of(last).get(key)
     if before is None or after is None:
         return None
     if not step.is_counted:
@@ -128,7 +160,11 @@ def _confirmed(step: Step, second: dict[str, dict]) -> bool | None:
     change = change_pct(before, after)
     if change is None or step.change_pct is None:
         return False
-    return abs(change - step.change_pct) <= CONFIRM_TOLERANCE_POINTS
+    if not is_step(step.metric, before, after, runs_of(first).get(key), runs_of(last).get(key)):
+        return False
+    return abs(change - step.change_pct) <= max(
+        CONFIRM_TOLERANCE_POINTS, abs(step.change_pct) * CONFIRM_TOLERANCE_SHARE
+    )
 
 
 def confirm_steps(steps: list[Step], second_set: list[dict]) -> list[Step]:
