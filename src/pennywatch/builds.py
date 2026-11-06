@@ -2,7 +2,7 @@
 
 import urllib.error
 
-from pennywatch import stacks
+from pennywatch import history, stacks
 
 PACKAGES = ("pennylane", "pennylane-lightning", stacks.CATALYST)
 
@@ -39,3 +39,22 @@ def availability() -> dict | None:
     pins = stacks.exact_pins(info.get("requires_dist") or [])
     pennylane_pins = {name: version for name, version in pins.items() if "pennylane" in name}
     return {"packages": packages, "newest_catalyst_pins": pennylane_pins}
+
+
+def dev_builds(releases: dict[str, list[dict]], since: str) -> list[str]:
+    """Catalyst dev builds uploaded on or after a date, oldest first. A build with no files left
+    can't be measured, so it isn't listed."""
+    versions = [
+        version
+        for version, files in releases.items()
+        if files and ".dev" in version and files[0]["upload_time"][:10] >= since
+    ]
+    return sorted(versions, key=history.version_key)
+
+
+def pending(done: set[str], since: str, limit: int) -> list[str]:
+    """What to measure next: the newest builds first, so that backfilling older ones never makes
+    tonight's build wait."""
+    releases = stacks.fetch_json(f"https://test.pypi.org/pypi/{stacks.CATALYST}/json")["releases"]
+    waiting = [version for version in dev_builds(releases, since) if version not in done]
+    return waiting[::-1][:limit]
