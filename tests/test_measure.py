@@ -196,3 +196,29 @@ def test_a_command_that_outlives_its_timeout_is_killed():
     code = "import time; time.sleep(60)"
     with pytest.raises(subprocess.TimeoutExpired):
         measure.run_keeping_tail([sys.executable, "-c", code], timeout=0.2)
+
+
+def _git_repository(path):
+    def git(*arguments):
+        subprocess.run(
+            ["git", "-C", str(path), "-c", "user.name=t", "-c", "user.email=t@t", *arguments],
+            check=True,
+            capture_output=True,
+        )
+
+    git("init", "-q")
+    (path / "code.py").write_text("x = 1\n")
+    git("add", "code.py")
+    git("commit", "-qm", "init", "--no-verify")
+
+
+def test_an_earlier_runs_results_do_not_make_the_code_dirty(tmp_path):
+    _git_repository(tmp_path)
+    (tmp_path / "results.json").write_text("{}")
+    assert measure.git_revision(tmp_path)["dirty"] is False
+
+
+def test_a_change_to_tracked_code_makes_it_dirty(tmp_path):
+    _git_repository(tmp_path)
+    (tmp_path / "code.py").write_text("x = 2\n")
+    assert measure.git_revision(tmp_path)["dirty"] is True

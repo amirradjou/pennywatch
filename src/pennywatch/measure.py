@@ -237,16 +237,18 @@ def harness_sha256() -> str:
     return digest.hexdigest()
 
 
-def git_revision() -> dict:
+def git_revision(repository: Path = container.REPO_ROOT) -> dict:
     def git(*arguments: str) -> str:
         return subprocess.run(
-            ["git", "-C", str(container.REPO_ROOT), *arguments],
+            ["git", "-C", str(repository), *arguments],
             capture_output=True,
             text=True,
             check=True,
         ).stdout.strip()
 
-    return {"commit": git("rev-parse", "HEAD"), "dirty": bool(git("status", "--porcelain"))}
+    # Untracked files don't count: an earlier run's results aren't a change to the code.
+    dirty = bool(git("status", "--porcelain", "--untracked-files=no"))
+    return {"commit": git("rev-parse", "HEAD"), "dirty": dirty}
 
 
 def host_facts() -> dict:

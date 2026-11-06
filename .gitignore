@@ -35,4 +35,4 @@ htmlcov/
 CLAUDE.md
 
 # A rejected run is kept for debugging and never published
-results/*.rejected.json
+*.rejected.json
