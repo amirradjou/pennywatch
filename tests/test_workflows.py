@@ -48,3 +48,9 @@ def test_a_branch_that_starts_one_measuring_workflow_starts_no_other():
         for other, branch in triggers.items():
             if other != name:
                 assert not fnmatch(branch, pattern.replace("**", "*")), (name, other)
+
+
+@pytest.mark.parametrize("name", ["history.yml", "nightly.yml"])
+def test_published_results_always_use_several_memory_layouts(name):
+    text = next(path for path in WORKFLOWS if path.name == name).read_text()
+    assert "--repeats 3" in text

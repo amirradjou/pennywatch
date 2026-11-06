@@ -2,7 +2,8 @@ name: Nightly
 
 # Measures each new Catalyst dev build and publishes the results to the `data` branch. New builds
 # land on TestPyPI between 04:00 and 06:30 UTC. `limit` above 1 also works through older builds,
-# newest first, which is how the backfill runs.
+# newest first, which is how the backfill runs. Each build takes up to an hour, against the 2,000
+# free minutes a private repo gets each month, and public repos don't count them.
 on:
   schedule:
     - cron: "23 8 * * *"
@@ -70,7 +71,7 @@ jobs:
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
       - name: Measure
         run: >-
-          uv run pennywatch run --stack "$VERSION" --suite full --repeats 1 --no-busy-check
+          uv run pennywatch run --stack "$VERSION" --suite full --repeats 3 --no-busy-check
           --out "measured/catalyst-$VERSION.json"
       - name: Keep the lock file with the result
         if: always()
