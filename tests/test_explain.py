@@ -239,6 +239,59 @@ def _side(stack, runs, calls=None, functions=None):
     return Side(stack, runs, functions or {}, calls or {})
 
 
+IMPORT_TIMES = """import time: self [us] | cumulative | imported package
+import time:       100 |        100 |     numpy.core
+import time:       200 |        300 |   numpy
+import time:        50 |         50 |     scipy.stats._distn
+import time:      1000 |       1050 |   scipy.stats
+import time:        70 |       1420 | pennylane.transforms.split
+import time:         5 |         5 |     json
+import time:        30 |        35 |   pennylane.ops
+import time:        40 |      1495 | pennylane
+"""
+
+
+def test_an_outside_package_is_charged_to_the_file_that_imported_it():
+    costs = explain.import_costs(IMPORT_TIMES)
+    assert costs["pennylane/transforms/split.py"] == 70 + 300 + 1050
+    assert costs["pennylane/ops.py"] == 30 + 5
+    assert costs["pennylane.py"] == 40
+
+
+def test_an_outside_package_imported_by_another_outside_package_is_not_counted_twice():
+    costs = explain.import_costs(IMPORT_TIMES)
+    assert sum(costs.values()) == 1495
+
+
+def test_lines_that_are_not_import_times_are_ignored():
+    assert explain.import_costs("hello\nimport time: nonsense\n") == {}
+
+
+def test_import_times_rank_the_pull_request_that_touched_the_file():
+    before = {"pennylane/transforms/split.py": 70, "pennylane/ops.py": 35}
+    after = {"pennylane/transforms/split.py": 1500000, "pennylane/ops.py": 40}
+    moved = [[path, old, after[path]] for path, old in before.items()]
+    merged = [
+        _merged("other", ["pennylane/ops.py"]),
+        _merged("right", ["pennylane/transforms/split.py"]),
+    ]
+    assert rank_candidates(merged, moved)[0][1].commit == "right"
+
+
+def test_an_imports_report_talks_about_files_and_not_calls():
+    explanation = explain.Explanation(
+        "qft/default",
+        "imports",
+        _side("a", [1000, 1001, 1002]),
+        _side("b", [1100, 1101, 1102]),
+        [],
+        [["pennylane/transforms/split.py", 70, 1500000]],
+        [],
+        {},
+    )
+    assert "| File, with the packages it imports |" in explain.render(explanation)
+
+
 def test_the_report_shows_the_numbers_candidates_and_bisect():
     explanation = explain.Explanation(
         "qft/default",
@@ -283,7 +336,7 @@ def test_the_report_shows_the_numbers_candidates_and_bisect():
     assert "after measuring 9 commits" in text
     assert "100% of that" in text
     assert "Somewhere among 2 commits" in text
-    assert "touches moved code: 2 calls" in text
+    assert "touches code that moved: 2" in text
 
 
 def test_a_change_within_the_noise_says_so():

@@ -1,11 +1,39 @@
 # Findings
 
-Behaviour noticed while building the suite, with the measurements behind it. Each entry is data for a
-person to check. Nothing here has been reported upstream: see [Reporting upstream](../README.md#reporting-upstream).
+Behaviour noticed while building and running the suite, with the measurements behind it. Each entry is
+data for a person to check. Nothing here has been reported upstream: see
+[Reporting upstream](PLAN.md#reporting-upstream).
 
 Measured on 2026-11-05 on PennyLane 0.45.1 and 0.46.0.dev142, in the pinned image, on one CPU of a
 laptop that was busy with other work. Treat the times as rough; the ratios are far larger than the
 noise, and the gate lists and the error are exact.
+
+## `import pennylane` pays for all of `scipy.stats`, for one function
+
+`pennylane/transforms/split_non_commuting.py` has `from scipy.stats import multinomial` at the top of
+the module, added in [#7988](https://github.com/PennyLaneAI/pennylane/pull/7988) (2025-08-27, in 0.43)
+and still there on `main` on 2026-11-06. `multinomial` is called once, at line 90, and only for one way
+of distributing shots. The import pulls in `scipy.stats`, and with it `scipy.optimize`, `interpolate`,
+`integrate` and `spatial`: scipy goes from 188 modules to 488.
+
+Measured on PennyLane 0.43.3 on its own stack, the instructions to import it and create `default.qubit`,
+over three memory layouts:
+
+| | Runs | Median |
+|---|---:|---:|
+| As released | 7,966,276,946 / 7,966,118,229 / 7,967,085,862 | **7.966 billion** |
+| With only that line removed | 5,003,483,139 / 5,003,207,345 / 5,003,329,814 | **5.003 billion** |
+| PennyLane 0.42.3, the release before | 4,566,874,928 / 4,566,830,407 / 4,566,558,160 | 4.567 billion |
+
+So that line is 37% of the import, and 87% of the 74% rise from 0.42 to 0.43. `python -X importtime` puts
+`scipy.stats` at about 1.6 s on one machine, where a clock is a rough guide.
+
+## `default.qubit` got 11% cheaper from numpy 2.4, not from PennyLane
+
+Every `default.qubit` cell fell at Catalyst 0.13 / PennyLane 0.43: `qft/default` by 10.8%, from 8.627 to
+7.696 billion. The function that moved is `zgemm_itcopy_HASWELL`, inside OpenBLAS: from 1,212 to 291
+million. Putting numpy 2.4.3 on the older stack, with PennyLane 0.42.3 and nothing else changed, gives
+7.678 billion: all of it.
 
 ## `default.qubit` builds a dense matrix for `adjoint(QFT)`
 

@@ -7,6 +7,8 @@ commit by commit. A wrong answer is possible at every stage, so the output says 
 
 import io
 import json
+import os
+import re
 import shutil
 import subprocess
 import tarfile
@@ -75,6 +77,68 @@ def _usable_calls(sentinel: dict | None) -> dict[str, int]:
         for name, count in calls.items()
         if isinstance(count, int) and not isinstance(count, bool)
     }
+
+
+_IMPORT_LINE = re.compile(r"import time:\s+(\d+) \|\s+(\d+) \|(\s+)(\S+)")
+IMPORT_TIMES_LIMIT = 4 * 1024 * 1024
+
+
+def import_costs(text: str, package: str = "pennylane") -> dict[str, int]:
+    """Microseconds per file of a package, from `python -X importtime`, with each outside package
+    charged to whichever file of this one imported it. That's what points at a line of the package
+    when the time itself goes to a dependency. Times are a guide: only instructions are exact."""
+    rows = [
+        (match[4], int(match[1]), int(match[2]), len(match[3]))
+        for match in map(_IMPORT_LINE.match, text.splitlines())
+        if match
+    ]
+    costs: dict[str, int] = {}
+
+    def ours(module: str) -> bool:
+        return module == package or module.startswith(f"{package}.")
+
+    def path_of(module: str) -> str:
+        return untrusted.clean_name(module.replace(".", "/") + ".py")
+
+    # Children print before their parent, so a parent is the next line with less indent.
+    for index, (module, own, cumulative, depth) in enumerate(rows):
+        if ours(module):
+            costs[path_of(module)] = costs.get(path_of(module), 0) + own
+            continue
+        parent = next((row for row in rows[index + 1 :] if row[3] < depth), None)
+        if parent is not None and ours(parent[0]):
+            costs[path_of(parent[0])] = costs.get(path_of(parent[0]), 0) + cumulative
+    return costs
+
+
+def measure_import_times(image: str, stack_dir: Path, cpus: list[int]) -> dict[str, int]:
+    """How long each file of PennyLane took to import, on this stack. Not under Valgrind."""
+    workspace = _workspace()
+    output = workspace / "out"
+    output.mkdir()
+    (workspace / "src").mkdir()
+    try:
+        code, _ = measure.run_keeping_tail(
+            [
+                "docker",
+                "run",
+                f"--name=pennywatch-{os.getpid()}-importtime",
+                *container.sandbox_args(cpus[0], stack_dir, workspace / "src", output),
+                "--workdir=/tmp",
+                image,
+                "sh",
+                "-c",
+                "/stack/bin/python -P -s -X importtime -c 'import pennylane' "
+                "2> /out/importtime.txt",
+            ],
+            measure.JOB_TIMEOUT_S,
+        )
+        if code != 0:
+            raise MeasurementFailed(f"importing PennyLane exited {code}")
+        data = untrusted.read_file(output / "importtime.txt", IMPORT_TIMES_LIMIT)
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+    return import_costs(data.decode(errors="replace"))
 
 
 def counted_role(metric: str) -> str:
@@ -422,6 +486,10 @@ def explain(
         versions[name] = stacks.locked_versions(stack.lock_path)
         directories[name] = stacks.install(stack, image)
         sides[name] = measure_side(image, directories[name], stack.id, cell, list(cpus), metric)
+    if metric == "imports":
+        # What the circuit does says nothing about a step in the imports.
+        for name in ("before", "after"):
+            sides[name].calls = measure_import_times(image, directories[name], list(cpus))
     moved_calls = call_changes(sides["before"].calls, sides["after"].calls, 200)
     merged = candidates(versions["before"], versions["after"])
     changed = {
@@ -524,10 +592,12 @@ def render(explanation: Explanation) -> str:
     if explanation.bisect:
         lines += _render_bisect(explanation.bisect, before.net)
     if explanation.python_functions:
-        lines += [
-            "| Python function | Calls before | Calls after | Moved |",
-            "|---|---:|---:|---:|",
-        ]
+        heading = (
+            "| File, with the packages it imports | Before, µs | After, µs | Moved |"
+            if explanation.metric == "imports"
+            else "| Python function | Calls before | Calls after | Moved |"
+        )
+        lines += [heading, "|---|---:|---:|---:|"]
         lines += [
             f"| `{name}` | {old:,} | {new:,} | {_signed(new - old)} |"
             for name, old, new in explanation.python_functions
@@ -547,7 +617,7 @@ def render(explanation: Explanation) -> str:
         lines.append("")
         lines += [
             f"- {untrusted.clean_name(change['subject'])[:100]} ({change['url']})"
-            + (f", touches moved code: {change['score']:,} calls" if change["score"] else "")
+            + (f", touches code that moved: {change['score']:,}" if change["score"] else "")
             for change in changes[:12]
         ]
         lines.append("")
