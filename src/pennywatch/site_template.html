@@ -126,7 +126,7 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.875rem; }
 <h2>How it works</h2>
 <ul class="plain">
   <li><strong>Instructions, not time.</strong> Each circuit runs under Valgrind's Cachegrind, single-threaded, in a pinned container, counting only the circuit and not the imports. On a busy machine, wall-clock time moved by a factor of four while the count moved by less than 0.001%.</li>
-  <li><strong>Several memory layouts.</strong> The same code on the same machine can cost half a percent more when something shifts its addresses by a few bytes, because Python's caches and the order of its sets follow addresses. So each cell runs under several layouts, the figure is their median, and a change only counts if the runs of the two builds are apart.</li>
+  <li><strong>Several memory layouts.</strong> The same code on the same machine can cost half a percent more when something shifts its addresses by a few bytes. The Python calls stay the same, so the extra work is inside the interpreter. So each cell runs under several layouts, the figure is their median, and a change only counts if the runs of the two builds are apart.</li>
   <li><strong>Every run proves itself.</strong> Each cell also runs a canary with 1% extra gates, which has to show up, and each circuit's answer has to be right. A build that fails either gets thrown out, not published.</li>
   <li><strong>The set is what's measured.</strong> One Catalyst build pins exact PennyLane and Lightning builds, so one version names a whole stack.</li>
 </ul>

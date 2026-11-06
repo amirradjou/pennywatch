@@ -35,9 +35,10 @@ LAYOUT_VARIABLE = "PENNYWATCH_LAYOUT"
 
 def layout_padding(layout: int) -> str:
     """Padding for an environment variable, which shifts the process's memory layout and nothing
-    else. Layout changes what the code does: CPython's method cache and the order of sets of objects
-    follow addresses. Adding 16 bytes here moved one cell by 0.58%, while repeat runs under one
-    layout agreed to 0.005%. So runs of a cell differ in layout, or their agreement means little."""
+    else. Adding 16 bytes here moved one cell by 0.58%, while repeat runs under one layout agreed to
+    0.005%. Python's call counts stay exact across layouts, so the same code runs and the extra work
+    is inside the interpreter, where caches such as the method cache depend on addresses. So runs of
+    a cell differ in layout, or their agreement means little."""
     return "x" * (16 + 24 * layout)
 
 

@@ -76,6 +76,7 @@ def profile_report(adapter, qml, args, circuit, program, seed) -> dict:
     interpreter. Compiling happens when qjit is applied, so that's inside the profile too."""
     import cProfile
     import pstats
+    import re
 
     profiler = cProfile.Profile()
     profiler.enable()
@@ -87,7 +88,9 @@ def profile_report(adapter, qml, args, circuit, program, seed) -> dict:
     for (path, _, name), (_, total, _, _, _) in pstats.Stats(profiler).stats.items():
         short = path.split("site-packages/", 1)[-1]
         if total >= MIN_PROFILED_CALLS:
-            calls[f"{short}:{name}"] = calls.get(f"{short}:{name}", 0) + total
+            # Built-ins are named with their address, which differs in every process.
+            key = re.sub(r"0x[0-9a-f]+", "0x", f"{short}:{name}")
+            calls[key] = calls.get(key, 0) + total
     return {"result": circuit.answer(result), "calls": calls}
 
 
