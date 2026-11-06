@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from pennywatch import cli
 
 
@@ -44,3 +46,14 @@ def test_rejected_runs_are_saved_under_a_name_nothing_publishes():
 def test_valid_runs_are_saved_where_asked():
     result = {"valid": True, "started_at": "x", "stack": {"id": "s"}}
     assert cli.result_path(result, Path("results/a.json")) == Path("results/a.json")
+
+
+def test_every_cell_of_the_suite_unless_some_are_named():
+    assert cli.chosen_cells("m0", None) == cli.SUITES["m0"]
+    names = [cell.name for cell in cli.chosen_cells("m0", "qft/qjit,grover/default")]
+    assert names == ["qft/qjit", "grover/default"]
+
+
+def test_a_cell_outside_the_suite_is_an_error():
+    with pytest.raises(SystemExit, match="not in suite m0: qpe/qjit"):
+        cli.chosen_cells("m0", "qpe/qjit,qft/qjit")

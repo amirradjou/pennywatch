@@ -5,8 +5,8 @@ import json
 import sys
 from pathlib import Path
 
-from pennywatch import compare, container, measure, report, stacks
-from pennywatch.suite import SUITES
+from pennywatch import builds, compare, container, history, measure, publish, report, stacks
+from pennywatch.suite import MEMORY_WIRES, SUITES, Cell
 
 DEFAULT_STACK = "0.15.0"
 AGREEMENT_LIMIT_PCT = 0.05
@@ -21,6 +21,7 @@ def _parser() -> argparse.ArgumentParser:
         "--stack", default=DEFAULT_STACK, help="Catalyst version (default: %(default)s)"
     )
     run.add_argument("--suite", default="m0", choices=sorted(SUITES))
+    run.add_argument("--cells", help="only these cells of the suite, comma-separated")
     run.add_argument("--repeats", type=int, default=3, help="runs per cell (default: %(default)s)")
     run.add_argument(
         "--cpus",
@@ -45,6 +46,22 @@ def _parser() -> argparse.ArgumentParser:
         default=AGREEMENT_LIMIT_PCT,
         help="fail if any metric ranges wider than this percentage (default: %(default)s)",
     )
+
+    steps = commands.add_parser("steps", help="what changed from one build to the next")
+    steps.add_argument("results", type=Path, nargs="+")
+    steps.add_argument(
+        "--second-set", type=Path, nargs="*", default=[], help="separate results to confirm against"
+    )
+    steps.add_argument("--series", action="store_true", help="also print each metric's history")
+
+    waiting = commands.add_parser("pending", help="which dev builds to measure next, as JSON")
+    waiting.add_argument("--data", type=Path, required=True, help="where published results live")
+    waiting.add_argument("--since", default="2026-08-08", help="first upload date to consider")
+    waiting.add_argument("--limit", type=int, default=1)
+
+    accept = commands.add_parser("accept", help="check measured results and store them")
+    accept.add_argument("artifacts", type=Path)
+    accept.add_argument("--into", type=Path, required=True)
     return parser
 
 
@@ -58,14 +75,26 @@ def result_path(result: dict, requested: Path | None) -> Path:
     return requested.with_suffix(".rejected.json")
 
 
+def chosen_cells(suite: str, names: str | None) -> list[Cell]:
+    cells = SUITES[suite]
+    if names is None:
+        return cells
+    wanted = set(names.split(","))
+    if unknown := wanted - {cell.name for cell in cells}:
+        raise SystemExit(f"not in suite {suite}: {', '.join(sorted(unknown))}")
+    return [cell for cell in cells if cell.name in wanted]
+
+
 def run_command(args: argparse.Namespace) -> int:
+    cells = chosen_cells(args.suite, args.cells)
     result = measure.run_suite(
-        SUITES[args.suite],
+        cells,
         stacks.Stack(args.stack),
         repeats=args.repeats,
         cpus=[int(cpu) for cpu in args.cpus.split(",")],
         busy_check=not args.no_busy_check,
         keep_raw=args.keep_raw,
+        memory_wires=None if args.cells else MEMORY_WIRES.get(args.suite),
     )
     path = result_path(result, args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -85,6 +114,18 @@ def compare_command(args: argparse.Namespace) -> int:
     return 0 if comparison["worst_pct"] <= args.limit else 1
 
 
+def steps_command(args: argparse.Namespace) -> int:
+    results = history.load_results(args.results)
+    found = history.find_steps(results)
+    if args.second_set:
+        found = history.confirm_steps(found, history.load_results(args.second_set))
+    if args.series:
+        for metric in ("instructions", "compile", "imports"):
+            print(history.render_series(results, metric))
+    print(history.render_steps(found))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "run":
@@ -94,6 +135,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "report":
         print(report.render(json.loads(args.result.read_text())))
+        return 0
+    if args.command == "steps":
+        return steps_command(args)
+    if args.command == "pending":
+        print(json.dumps(builds.pending(publish.done_builds(args.data), args.since, args.limit)))
+        return 0
+    if args.command == "accept":
+        for outcome in publish.accept(args.artifacts, args.into):
+            print(outcome)
         return 0
     return compare_command(args)
 
