@@ -22,6 +22,10 @@ from pennywatch.suite import SUITES, Cell
 
 LAYOUTS = 3
 TOP_FUNCTIONS = 15
+# A commit has to move this share of the step, and this share of the metric, to be worth chasing.
+MIN_CULPRIT_SHARE = 0.1
+COUNTED_STEP = 0.005
+MAX_CULPRITS = 6
 # A bisect only makes sense if the newest PennyLane alone gives most of the step.
 BISECT_MIN_SHARE = 0.5
 ARCHIVE_LIMIT_BYTES = 200 * 1024 * 1024
@@ -284,6 +288,45 @@ def bisect_commits(commits: list[str], low: float, high: float, measure_commit) 
     }
 
 
+def bisect_all(
+    commits: list[str], low: float, high: float, measure_commit, max_found: int = MAX_CULPRITS
+) -> dict:
+    """Every commit that moved a metric by a meaningful part of a step. A step often has several, so
+    after each find this looks on either side of it, reusing what it has already measured."""
+    known: dict[str, float | None] = {}
+
+    def remembered(commit: str) -> float | None:
+        if commit not in known:
+            known[commit] = measure_commit(commit)
+        return known[commit]
+
+    smallest = max(abs(high - low) * MIN_CULPRIT_SHARE, abs(low) * COUNTED_STEP)
+    found: list[dict] = []
+    unresolved: list[list[str]] = []
+
+    def walk(segment: list[str], first: float, last: float) -> None:
+        if not segment or abs(last - first) < smallest or len(found) >= max_found:
+            return
+        result = bisect_commits(segment, first, last, remembered)
+        if result["found"] is None:
+            unresolved.append(result["range"])
+            return
+        at = segment.index(result["found"])
+        found.append(
+            {"commit": result["found"], "before": result["before"], "after": result["after"]}
+        )
+        walk(segment[:at], first, result["before"])
+        if result["after"] is not None:
+            walk(segment[at + 1 :], result["after"], last)
+
+    walk(commits, low, high)
+    return {
+        "culprits": sorted(found, key=lambda step: -abs(step["after"] - step["before"])),
+        "unresolved": unresolved,
+        "measured": len(known),
+    }
+
+
 def bisect_pennylane(
     image: str,
     stack_dir: Path,
@@ -328,7 +371,7 @@ def bisect_pennylane(
     commits = [change.commit for change in merged]
     if not commits or commits[-1] != last_commit:
         commits.append(last_commit)
-    outcome = bisect_commits(commits, low, newest, run)
+    outcome = bisect_all(commits, low, newest, run)
     outcome["pennylane_alone"] = newest
     outcome["pennylane_share"] = share
     return outcome
@@ -401,12 +444,12 @@ def explain(
             list(cpus),
             metric,
         )
-        found = bisected.get("found")
-        if found:
-            hit = next((c for c in merged["pennylane"] if c.commit == found), None)
-            bisected["pull_request"] = hit.pull_request if hit else None
-            bisected["url"] = hit.url if hit else None
-            bisected["subject"] = hit.subject if hit else None
+        by_commit = {change.commit: change for change in merged["pennylane"]}
+        for culprit in bisected.get("culprits", []):
+            hit = by_commit.get(culprit["commit"])
+            culprit["pull_request"] = hit.pull_request if hit else None
+            culprit["url"] = hit.url if hit else None
+            culprit["subject"] = hit.subject if hit else None
     return Explanation(
         cell_name,
         metric,
@@ -429,6 +472,30 @@ def _signed(value: int) -> str:
     return f"{value:+,}"
 
 
+def _render_bisect(bisected: dict, low: float) -> list[str]:
+    if "culprits" not in bisected:
+        return [f"**Bisect:** {bisected.get('verdict', 'no single commit found')}", ""]
+    alone = bisected["pennylane_alone"]
+    share = bisected.get("pennylane_share", 0.0)
+    lines = [
+        f"**Bisect:** on the older stack, PennyLane alone takes this to {alone:,.0f}, {share:.0%} "
+        f"of the step, after measuring {bisected['measured']} commits.",
+        "",
+    ]
+    span = alone - low
+    for culprit in bisected["culprits"]:
+        moved = culprit["after"] - culprit["before"]
+        portion = f", {moved / span:.0%} of that" if span else ""
+        lines.append(
+            f"- {untrusted.clean_name(culprit.get('subject'))} ({culprit.get('url')}): "
+            f"{culprit['before']:,.0f} → {culprit['after']:,.0f}{portion}"
+        )
+    for commits in bisected.get("unresolved", []):
+        lines.append(f"- Somewhere among {len(commits)} commits that can't be measured")
+    lines.append("")
+    return lines
+
+
 def render(explanation: Explanation) -> str:
     before, after = explanation.before, explanation.after
     change = history.change_pct(before.net, after.net) or 0.0
@@ -448,18 +515,7 @@ def render(explanation: Explanation) -> str:
     if explanation.packages:
         lines += ["**Packages that moved:** " + ", ".join(explanation.packages), ""]
     if explanation.bisect:
-        bisected = explanation.bisect
-        if bisected.get("found"):
-            share = bisected.get("share_of_step")
-            portion = "" if share is None else f", {share:.0%} of what PennyLane alone gives"
-            lines += [
-                f"**Bisected to:** {untrusted.clean_name(bisected.get('subject'))} "
-                f"({bisected.get('url')}): "
-                f"{bisected['before']:,.0f} → {bisected['after']:,.0f}{portion}.",
-                "",
-            ]
-        else:
-            lines += [f"**Bisect:** {bisected.get('verdict', 'no single commit found')}", ""]
+        lines += _render_bisect(explanation.bisect, before.net)
     if explanation.python_functions:
         lines += [
             "| Python function | Calls before | Calls after | Moved |",

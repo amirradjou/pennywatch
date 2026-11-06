@@ -118,8 +118,10 @@ def explanation_entry(saved: dict) -> tuple[str, dict]:
     page only links to GitHub, and only prints these as text."""
     key = f"{saved['before']['stack']}..{saved['after']['stack']}/{saved['cell']}/{saved['metric']}"
     bisect = saved.get("bisect") or {}
-    if bisect.get("found") and bisect.get("subject"):
-        return key, {"text": str(bisect["subject"])[:120], "url": bisect.get("url")}
+    culprits = [culprit for culprit in bisect.get("culprits", []) if culprit.get("subject")]
+    if culprits:
+        also = f", and {len(culprits) - 1} more" if len(culprits) > 1 else ""
+        return key, {"text": f"{culprits[0]['subject'][:120]}{also}", "url": culprits[0].get("url")}
     if bisect.get("verdict"):
         return key, {"text": str(bisect["verdict"])[:160], "url": None}
     count = sum(len(changes) for changes in (saved.get("candidates") or {}).values())

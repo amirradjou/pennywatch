@@ -76,6 +76,64 @@ def test_a_step_split_over_two_commits_reports_the_share_of_the_one_it_found():
     assert result["share_of_step"] == pytest.approx(0.6)
 
 
+def _staircase(steps, low=100.0):
+    """A metric that moves at these commits, by these amounts."""
+
+    def measure(commit):
+        index = int(commit[1:])
+        return low + sum(amount for position, amount in steps.items() if index >= position)
+
+    return measure
+
+
+def test_every_commit_that_moved_a_step_is_found_largest_first():
+    measure = _staircase({3: 30.0, 9: 50.0, 20: 20.0})
+    result = explain.bisect_all(_commits(32), 100.0, 200.0, measure)
+    assert [(c["commit"], c["before"], c["after"]) for c in result["culprits"]] == [
+        ("c9", 130.0, 180.0),
+        ("c3", 100.0, 130.0),
+        ("c20", 180.0, 200.0),
+    ]
+    assert result["unresolved"] == []
+
+
+def test_a_commit_too_small_to_matter_is_not_chased():
+    measure = _staircase({3: 98.0, 9: 0.5})
+    result = explain.bisect_all(_commits(16), 100.0, 198.5, measure)
+    assert [c["commit"] for c in result["culprits"]] == ["c3"]
+
+
+def test_commits_are_measured_only_once():
+    seen = []
+    staircase = _staircase({3: 30.0, 9: 70.0})
+
+    def measure(commit):
+        seen.append(commit)
+        return staircase(commit)
+
+    explain.bisect_all(_commits(32), 100.0, 200.0, measure)
+    assert len(seen) == len(set(seen))
+    assert len(seen) <= 16
+
+
+def test_the_search_stops_at_the_limit():
+    measure = _staircase({position: 10.0 for position in range(0, 20, 2)})
+    result = explain.bisect_all(_commits(20), 100.0, 200.0, measure, max_found=3)
+    assert len(result["culprits"]) == 3
+
+
+def test_a_part_among_broken_commits_is_reported_as_unresolved():
+    staircase = _staircase({2: 50.0, 10: 50.0})
+
+    def measure(commit):
+        return None if commit in {"c9", "c10"} else staircase(commit)
+
+    result = explain.bisect_all(_commits(16), 100.0, 200.0, measure)
+    assert [c["commit"] for c in result["culprits"]] == ["c2"]
+    # c11 is the first that can be measured after the move, so any of the three may have done it.
+    assert result["unresolved"] == [["c9", "c10", "c11"]]
+
+
 def _merged(commit, files):
     return upstream.Merged("pennylane", commit, commit, None, "u", tuple(files))
 
@@ -190,12 +248,19 @@ def test_the_report_shows_the_numbers_candidates_and_bisect():
             ]
         },
         {
-            "found": "abc",
-            "before": 105.0,
-            "after": 205.0,
-            "share_of_step": 1.0,
-            "subject": "Change apply (#7)",
-            "url": "https://github.com/PennyLaneAI/pennylane/pull/7",
+            "culprits": [
+                {
+                    "commit": "abc",
+                    "before": 105.0,
+                    "after": 205.0,
+                    "subject": "Change apply (#7)",
+                    "url": "https://github.com/PennyLaneAI/pennylane/pull/7",
+                }
+            ],
+            "unresolved": [["x", "y"]],
+            "measured": 9,
+            "pennylane_alone": 205.0,
+            "pennylane_share": 1.0,
         },
     )
     text = explain.render(explanation)
@@ -204,7 +269,10 @@ def test_the_report_shows_the_numbers_candidates_and_bisect():
     assert "numpy 2.4 → 2.5" in text
     assert "`pennylane/a.py:apply`" in text
     assert "`_PyEval_EvalFrameDefault`" in text
-    assert "**Bisected to:** Change apply (#7)" in text
+    assert "- Change apply (#7) (https://github.com/PennyLaneAI/pennylane/pull/7)" in text
+    assert "after measuring 9 commits" in text
+    assert "100% of that" in text
+    assert "Somewhere among 2 commits" in text
     assert "touches moved code: 2 calls" in text
 
 

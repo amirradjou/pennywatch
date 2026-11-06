@@ -130,11 +130,19 @@ KEY = "catalyst-0.9.0..catalyst-0.10.0/qft/qjit/instructions"
 
 
 def test_a_bisected_change_links_to_its_pull_request():
-    bisect = {"found": "abc", "subject": "Fix adjoint (#7)", "url": "https://github.com/x/y/pull/7"}
+    url = "https://github.com/x/y/pull/7"
+    bisect = {"culprits": [{"commit": "abc", "subject": "Fix adjoint (#7)", "url": url}]}
     assert site.explanation_entry(_saved(bisect=bisect)) == (
         KEY,
-        {"text": "Fix adjoint (#7)", "url": "https://github.com/x/y/pull/7"},
+        {"text": "Fix adjoint (#7)", "url": url},
     )
+
+
+def test_a_change_with_several_causes_says_how_many():
+    url = "https://github.com/x/y/pull/7"
+    culprits = [{"subject": "Big (#7)", "url": url}, {"subject": "Small (#8)", "url": "u"}]
+    entry = site.explanation_entry(_saved(bisect={"culprits": culprits}))[1]
+    assert entry == {"text": "Big (#7), and 1 more", "url": url}
 
 
 def test_a_bisect_that_stopped_says_why():

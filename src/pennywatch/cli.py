@@ -85,7 +85,9 @@ def _parser() -> argparse.ArgumentParser:
     why.add_argument("before", help="Catalyst version before the change")
     why.add_argument("after", help="Catalyst version after the change")
     why.add_argument("--cell", required=True)
-    why.add_argument("--metric", default="instructions", choices=["instructions", "compile"])
+    why.add_argument(
+        "--metric", default="instructions", choices=["instructions", "compile", "imports"]
+    )
     why.add_argument("--bisect", action="store_true", help="also bisect PennyLane commit by commit")
     why.add_argument("--cpus", default="0,1")
     why.add_argument("--out", type=Path, default=Path("results/explanations"))
