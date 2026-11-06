@@ -4,9 +4,30 @@ Behaviour noticed while building and running the suite, with the measurements be
 data for a person to check. Nothing here has been reported upstream: see
 [Reporting upstream](PLAN.md#reporting-upstream).
 
-Measured on 2026-11-05 on PennyLane 0.45.1 and 0.46.0.dev142, in the pinned image, on one CPU of a
-laptop that was busy with other work. Treat the times as rough; the ratios are far larger than the
-noise, and the gate lists and the error are exact.
+Counts are instructions, and the median of three memory layouts. The sections on dense matrices were
+measured on 2026-11-05 on PennyLane 0.45.1 and 0.46.0.dev142, in the pinned image, on one CPU of a laptop
+that was busy with other work. Treat their times as rough; the ratios are far larger than the noise, and
+the gate lists and the error are exact.
+
+## `QFT.compute_matrix` lost its cache
+
+Until 0.45, `QFT.compute_matrix` had `@functools.lru_cache`, keyed on `num_wires`. The port to `Operator2`
+([#9932](https://github.com/PennyLaneAI/pennylane/pull/9932), 2026-07-31) changed its argument to `wires` and removed
+the decorator, and it's still gone on `main` on 2026-11-06. So `default.qubit` builds the same dense matrix again each
+time it applies a QFT whole.
+
+`qpe/default` runs phase estimation 7 times, and on the commit before and after the port, `pocketfft`'s share goes
+from 205,687,808 to 1,439,814,656 instructions, and `general_nd` from 46,259,411 to 323,815,877: exactly 7.0 times.
+
+Measured on Catalyst 0.16.0.dev135 with only a cached helper added, over three memory layouts:
+
+| `qpe/default` | Runs | Median |
+|---|---:|---:|
+| As released | 3,152,543,519 / 3,154,024,396 / 3,153,068,442 | **3.153 billion** |
+| Matrix cached again | 1,523,113,835 / 1,524,686,538 / 1,523,854,478 | **1.524 billion** |
+| 0.45.1, for comparison | 1,163,285,842 is the median | 1.163 billion |
+
+That's 52% of the cell's cost today, and 82% of its rise since 0.45.1.
 
 ## `import pennylane` pays for all of `scipy.stats`, for one function
 
@@ -27,6 +48,38 @@ over three memory layouts:
 
 So that line is 37% of the import, and 87% of the 74% rise from 0.42 to 0.43. `python -X importtime` puts
 `scipy.stats` at about 1.6 s on one machine, where a clock is a rough guide.
+
+## Decomposition rules read and tokenise their own source when created
+
+`DecompositionRule.__init__` in `pennylane/decomposition/decomposition_rule.py` calls
+`inspect.getsource(func)` every time, and the result is used by `__str__`. On a circuit that creates rules while it
+runs, that tokenises source code during the run: `qpe/lightning` on 0.46.0.dev142 makes 89,708 calls into
+`tokenize.py`, up from none on 0.45.1.
+
+Measured on Catalyst 0.16.0.dev135 with only that call replaced by a constant, over three memory layouts:
+
+| | As released | Source not captured | Change |
+|---|---:|---:|---:|
+| `qpe/lightning` | 3,620,385,819 | 2,445,917,982 | **-32.4%** |
+| Imports and creating `default.qubit` | 8,001,419,809 | 7,388,246,275 | **-7.7%** |
+| `trotter/lightning` | 9,785,745,619 | 9,771,755,399 | -0.14% |
+| `qft/lightning` | 2,275,221,140 | 2,274,824,802 | -0.02% |
+
+The last two are within their layout noise. Replacing the call breaks `__str__`, so this measures the cost and
+isn't a proposal: computing the source when it's asked for would keep that behaviour.
+
+## Moving operators to `Operator2` makes them more expensive to build
+
+From 0.45.1 to 0.46.0.dev142, in instructions: `qpe/lightning` +622%, `qpe/default` +171%, `trotter/lightning` +102%,
+`qft/lightning` +46%. Bisects put most of it on the pull requests that port each operator: see
+[explanations](explanations.md). `Operator2.__init__` calls `Signature.bind`, and the profile shows the new calls in
+`inspect.py`. The migration is still in progress and hasn't reached a stable release, so this is a snapshot.
+
+## Lightning's peak memory fell by 44% at PennyLane 0.41
+
+At 25 wires on `lightning.qubit`, from 1,232 MiB at Catalyst 0.10.0 to 690 MiB at 0.11.0, and from 1,759 to 1,217 MiB
+under `qjit`, with a spread across layouts of at most 0.08%. It's held since, rising slowly to 772 and 1,337 MiB at
+0.15.0. Not explained yet.
 
 ## `default.qubit` got 11% cheaper from numpy 2.4, not from PennyLane
 
