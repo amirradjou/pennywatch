@@ -78,16 +78,6 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.875rem; }
 <p class="lede">An independent performance history of <a href="https://github.com/PennyLaneAI/pennylane">PennyLane</a>, <a href="https://github.com/PennyLaneAI/pennylane-lightning">Lightning</a> and <a href="https://github.com/PennyLaneAI/catalyst">Catalyst</a>. The same circuits run on every build, and any change in what they cost gets traced to the pull requests behind it.</p>
 <div class="tiles" id="tiles"></div>
 
-<h2>What changed</h2>
-<p>Each row is a change from one build to the next: 0.5% or more in a counted metric, or any change in a gate count. <q>Confirmed</q> means a second, separate measurement showed the same change.</p>
-<div class="controls">
-  <label>Metric
-    <select id="step-metric"></select>
-  </label>
-</div>
-<div class="table-wrap"><table id="steps"></table></div>
-<p class="empty" id="no-steps" hidden>No changes in this view.</p>
-
 <h2>History</h2>
 <div class="controls">
   <label>Metric
@@ -120,9 +110,23 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.875rem; }
   <div class="table-wrap"><table id="values"></table></div>
 </details>
 
+<h2>What changed</h2>
+<p>Each row is a change from one build to the next: 0.5% or more in a counted metric with the runs of the two builds apart, or any change in a gate count. <q>Confirmed</q> means a second, separate measurement showed the same change.</p>
+<div class="controls">
+  <label>Between
+    <select id="step-between"></select>
+  </label>
+  <label>Metric
+    <select id="step-metric"></select>
+  </label>
+</div>
+<div class="table-wrap"><table id="steps"></table></div>
+<p class="empty" id="no-steps" hidden>No changes in this view.</p>
+
 <h2>How it works</h2>
 <ul class="plain">
   <li><strong>Instructions, not time.</strong> Each circuit runs under Valgrind's Cachegrind, single-threaded, in a pinned container, counting only the circuit and not the imports. On a busy machine, wall-clock time moved by a factor of four while the count moved by less than 0.001%.</li>
+  <li><strong>Several memory layouts.</strong> The same code on the same machine can cost half a percent more when something shifts its addresses by a few bytes, because Python's caches and the order of its sets follow addresses. So each cell runs under several layouts, the figure is their median, and a change only counts if the runs of the two builds are apart.</li>
   <li><strong>Every run proves itself.</strong> Each cell also runs a canary with 1% extra gates, which has to show up, and each circuit's answer has to be right. A build that fails either gets thrown out, not published.</li>
   <li><strong>The set is what's measured.</strong> One Catalyst build pins exact PennyLane and Lightning builds, so one version names a whole stack.</li>
 </ul>
@@ -327,9 +331,15 @@ function drawHistory() {
 const METRIC_NAMES = { instructions: "Instructions", compile: "Compile cost", imports: "Imports", peak_kb: "Peak memory" };
 const metricName = (metric) => METRIC_NAMES[metric] || metric.replace(".", " at ").replace("gates", "Gates").replace("depth", "Depth");
 
+const transition = (row) => `${row.before_stack} → ${row.after_stack}`;
+
 function drawSteps() {
   const wanted = $("step-metric").value;
-  const rows = DATA.steps.filter((row) => wanted === "all" || row.metric === wanted);
+  const between = $("step-between").value;
+  const size = (row) => (row.change_pct === null ? Infinity : Math.abs(row.change_pct));
+  const rows = DATA.steps
+    .filter((row) => (wanted === "all" || row.metric === wanted) && (between === "all" || transition(row) === between))
+    .sort((a, b) => size(b) - size(a));
   const table = $("steps");
   table.replaceChildren();
   $("no-steps").hidden = rows.length > 0;
@@ -343,7 +353,7 @@ function drawSteps() {
   const body = el("tbody");
   for (const row of rows) {
     const tr = el("tr");
-    tr.append(el("td", {}, `${row.before_stack} → ${row.after_stack}`), el("td", {}, row.cell), el("td", {}, metricName(row.metric)));
+    tr.append(el("td", {}, transition(row)), el("td", {}, row.cell), el("td", {}, metricName(row.metric)));
     const unit = row.metric === "instructions" || row.metric === "compile" || row.metric === "imports" ? "instructions" : "";
     tr.append(el("td", { class: "num" }, shown(row.before, unit)), el("td", { class: "num" }, shown(row.after, unit)));
     const change = row.change_pct === null ? "" : pct(row.change_pct);
@@ -396,11 +406,17 @@ stepMetric.append(el("option", { value: "all" }, "All"));
 for (const metric of [...new Set(DATA.steps.map((row) => row.metric))].sort()) {
   stepMetric.append(el("option", { value: metric }, metricName(metric)));
 }
+const stepBetween = $("step-between");
+stepBetween.append(el("option", { value: "all" }, "Every build"));
+const transitions = [...new Set(DATA.steps.map(transition))];
+for (const name of [...transitions].reverse()) stepBetween.append(el("option", { value: name }, name));
+if (transitions.length) stepBetween.value = transitions[transitions.length - 1];
 if (!DATA.nightly.builds.length) $("track").value = "stable";
 if (!DATA.stable.builds.length && DATA.nightly.builds.length) $("track").value = "nightly";
 stepMetric.value = DATA.steps.some((row) => row.metric === "instructions") ? "instructions" : "all";
 for (const id of ["metric", "track", "scale"]) $(id).addEventListener("change", drawHistory);
 stepMetric.addEventListener("change", drawSteps);
+stepBetween.addEventListener("change", drawSteps);
 drawTiles();
 drawSteps();
 drawHistory();
