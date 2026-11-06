@@ -251,6 +251,31 @@ def install(stack: Stack, image: str) -> Path:
     return target
 
 
+def install_extras(image: str, target: Path, packages: tuple[str, ...]) -> None:
+    """Unpack packages from PyPI into a directory. Wheels only, so nothing from them runs."""
+    _in_image(
+        image,
+        [
+            "uv",
+            "pip",
+            "install",
+            "--quiet",
+            "--no-deps",
+            "--only-binary",
+            ":all:",
+            "--python-version",
+            "3.12",
+            "--python-platform",
+            "x86_64-manylinux_2_28",
+            "--target",
+            "/target",
+            *packages,
+        ],
+        target,
+        "/target",
+    )
+
+
 def _uv(image: str, work: Path, arguments: str) -> None:
     _in_image(
         image, ["uv", *arguments.split()], work, "/work", workdir="/work", capture_errors=True

@@ -54,6 +54,8 @@ This re-measures the cell on both builds, then lists what merged between them, m
 - `--bisect` runs PennyLane alone at each commit on top of the older stack. If the newest PennyLane
   alone doesn't give most of the step, it says the cause is elsewhere. Commits that can't be measured
   are stepped around, and if the step is among them, the answer is the range.
+- If PennyLane needs something the older stack lacks, `--with tomlkit` adds it. If it needs a different
+  version of something the stack has, the bisect can't run across that change, and it says so.
 - Lightning needs a C++ build per commit and Catalyst is too heavy to build per commit, so for those
   it stops at the candidates and says so.
 

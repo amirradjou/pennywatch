@@ -231,6 +231,7 @@ def run_on_slots(
     def on_a_slot(job: Job) -> Outcome:
         cpu = free.get()
         try:
+            container.wait_for_memory()
             outcome = execute(job, cpu)
         except Exception as error:  # noqa: BLE001 - one bad job must not lose the others
             outcome = Outcome(job, error=f"{type(error).__name__}: {error}")

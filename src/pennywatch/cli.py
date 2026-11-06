@@ -89,6 +89,12 @@ def _parser() -> argparse.ArgumentParser:
         "--metric", default="instructions", choices=["instructions", "compile", "imports"]
     )
     why.add_argument("--bisect", action="store_true", help="also bisect PennyLane commit by commit")
+    why.add_argument(
+        "--with",
+        dest="extras",
+        default="",
+        help="packages the commits need and the older stack lacks, comma-separated",
+    )
     why.add_argument("--cpus", default="0,1")
     why.add_argument("--out", type=Path, default=Path("results/explanations"))
 
@@ -197,6 +203,7 @@ def explain_command(args: argparse.Namespace) -> int:
         metric=args.metric,
         cpus=tuple(int(cpu) for cpu in args.cpus.split(",")),
         bisect=args.bisect,
+        extras=tuple(package for package in args.extras.split(",") if package),
     )
     print(explain.render(explanation))
     print(f"Saved to {explain.save(explanation, args.out)}")

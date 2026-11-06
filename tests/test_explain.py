@@ -225,6 +225,16 @@ def test_an_archive_with_too_many_files_is_refused(tmp_path, monkeypatch):
         explain.unpack_package(archive, tmp_path)
 
 
+def test_an_overlay_with_extras_is_kept_apart_from_one_without(tmp_path, monkeypatch):
+    monkeypatch.setattr(explain.stacks, "cache_dir", lambda: tmp_path)
+    plain = tmp_path / "overlays" / "abc"
+    extended = tmp_path / "overlays" / "abc+toml+tomlkit"
+    plain.mkdir(parents=True)
+    extended.mkdir()
+    assert explain.fetch_overlay("abc") == plain
+    assert explain.fetch_overlay("abc", ("tomlkit", "toml")) == extended
+
+
 def _side(stack, runs, calls=None, functions=None):
     return Side(stack, runs, functions or {}, calls or {})
 

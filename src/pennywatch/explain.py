@@ -157,10 +157,12 @@ def candidates(before: dict[str, str], after: dict[str, str]) -> dict[str, list[
     return found
 
 
-def fetch_overlay(commit: str) -> Path:
-    """PennyLane's Python files at one commit, from GitHub's archive, unpacked once into the cache.
-    Bytecode gets compiled offline, as for a stack, so no measured run pays for writing it."""
-    target = stacks.cache_dir() / "overlays" / commit
+def fetch_overlay(commit: str, extras: tuple[str, ...] = ()) -> Path:
+    """PennyLane's Python files at one commit, from GitHub's archive, unpacked once into the cache,
+    with any packages this commit needs and the stack lacks. Bytecode gets compiled offline, as for
+    a stack, so no measured run pays for writing it."""
+    name = "+".join((commit, *sorted(extras)))
+    target = stacks.cache_dir() / "overlays" / name
     if target.is_dir():
         return target
     url = f"https://github.com/{upstream.REPOS['pennylane'].slug}/archive/{commit}.tar.gz"
@@ -171,6 +173,8 @@ def fetch_overlay(commit: str) -> Path:
     partial = Path(tempfile.mkdtemp(prefix=f"{commit[:12]}.", dir=_overlays_dir()))
     partial.chmod(0o755)
     unpack_package(archive, partial)
+    if extras:
+        stacks.install_extras(container.ensure_image(), partial, extras)
     subprocess.run(
         [
             "docker",
@@ -337,12 +341,13 @@ def bisect_pennylane(
     last_commit: str,
     cpus: list[int],
     metric: str,
+    extras: tuple[str, ...] = (),
 ) -> dict:
     """Bisect PennyLane alone on top of the older stack, so nothing else can be the cause."""
 
     def run(commit: str) -> float | None:
         try:
-            overlay = fetch_overlay(commit)
+            overlay = fetch_overlay(commit, extras)
             side = measure_side(
                 image, stack_dir, commit[:12], cell, cpus, metric, overlay=overlay, profile=False
             )
@@ -406,6 +411,7 @@ def explain(
     cpus: tuple[int, ...] = (0, 1),
     bisect: bool = False,
     suite: str = "full",
+    extras: tuple[str, ...] = (),
 ) -> Explanation:
     cell = find_cell(cell_name, suite)
     image = container.ensure_image()
@@ -443,6 +449,7 @@ def explain(
             upstream.commit_of(repo, versions["after"]["pennylane"]),
             list(cpus),
             metric,
+            extras,
         )
         by_commit = {change.commit: change for change in merged["pennylane"]}
         for culprit in bisected.get("culprits", []):

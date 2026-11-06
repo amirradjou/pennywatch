@@ -3,6 +3,7 @@
 import hashlib
 import os
 import subprocess
+import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -32,6 +33,13 @@ HARDENING = ["--cap-drop=ALL", "--security-opt=no-new-privileges"]
 
 LAYOUT_VARIABLE = "PENNYWATCH_LAYOUT"
 
+# A job can reach MEMORY_LIMIT, and whatever else is running has to keep going meanwhile. Limiting
+# CPUs alone isn't enough: three chains of jobs on two CPUs once ran a laptop out of memory, and the
+# kernel killed the editor.
+MIN_AVAILABLE_GIB = 4.0
+MEMORY_WAIT_LIMIT_S = 3600
+MEMORY_POLL_S = 15
+
 
 def layout_padding(layout: int) -> str:
     """Padding for an environment variable, which shifts the process's memory layout and nothing
@@ -40,6 +48,26 @@ def layout_padding(layout: int) -> str:
     is inside the interpreter, where caches such as the method cache depend on addresses. So runs of
     a cell differ in layout, or their agreement means little."""
     return "x" * (16 + 24 * layout)
+
+
+def available_memory_gib(meminfo: Path = Path("/proc/meminfo")) -> float:
+    for line in meminfo.read_text().splitlines():
+        if line.startswith("MemAvailable:"):
+            return int(line.split()[1]) / (1024 * 1024)
+    raise ValueError("no MemAvailable in /proc/meminfo")
+
+
+def wait_for_memory(read=available_memory_gib, sleep=time.sleep, now=time.monotonic) -> None:
+    """Hold a job back until the host can spare it. Fails rather than waiting for ever, since a job
+    that never starts looks just like one that is taking a long time."""
+    deadline = now() + MEMORY_WAIT_LIMIT_S
+    while (available := read()) < MIN_AVAILABLE_GIB:
+        if now() >= deadline:
+            raise RuntimeError(
+                f"only {available:.1f} GiB of memory free after an hour, "
+                f"and a job needs {MIN_AVAILABLE_GIB} GiB to start"
+            )
+        sleep(MEMORY_POLL_S)
 
 
 def image_tag() -> str:

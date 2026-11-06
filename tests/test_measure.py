@@ -234,6 +234,20 @@ def test_a_command_that_outlives_its_timeout_is_killed():
         measure.run_keeping_tail([sys.executable, "-c", code], timeout=0.2)
 
 
+def test_a_job_that_cannot_get_memory_fails_and_the_others_carry_on(monkeypatch):
+    def no_memory():
+        raise RuntimeError("only 1.0 GiB of memory free")
+
+    monkeypatch.setattr(measure.container, "wait_for_memory", no_memory)
+    jobs = [full_job()]
+
+    def execute(job, cpu):
+        raise AssertionError("must not start")
+
+    outcomes = measure.run_on_slots(jobs, [0], execute)
+    assert "memory" in outcomes[jobs[0]].error
+
+
 def _git_repository(path):
     def git(*arguments):
         subprocess.run(
