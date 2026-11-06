@@ -12,6 +12,7 @@ from pennywatch import history
 from pennywatch.suite import BACKENDS
 
 MIB_PER_KB = 1 / 1024
+CHECKED_FILE = "checked.json"
 CIRCUIT_ORDER = ("qft", "grover", "trotter", "qpe", "variational", "sampling")
 BACKEND_LABELS = {
     "default": "default.qubit",
@@ -115,7 +116,11 @@ def _track(results: list[dict]) -> dict:
 def explanation_entry(saved: dict) -> tuple[str, dict]:
     """A saved explanation, as the key of the step it explains and what the page says about it. The
     page only links to GitHub, and only prints these as text."""
-    key = f"{saved['before']['stack']}..{saved['after']['stack']}/{saved['cell']}/{saved['metric']}"
+    # Imports belong to a backend, and steps name them that way.
+    cell = saved["cell"]
+    if saved["metric"] == "imports":
+        cell = f"imports/{cell.split('/')[1]}"
+    key = f"{saved['before']['stack']}..{saved['after']['stack']}/{cell}/{saved['metric']}"
     bisect = saved.get("bisect") or {}
     culprits = [culprit for culprit in bisect.get("culprits", []) if culprit.get("subject")]
     if culprits:
@@ -131,10 +136,18 @@ def explanation_entry(saved: dict) -> tuple[str, dict]:
 
 
 def load_explanations(directory: Path | None) -> dict:
+    """What the tool said about each step, overridden by what a person then checked."""
     if directory is None or not directory.is_dir():
         return {}
-    entries = (explanation_entry(json.loads(path.read_text())) for path in directory.glob("*.json"))
-    return dict(entries)
+    explanations = dict(
+        explanation_entry(json.loads(path.read_text()))
+        for path in directory.glob("*.json")
+        if path.name != CHECKED_FILE
+    )
+    checked = directory / CHECKED_FILE
+    if checked.exists():
+        explanations |= json.loads(checked.read_text())
+    return explanations
 
 
 def step_rows(steps: list[history.Step], explanations: dict | None = None) -> list[dict]:

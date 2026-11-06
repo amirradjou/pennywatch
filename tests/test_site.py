@@ -184,6 +184,18 @@ def test_saved_explanations_are_matched_to_their_steps(tmp_path):
     assert row["explanation"]["text"] == "3 candidates, not narrowed further"
 
 
+def test_a_step_in_the_imports_is_matched_by_its_backend():
+    key = site.explanation_entry(_saved(cell="qft/default", metric="imports"))[0]
+    assert key == "catalyst-0.9.0..catalyst-0.10.0/imports/default/imports"
+
+
+def test_what_a_person_checked_replaces_what_the_tool_said(tmp_path):
+    (tmp_path / "a.json").write_text(json.dumps(_saved()))
+    checked = {KEY: {"text": "numpy, not PennyLane", "url": None}}
+    (tmp_path / site.CHECKED_FILE).write_text(json.dumps(checked))
+    assert site.load_explanations(tmp_path)[KEY]["text"] == "numpy, not PennyLane"
+
+
 def test_no_directory_of_explanations_is_no_explanations(tmp_path):
     assert site.load_explanations(tmp_path / "missing") == {}
     assert site.load_explanations(None) == {}
