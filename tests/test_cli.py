@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from pennywatch import cli
+from pennywatch import cli, measure, stacks
 
 
 def saved(tmp_path, name, net):
@@ -57,3 +57,19 @@ def test_every_cell_of_the_suite_unless_some_are_named():
 def test_a_cell_outside_the_suite_is_an_error():
     with pytest.raises(SystemExit, match="not in suite m0: qpe/qjit"):
         cli.chosen_cells("m0", "qpe/qjit,qft/qjit")
+
+
+def test_a_build_that_cannot_be_measured_is_saved_as_rejected_with_the_reason(
+    tmp_path, monkeypatch, capsys
+):
+    def unavailable(*args, **kwargs):
+        raise stacks.StackUnavailable("not on the index")
+
+    monkeypatch.setattr(measure, "run_suite", unavailable)
+    out = tmp_path / "catalyst-0.16.0.dev1.json"
+    assert cli.main(["run", "--stack", "0.16.0.dev1", "--out", str(out)]) == 1
+    saved = json.loads((tmp_path / "catalyst-0.16.0.dev1.rejected.json").read_text())
+    assert saved["valid"] is False
+    assert saved["cells"] == []
+    assert saved["problems"] == ["not on the index"]
+    assert "not on the index" in capsys.readouterr().out

@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from statistics import median
 
-from pennywatch import cachegrind, container, history, measure, stacks, upstream
+from pennywatch import cachegrind, container, history, measure, stacks, untrusted, upstream
 from pennywatch.measure import Job
 from pennywatch.suite import SUITES, Cell
 
@@ -24,7 +24,9 @@ LAYOUTS = 3
 TOP_FUNCTIONS = 15
 # A bisect only makes sense if the newest PennyLane alone gives most of the step.
 BISECT_MIN_SHARE = 0.5
-OVERLAY_LIMIT_BYTES = 200 * 1024 * 1024
+ARCHIVE_LIMIT_BYTES = 200 * 1024 * 1024
+UNPACKED_LIMIT_BYTES = 500 * 1024 * 1024
+ARCHIVE_MEMBERS_LIMIT = 50_000
 
 
 @dataclass
@@ -65,7 +67,7 @@ def _usable_calls(sentinel: dict | None) -> dict[str, int]:
     if not isinstance(calls, dict):
         return {}
     return {
-        str(name)[:300]: count
+        untrusted.clean_name(name): count
         for name, count in calls.items()
         if isinstance(count, int) and not isinstance(count, bool)
     }
@@ -159,7 +161,9 @@ def fetch_overlay(commit: str) -> Path:
         return target
     url = f"https://github.com/{upstream.REPOS['pennylane'].slug}/archive/{commit}.tar.gz"
     with urllib.request.urlopen(url, timeout=120) as response:
-        archive = response.read(OVERLAY_LIMIT_BYTES)
+        archive = response.read(ARCHIVE_LIMIT_BYTES + 1)
+    if len(archive) > ARCHIVE_LIMIT_BYTES:
+        raise BadArchive(f"the archive of {commit[:12]} is larger than expected")
     partial = Path(tempfile.mkdtemp(prefix=f"{commit[:12]}.", dir=_overlays_dir()))
     partial.chmod(0o755)
     unpack_package(archive, partial)
@@ -196,20 +200,33 @@ def _overlays_dir() -> Path:
     return path
 
 
+class BadArchive(ValueError):
+    """An archive that isn't what a release of the package looks like."""
+
+
 def unpack_package(archive: bytes, target: Path, package: str = "pennylane") -> None:
-    """Only regular files inside the package's own directory come out of the archive."""
+    """Only regular files inside the package's own directory come out of the archive, and a member
+    is read as it arrives, so the limits hold whatever its header claims."""
+    written = 0
     with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
-        for member in tar.getmembers():
+        for count, member in enumerate(tar, start=1):
+            if count > ARCHIVE_MEMBERS_LIMIT:
+                raise BadArchive("too many files in the archive")
             _, _, inside = member.name.partition("/")
             if not member.isfile() or not inside.startswith(f"{package}/"):
                 continue
             if ".." in Path(inside).parts:
                 continue
+            source = tar.extractfile(member)
+            if source is None:
+                continue
+            data = source.read(UNPACKED_LIMIT_BYTES - written + 1)
+            written += len(data)
+            if written > UNPACKED_LIMIT_BYTES:
+                raise BadArchive("the archive unpacks to more than expected")
             destination = target / inside
             destination.parent.mkdir(parents=True, exist_ok=True)
-            source = tar.extractfile(member)
-            if source is not None:
-                destination.write_bytes(source.read())
+            destination.write_bytes(data)
 
 
 def bisect_commits(commits: list[str], low: float, high: float, measure_commit) -> dict:
@@ -286,7 +303,13 @@ def bisect_pennylane(
             side = measure_side(
                 image, stack_dir, commit[:12], cell, cpus, metric, overlay=overlay, profile=False
             )
-        except (MeasurementFailed, OSError, subprocess.CalledProcessError) as error:
+        except (
+            MeasurementFailed,
+            OSError,
+            subprocess.CalledProcessError,
+            tarfile.TarError,
+            BadArchive,
+        ) as error:
             print(f"{commit[:12]} can't be measured: {str(error)[:160]}")
             return None
         print(f"{commit[:12]} {side.net:,}", flush=True)
@@ -424,7 +447,8 @@ def render(explanation: Explanation) -> str:
             share = bisected.get("share_of_step")
             portion = "" if share is None else f", {share:.0%} of what PennyLane alone gives"
             lines += [
-                f"**Bisected to:** {bisected.get('subject')} ({bisected.get('url')}): "
+                f"**Bisected to:** {untrusted.clean_name(bisected.get('subject'))} "
+                f"({bisected.get('url')}): "
                 f"{bisected['before']:,.0f} → {bisected['after']:,.0f}{portion}.",
                 "",
             ]
@@ -453,7 +477,7 @@ def render(explanation: Explanation) -> str:
         )
         lines.append("")
         lines += [
-            f"- {change['subject'][:100]} ({change['url']})"
+            f"- {untrusted.clean_name(change['subject'])[:100]} ({change['url']})"
             + (f", touches moved code: {change['score']:,} calls" if change["score"] else "")
             for change in changes[:12]
         ]

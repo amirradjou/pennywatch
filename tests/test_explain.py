@@ -110,7 +110,7 @@ def test_calls_written_by_the_code_under_test_are_cleaned_before_use():
     assert calls["f"] == 3
     assert "g" not in calls
     assert "h" not in calls
-    assert max(len(name) for name in calls) == 300
+    assert max(len(name) for name in calls) == explain.untrusted.NAME_LIMIT
     assert explain._usable_calls({"calls": "nope"}) == {}
     assert explain._usable_calls(None) == {}
 
@@ -145,6 +145,26 @@ def test_only_the_package_comes_out_of_an_archive(tmp_path):
         "pennylane/__init__.py"
     ]
     assert not (tmp_path.parent / "escape.py").exists()
+
+
+def test_an_archive_that_unpacks_too_large_is_refused_early(tmp_path, monkeypatch):
+    monkeypatch.setattr(explain, "UNPACKED_LIMIT_BYTES", 10)
+    archive = _archive([("p-abc/pennylane/big.py", b"x" * 100, tarfile.REGTYPE)])
+    with pytest.raises(explain.BadArchive, match="more than expected"):
+        explain.unpack_package(archive, tmp_path)
+    assert not list(tmp_path.rglob("*.py"))
+
+
+def test_an_archive_with_too_many_files_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setattr(explain, "ARCHIVE_MEMBERS_LIMIT", 1)
+    archive = _archive(
+        [
+            ("p-abc/pennylane/a.py", b"a", tarfile.REGTYPE),
+            ("p-abc/pennylane/b.py", b"b", tarfile.REGTYPE),
+        ]
+    )
+    with pytest.raises(explain.BadArchive, match="too many"):
+        explain.unpack_package(archive, tmp_path)
 
 
 def _side(stack, runs, calls=None, functions=None):

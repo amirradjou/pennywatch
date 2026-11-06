@@ -12,6 +12,7 @@ from pathlib import Path
 from pennywatch import untrusted
 
 LINKER_PROGRAMS = {"gcc", "cc", "collect2", "ld", "as"}
+FUNCTION_NAMES_LIMIT = 500_000  # real runs have about 30,000
 
 
 @dataclass(frozen=True)
@@ -51,13 +52,20 @@ def process_kind(command: str) -> str:
     return "other"
 
 
-def collect(directory: Path) -> Counts:
-    """Sum the output files of one measured run by kind of process."""
-    totals = {"python": 0, "compiler": 0, "linker": 0, "other": 0}
+def _out_files(directory: Path) -> list[Path]:
+    """The output files of one run. The measured process picks how many there are."""
     files = sorted(directory.glob("cachegrind.*"))
     if not files:
         raise ValueError(f"no Cachegrind output in {directory}")
-    for path in files:
+    if len(files) > untrusted.OUTPUT_FILES_LIMIT:
+        raise untrusted.UnsafeOutput(f"{len(files)} Cachegrind files in one run")
+    return files
+
+
+def collect(directory: Path) -> Counts:
+    """Sum the output files of one measured run by kind of process."""
+    totals = {"python": 0, "compiler": 0, "linker": 0, "other": 0}
+    for path in _out_files(directory):
         text = untrusted.read_file(path, untrusted.CACHEGRIND_LIMIT).decode(errors="replace")
         command, summary = read_out_file(text)
         totals[process_kind(command)] += summary
@@ -71,8 +79,10 @@ def read_functions(text: str) -> dict[str, int]:
     current = None
     for line in text.splitlines():
         if line.startswith("fn="):
-            current = line[3:]
+            current = untrusted.clean_name(line[3:])
             functions.setdefault(current, 0)
+            if len(functions) > FUNCTION_NAMES_LIMIT:
+                raise untrusted.UnsafeOutput("too many functions in a Cachegrind file")
         elif current is not None and line[:1].isdigit():
             functions[current] += int(line.split()[1])
     return functions
@@ -82,13 +92,15 @@ def collect_functions(directory: Path) -> dict[str, int]:
     """Instructions per function, summed over the processes of one run. The link step is left out,
     as it is from the total."""
     totals: dict[str, int] = {}
-    for path in sorted(directory.glob("cachegrind.*")):
+    for path in _out_files(directory):
         text = untrusted.read_file(path, untrusted.CACHEGRIND_LIMIT).decode(errors="replace")
         command, _ = read_out_file(text)
         if process_kind(command) == "linker":
             continue
         for name, count in read_functions(text).items():
             totals[name] = totals.get(name, 0) + count
+        if len(totals) > FUNCTION_NAMES_LIMIT:
+            raise untrusted.UnsafeOutput("too many functions in one run")
     return totals
 
 

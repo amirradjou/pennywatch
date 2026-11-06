@@ -8,12 +8,17 @@ believes a size, and only regular files are ever read.
 
 import json
 import os
+import re
 import stat
 from pathlib import Path
 
 SENTINEL_LIMIT = 1024 * 1024
 CACHEGRIND_LIMIT = 64 * 1024 * 1024  # real ones are about 2.5 MiB
 RAW_FILE_LIMIT = CACHEGRIND_LIMIT
+OUTPUT_FILES_LIMIT = 64  # a qjit run has five
+NAME_LIMIT = 300
+
+_UNSAFE_IN_TEXT = re.compile(r"[^\x20-\x7e]")
 
 
 class UnsafeOutput(ValueError):
@@ -35,6 +40,13 @@ def read_file(path: Path, limit: int) -> bytes:
     if len(data) > limit:
         raise UnsafeOutput(f"{path.name}: larger than {limit} bytes")
     return data
+
+
+def clean_name(name: object) -> str:
+    """A name from the measured process, safe to print or to put in a Markdown table: no control
+    characters, nothing that closes a code span or a table cell, and a sensible length."""
+    text = _UNSAFE_IN_TEXT.sub("?", str(name)).replace("`", "'").replace("|", "/")
+    return text[:NAME_LIMIT]
 
 
 def read_sentinel(path: Path) -> dict | None:

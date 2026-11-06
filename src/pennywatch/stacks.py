@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import tempfile
 import tomllib
+import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -48,6 +49,11 @@ PENNYLANE_MINOR_OFFSET = 30
 
 _PIN = re.compile(r"^([A-Za-z0-9._-]+)\s*==\s*([^\s;,]+)$")
 _STABLE_VERSION = re.compile(r"^\d+(\.\d+)+$")
+
+
+class StackUnavailable(RuntimeError):
+    """This build can never be measured as it stands, which is different from a network failure:
+    trying again tomorrow won't help, so it gets recorded and not retried."""
 
 
 @dataclass(frozen=True)
@@ -159,19 +165,35 @@ def project_file(stack: Stack, pins: dict[str, str]) -> str:
 
 def write_lock(stack: Stack, image: str) -> Path:
     """Resolve a stack and save its lock file. Needs the network; touches only this repo's file."""
-    release = fetch_json(json_api_url(stack))
-    pins = exact_pins(release["info"].get("requires_dist") or [])
-    cutoff = as_of(stack, release["urls"], pins)
+    try:
+        release = fetch_json(json_api_url(stack))
+        pins = exact_pins(release["info"].get("requires_dist") or [])
+        cutoff = as_of(stack, release["urls"], pins)
+        project = project_file(stack, pins)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            raise StackUnavailable(f"not on the index: {error.url}") from error
+        raise
+    except KeyError as error:
+        raise StackUnavailable(f"Catalyst {stack.catalyst} doesn't pin {error}") from error
     with tempfile.TemporaryDirectory(prefix="pennywatch-lock-") as temporary:
         work = Path(temporary)
-        (work / "pyproject.toml").write_text(project_file(stack, pins))
-        _uv(
-            image,
-            work,
-            "pip compile pyproject.toml --quiet --python-version 3.12 "
-            "--python-platform x86_64-manylinux_2_28 --only-binary :all: "
-            f"--exclude-newer {cutoff} -o pylock.toml",
-        )
+        (work / "pyproject.toml").write_text(project)
+        try:
+            _uv(
+                image,
+                work,
+                "pip compile pyproject.toml --quiet --python-version 3.12 "
+                "--python-platform x86_64-manylinux_2_28 --only-binary :all: "
+                f"--exclude-newer {cutoff} -o pylock.toml",
+            )
+        except subprocess.CalledProcessError as error:
+            if "No solution found" in (error.stderr or ""):
+                reason = error.stderr.strip()[-400:]
+                raise StackUnavailable(
+                    f"its packages can't be installed together: {reason}"
+                ) from error
+            raise
         STACKS_DIR.mkdir(exist_ok=True)
         shutil.copyfile(work / "pylock.toml", stack.lock_path)
     return stack.lock_path
@@ -230,10 +252,19 @@ def install(stack: Stack, image: str) -> Path:
 
 
 def _uv(image: str, work: Path, arguments: str) -> None:
-    _in_image(image, ["uv", *arguments.split()], work, "/work", workdir="/work")
+    _in_image(
+        image, ["uv", *arguments.split()], work, "/work", workdir="/work", capture_errors=True
+    )
 
 
-def _in_image(image: str, command: list[str], mount: Path, at: str, workdir: str = "/") -> None:
+def _in_image(
+    image: str,
+    command: list[str],
+    mount: Path,
+    at: str,
+    workdir: str = "/",
+    capture_errors: bool = False,
+) -> None:
     """A networked container for installing, with no secrets and a limit on its CPUs."""
     uv_cache = cache_dir() / "uv"
     uv_cache.mkdir(parents=True, exist_ok=True)
@@ -256,4 +287,6 @@ def _in_image(image: str, command: list[str], mount: Path, at: str, workdir: str
             *command,
         ],
         check=True,
+        stderr=subprocess.PIPE if capture_errors else None,
+        text=capture_errors or None,
     )

@@ -1,4 +1,6 @@
+import subprocess
 import tomllib
+import urllib.error
 
 import pytest
 
@@ -129,3 +131,63 @@ def test_locked_versions(tmp_path):
 def test_compiling_bytecode_cannot_run_a_wheels_pth_file():
     # -S stops site from processing .pth files, which is the only way a wheel runs code at install.
     assert "-S" in COMPILE_BYTECODE
+
+
+def _http_error(code):
+    return urllib.error.HTTPError("https://test.pypi.org/x", code, "no", {}, None)
+
+
+def test_a_build_that_left_the_index_can_never_be_measured(monkeypatch):
+    def gone(url):
+        raise _http_error(404)
+
+    monkeypatch.setattr(stacks, "fetch_json", gone)
+    with pytest.raises(stacks.StackUnavailable, match="not on the index"):
+        stacks.write_lock(Stack("0.16.0.dev134"), "image")
+
+
+def test_a_server_error_is_not_mistaken_for_a_missing_build(monkeypatch):
+    def broken(url):
+        raise _http_error(503)
+
+    monkeypatch.setattr(stacks, "fetch_json", broken)
+    with pytest.raises(urllib.error.HTTPError):
+        stacks.write_lock(Stack("0.16.0.dev134"), "image")
+
+
+def test_a_dev_build_that_pins_nothing_can_never_be_measured(monkeypatch):
+    monkeypatch.setattr(
+        stacks,
+        "fetch_json",
+        lambda url: {"info": {"requires_dist": []}, "urls": _files("2026-11-03T00:00:00Z")},
+    )
+    with pytest.raises(stacks.StackUnavailable, match="doesn't pin"):
+        stacks.write_lock(Stack("0.16.0.dev134"), "image")
+
+
+def _lock_with_uv_failing(monkeypatch, stderr):
+    monkeypatch.setattr(
+        stacks,
+        "fetch_json",
+        lambda url: {
+            "info": {"requires_dist": DEV_REQUIRES},
+            "urls": _files("2026-11-03T00:00:00Z"),
+        },
+    )
+    monkeypatch.setattr(stacks, "as_of", lambda *args: "2026-11-03T00:00:01Z")
+
+    def fail(*args):
+        raise subprocess.CalledProcessError(1, "uv", stderr=stderr)
+
+    monkeypatch.setattr(stacks, "_uv", fail)
+    stacks.write_lock(Stack("0.16.0.dev134"), "image")
+
+
+def test_packages_that_cannot_go_together_can_never_be_measured(monkeypatch):
+    with pytest.raises(stacks.StackUnavailable, match="installed together"):
+        _lock_with_uv_failing(monkeypatch, "  x No solution found when resolving dependencies")
+
+
+def test_any_other_uv_failure_is_tried_again_another_day(monkeypatch):
+    with pytest.raises(subprocess.CalledProcessError):
+        _lock_with_uv_failing(monkeypatch, "error: connection reset")

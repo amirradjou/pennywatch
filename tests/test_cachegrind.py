@@ -1,6 +1,6 @@
 import pytest
 
-from pennywatch import cachegrind
+from pennywatch import cachegrind, untrusted
 from pennywatch.cachegrind import Counts, collect, process_kind, read_out_file
 
 OUT_FILE = """desc: Trigger: Program termination
@@ -104,3 +104,23 @@ def test_function_changes_come_largest_first_and_leave_out_what_did_not_move():
 
 def test_function_changes_stop_at_the_limit():
     assert len(cachegrind.function_changes({"a": 1, "b": 2}, {}, top=1)) == 1
+
+
+def test_a_run_with_hundreds_of_output_files_is_refused(tmp_path):
+    for index in range(untrusted.OUTPUT_FILES_LIMIT + 1):
+        (tmp_path / f"cachegrind.{index}").write_text(FUNCTIONS)
+    with pytest.raises(untrusted.UnsafeOutput, match="Cachegrind files"):
+        cachegrind.collect(tmp_path)
+    with pytest.raises(untrusted.UnsafeOutput, match="Cachegrind files"):
+        cachegrind.collect_functions(tmp_path)
+
+
+def test_a_file_with_endless_function_names_is_refused(monkeypatch):
+    monkeypatch.setattr(cachegrind, "FUNCTION_NAMES_LIMIT", 2)
+    text = "fn=a\n1 1\nfn=b\n1 1\nfn=c\n1 1\n"
+    with pytest.raises(untrusted.UnsafeOutput, match="too many"):
+        cachegrind.read_functions(text)
+
+
+def test_function_names_are_cleaned_as_they_are_read():
+    assert cachegrind.read_functions("fn=evil|`\x1b\n1 1\n") == {"evil/'?": 1}

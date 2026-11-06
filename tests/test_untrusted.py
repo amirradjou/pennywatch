@@ -96,3 +96,11 @@ def test_a_sentinel_round_trip(tmp_path):
     path = tmp_path / "sentinel.json"
     path.write_text(json.dumps({"result": [1.0]}))
     assert untrusted.read_sentinel(path) == {"result": [1.0]}
+
+
+def test_a_name_cannot_break_out_of_a_markdown_table_or_move_the_terminal():
+    assert untrusted.clean_name("a|b`c\x1b[31md\ne") == "a/b'c?[31md?e"
+
+
+def test_a_name_has_a_sensible_length():
+    assert len(untrusted.clean_name("x" * 5000)) == untrusted.NAME_LIMIT

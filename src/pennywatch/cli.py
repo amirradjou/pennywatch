@@ -118,19 +118,25 @@ def chosen_cells(suite: str, names: str | None) -> list[Cell]:
 
 def run_command(args: argparse.Namespace) -> int:
     cells = chosen_cells(args.suite, args.cells)
-    result = measure.run_suite(
-        cells,
-        stacks.Stack(args.stack),
-        repeats=args.repeats,
-        cpus=[int(cpu) for cpu in args.cpus.split(",")],
-        busy_check=not args.no_busy_check,
-        keep_raw=args.keep_raw,
-        memory_wires=None if args.cells else MEMORY_WIRES.get(args.suite),
-    )
+    stack = stacks.Stack(args.stack)
+    try:
+        result = measure.run_suite(
+            cells,
+            stack,
+            repeats=args.repeats,
+            cpus=[int(cpu) for cpu in args.cpus.split(",")],
+            busy_check=not args.no_busy_check,
+            keep_raw=args.keep_raw,
+            memory_wires=None if args.cells else MEMORY_WIRES.get(args.suite),
+        )
+    except stacks.StackUnavailable as error:
+        result = measure.unavailable_result(stack, str(error))
     path = result_path(result, args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(result, indent=1) + "\n")
-    print(report.render(result))
+    print(
+        report.render(result) if result["cells"] else f"Can't be measured: {result['problems'][0]}"
+    )
     print(f"Saved to {path}")
     return 0 if result["valid"] else 1
 

@@ -485,6 +485,20 @@ def run_suite(
     }
 
 
+def unavailable_result(stack: stacks.Stack, reason: str) -> dict:
+    """What's recorded for a build that can't be measured, so it isn't retried every night."""
+    now = datetime.now(UTC).isoformat(timespec="seconds")
+    return {
+        "schema": SCHEMA,
+        "started_at": now,
+        "finished_at": now,
+        "stack": {"id": stack.id, "pennylane-catalyst": stack.catalyst},
+        "cells": [],
+        "valid": False,
+        "problems": [reason],
+    }
+
+
 def _belongs_to(job: Job, cell: Cell) -> bool:
     return (
         job.role in ("full", "canary", "compile")
