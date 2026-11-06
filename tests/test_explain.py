@@ -208,6 +208,34 @@ def test_the_report_shows_the_numbers_candidates_and_bisect():
     assert "touches moved code: 2 calls" in text
 
 
+def test_a_change_within_the_noise_says_so():
+    explanation = explain.Explanation(
+        "qft/default",
+        "instructions",
+        _side("a", [1000, 1010, 1005]),
+        _side("b", [1002, 1012, 1007]),
+        [],
+        [],
+        [],
+        {},
+    )
+    assert "within the noise" in explain.render(explanation)
+
+
+def test_a_clear_change_does_not_say_it_is_noise():
+    explanation = explain.Explanation(
+        "qft/default",
+        "instructions",
+        _side("a", [1000, 1001, 1002]),
+        _side("b", [1100, 1101, 1102]),
+        [],
+        [],
+        [],
+        {},
+    )
+    assert "within the noise" not in explain.render(explanation)
+
+
 def test_a_bisect_that_stopped_says_why():
     explanation = explain.Explanation(
         "qft/default",

@@ -439,6 +439,12 @@ def render(explanation: Explanation) -> str:
         f"(**{change:+.2f}%**). Runs: {before.runs} → {after.runs}.",
         "",
     ]
+    if not history.is_step(explanation.metric, before.net, after.net, before.runs, after.runs):
+        lines += [
+            "**This is within the noise.** Below the threshold, or the runs of the two builds "
+            "overlap, so there's no change here to explain. What follows is for reference.",
+            "",
+        ]
     if explanation.packages:
         lines += ["**Packages that moved:** " + ", ".join(explanation.packages), ""]
     if explanation.bisect:
