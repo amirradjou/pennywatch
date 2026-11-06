@@ -2,6 +2,7 @@ import math
 
 import pytest
 from trotter_numpy import trotter_z_expectations
+from variational_numpy import first_layer_ry_gradient, parameter_shift_gradient
 
 from pennywatch.harness import expected
 
@@ -44,3 +45,38 @@ def test_mismatch_reports_the_wrong_length():
 def test_trotter_without_golden_values_is_an_error():
     with pytest.raises(ValueError, match="no golden"):
         expected.trotter(3, 99)
+
+
+@pytest.mark.parametrize(("wires", "layers"), sorted(expected.VARIATIONAL_GOLDEN))
+def test_variational_golden_values_match_the_independent_simulation(wires, layers):
+    angles = expected.variational_angles(wires, layers)
+    assert first_layer_ry_gradient(angles) == pytest.approx(
+        expected.VARIATIONAL_GOLDEN[(wires, layers)], abs=1e-10
+    )
+
+
+def test_the_reverse_sweep_agrees_with_the_parameter_shift_rule():
+    angles = expected.variational_angles(5, 3)
+    assert first_layer_ry_gradient(angles) == pytest.approx(parameter_shift_gradient(angles))
+
+
+def test_a_variational_circuit_without_golden_values_is_an_error():
+    with pytest.raises(ValueError, match="no golden"):
+        expected.variational(3, 99)
+
+
+def test_qpe_reads_the_phase_and_leaves_the_target_alone():
+    assert expected.qpe(5, 1) == [-1.0, 1.0, -1.0, 1.0, -1.0]
+
+
+def test_the_qpe_phase_fits_the_register_exactly():
+    # 1, 0, 1, 0 as a binary fraction.
+    assert expected.qpe_phase(5) == 0.5 + 0.125
+
+
+def test_sampling_reads_the_starting_bits():
+    assert expected.sampling(3, 1) == [-1.0, 1.0, -1.0]
+
+
+def test_the_uniform_superposition_has_zero_z():
+    assert expected.memory(3, 1) == [0.0, 0.0, 0.0]

@@ -25,7 +25,7 @@ import time
 from importlib import metadata
 
 DEVICES = {"default": "default.qubit", "lightning": "lightning.qubit", "qjit": "lightning.qubit"}
-CIRCUITS = ("grover", "qft", "trotter")
+CIRCUITS = ("grover", "memory", "qft", "qpe", "sampling", "trotter", "variational")
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -41,14 +41,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def floats(result) -> list[float]:
-    return [float(value) for value in result]
-
-
-def native_report(qml, adapter, args, qnode) -> dict:
+def native_report(qml, adapter, args, circuit, qnode, program, seed) -> dict:
     report = {}
     started = time.perf_counter()
-    function = qml.qjit(qnode) if args.backend == "qjit" else qnode
+    function = adapter.jit(qml, program, circuit, seed) if args.backend == "qjit" else program
     report["compile_s"] = time.perf_counter() - started
 
     wall_s = []
@@ -57,14 +53,15 @@ def native_report(qml, adapter, args, qnode) -> dict:
         result = function()
         wall_s.append(time.perf_counter() - started)
     report["wall_s"] = wall_s
-    report["result"] = floats(result)
+    report["result"] = circuit.answer(result)
     report["max_rss_kb"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     report["max_rss_children_kb"] = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
 
-    report["gates"] = adapter.tape_counts(qml, qnode)
+    arguments = adapter.qnode_arguments(circuit)
+    report["gates"] = adapter.tape_counts(qml, qnode, arguments)
     if args.backend == "qjit":
-        report["gates"]["qjit"] = adapter.qjit_counts(qml, function)
-    report["bare_qnode_specs"] = adapter.bare_qnode_specs(qml, qnode)
+        report["gates"]["qjit"] = adapter.qjit_counts(qml, qnode, circuit, seed)
+    report["bare_qnode_specs"] = adapter.bare_qnode_specs(qml, qnode, arguments)
     return report
 
 
@@ -88,31 +85,35 @@ def main(argv=None) -> None:
     if args.backend == "qjit":
         import catalyst  # noqa: F401 - qml.qjit needs it, and it's slow enough to measure
 
-    device = qml.device(DEVICES[args.backend], wires=args.wires)
     report = {"mode": args.mode}
 
-    if args.mode != "imports":
-        body = circuits.CIRCUITS[args.circuit](args.wires, args.rounds, args.extra_gates)
-        qnode = qml.QNode(body, device)
+    if args.mode == "imports":
+        qml.device(DEVICES[args.backend], wires=args.wires)
+    else:
+        seed = circuits.SEED
+        under_qjit = args.backend == "qjit"
+        circuit = circuits.CIRCUITS[args.circuit](args.wires, args.rounds, args.extra_gates)
+        qnode = adapter.make_qnode(qml, DEVICES[args.backend], args.wires, circuit, seed)
+        program = adapter.program(qml, qnode, circuit, under_qjit)
         if args.mode in ("compile", "full"):
             settle_collector()
         if args.mode == "compile":
-            if args.backend != "qjit":
+            if not under_qjit:
                 raise SystemExit("compile mode is for the qjit backend")
             instrument.start()
-            # A QNode without arguments compiles when qjit is applied, not at the first call.
-            compiled = qml.qjit(qnode).compiled_function
+            # With no arguments it compiles when qjit is applied, not at the first call.
+            compiled = adapter.jit(qml, program, circuit, seed).compiled_function
             instrument.stop()
             if compiled is None:
                 raise SystemExit("qjit returned without compiling")
         elif args.mode == "full":
             instrument.start()
-            function = qml.qjit(qnode) if args.backend == "qjit" else qnode
+            function = adapter.jit(qml, program, circuit, seed) if under_qjit else program
             result = function()
             instrument.stop()
-            report["result"] = floats(result)
+            report["result"] = circuit.answer(result)
         else:
-            report |= native_report(qml, adapter, args, qnode)
+            report |= native_report(qml, adapter, args, circuit, qnode, program, seed)
 
     instrument.stop()
     report["versions"] = {

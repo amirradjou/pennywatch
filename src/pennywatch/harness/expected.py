@@ -1,8 +1,8 @@
 """What each circuit's answer should be, so that a count from a circuit that didn't run is caught.
 
 A crash after the imports gives a stable, meaningless count, so finishing isn't enough: the circuit
-must also return the right numbers. Every circuit returns <Z> on each wire. Pure Python, because the
-host does the checking.
+must also return the right numbers. Every circuit gives one number per wire: <Z>, except for the
+variational circuit, which gives a gradient. Pure Python, because the host does the checking.
 """
 
 import math
@@ -43,6 +43,40 @@ TROTTER_GOLDEN: dict[tuple[int, int], list[float]] = {
 }
 
 
+# The first layer's RY gradient, one per wire. Also from a separate NumPy simulation, and the tests
+# recompute these too.
+VARIATIONAL_GOLDEN: dict[tuple[int, int], list[float]] = {
+    (6, 2): [
+        -0.8771356147075062,
+        -1.2138078780927875,
+        -1.09603388505376,
+        -1.0370404506538158,
+        -0.9560931257539433,
+        -0.7328147522951445,
+    ],
+    (18, 13): [
+        -0.006183242203811258,
+        -0.031175326496720286,
+        -0.09914409542545018,
+        -0.022630051455802182,
+        -0.22229827284205997,
+        -0.1393700690980321,
+        -0.2682135840315333,
+        -0.21997784697779182,
+        -0.22037861235978634,
+        -0.22178891952372717,
+        -0.11293240171148484,
+        0.020666481152152347,
+        0.21832831123563448,
+        0.23806221638359015,
+        0.06916178751148962,
+        -0.13017468692193104,
+        -0.2504095807879787,
+        -0.3099451485219589,
+    ],
+}
+
+
 def basis_bits(wires: int) -> list[int]:
     """The basis state the QFT starts from, and the one Grover searches for: 1, 0, 1, 0, ..."""
     return [(i + 1) % 2 for i in range(wires)]
@@ -69,7 +103,58 @@ def trotter(wires: int, rounds: int) -> list[float]:
         raise ValueError(f"no golden Trotter values for {wires} wires, {rounds} steps") from None
 
 
-EXPECTED = {"qft": qft, "grover": grover, "trotter": trotter}
+def phase_bits(wires: int) -> list[int]:
+    """The bits of the phase QPE estimates: one wire is the target, and the rest read these out."""
+    return basis_bits(wires - 1)
+
+
+def qpe_phase(wires: int) -> float:
+    """A phase that fits the register exactly, so the estimate is exact rather than peaked."""
+    return sum(bit / 2 ** (position + 1) for position, bit in enumerate(phase_bits(wires)))
+
+
+def qpe(wires: int, rounds: int) -> list[float]:
+    """The register holds the phase's bits, and the target stays in |1>."""
+    return [float((-1) ** bit) for bit in phase_bits(wires)] + [-1.0]
+
+
+def variational_angles(wires: int, layers: int) -> list[list[list[float]]]:
+    """(RY, RZ) for each wire of each layer. A fixed formula, so the golden values stay valid."""
+    return [
+        [
+            [0.3 + 0.1 * layer + 0.05 * wire, 0.2 - 0.03 * layer + 0.07 * wire]
+            for wire in range(wires)
+        ]
+        for layer in range(layers)
+    ]
+
+
+def variational(wires: int, rounds: int) -> list[float]:
+    try:
+        return VARIATIONAL_GOLDEN[(wires, rounds)]
+    except KeyError:
+        raise ValueError(f"no golden gradient for {wires} wires, {rounds} layers") from None
+
+
+def sampling(wires: int, rounds: int) -> list[float]:
+    """Each round entangles and then disentangles, so every shot reads the starting bits."""
+    return qft(wires, rounds)
+
+
+def memory(wires: int, rounds: int) -> list[float]:
+    """A uniform superposition: CNOT leaves |+...+> alone, and <Z> is 0 on every wire."""
+    return [0.0] * wires
+
+
+EXPECTED = {
+    "qft": qft,
+    "grover": grover,
+    "trotter": trotter,
+    "qpe": qpe,
+    "variational": variational,
+    "sampling": sampling,
+    "memory": memory,
+}
 
 
 def mismatch(circuit: str, wires: int, rounds: int, result: list[float]) -> str | None:

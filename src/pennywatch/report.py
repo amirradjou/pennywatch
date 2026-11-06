@@ -115,6 +115,22 @@ def imports_row(result: dict) -> str:
     return "Counted separately, per backend: " + ", ".join(parts)
 
 
+def memory_row(result: dict) -> str:
+    entries = result.get("memory")
+    if not entries:
+        return "Not measured in this suite"
+    parts = [
+        f"{entry['backend']} {entry['max_rss_kb']['net'] / 1024:,.0f} MiB"
+        + (
+            f" (spread {_pct(entry['max_rss_kb']['spread_pct'], 2)})"
+            if entry["max_rss_kb"]["spread_pct"] is not None
+            else ""
+        )
+        for entry in entries
+    ]
+    return f"Peak at {entries[0]['wires']} wires: " + ", ".join(parts)
+
+
 def builds_row(result: dict) -> str:
     available = result.get("availability")
     if not available:
@@ -157,6 +173,7 @@ def question_table(result: dict) -> str:
         ("Do gate counts show the compile stack?", gates_row(result)),
         ("What does compiling cost?", compiler_row(result)),
         ("What do the imports cost?", imports_row(result)),
+        ("How much memory does it hold?", memory_row(result)),
         ("Are dev builds installable?", builds_row(result)),
         ("Do the versions fit together?", pins_row(result)),
         ("Does the API hold still?", api_row(result)),

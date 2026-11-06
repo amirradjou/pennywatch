@@ -20,9 +20,9 @@ from statistics import median
 from pennywatch import analysis, builds, cachegrind, container, stacks, untrusted
 from pennywatch.cachegrind import Counts
 from pennywatch.harness import expected
-from pennywatch.suite import Cell
+from pennywatch.suite import BACKENDS, Cell
 
-SCHEMA = 1
+SCHEMA = 2
 JOB_TIMEOUT_S = 3600
 CANARY_FRACTION = 0.01
 TIMING_REPEATS = 10
@@ -47,7 +47,7 @@ PYTHON = ["/stack/bin/python", "-P", "-s", "-m", "pennywatch.harness.workload"]
 class Job:
     """One measured process."""
 
-    role: str  # imports | compile | full | canary | native
+    role: str  # imports | compile | full | canary | native | memory
     backend: str
     wires: int
     circuit: str = "qft"  # the imports baseline never builds it, but the workload wants a name
@@ -59,13 +59,13 @@ class Job:
     @property
     def label(self) -> str:
         busy = "-busy" if self.busy else ""
-        if self.role == "imports":
-            return f"imports-{self.backend}-{self.wires}w-{self.repeat}"
+        if self.role in ("imports", "memory"):
+            return f"{self.role}-{self.backend}-{self.wires}w-{self.repeat}"
         return f"{self.circuit}-{self.backend}-{self.role}{busy}-{self.repeat}"
 
     @property
     def mode(self) -> str:
-        return "full" if self.role == "canary" else self.role
+        return {"canary": "full", "memory": "native"}.get(self.role, self.role)
 
 
 @dataclass
@@ -78,6 +78,7 @@ class Outcome:
 
 
 def workload_args(job: Job) -> list[str]:
+    timing_repeats = 1 if job.role == "memory" else TIMING_REPEATS
     return [
         f"--mode={job.mode}",
         f"--circuit={job.circuit}",
@@ -85,7 +86,7 @@ def workload_args(job: Job) -> list[str]:
         f"--wires={job.wires}",
         f"--rounds={job.rounds}",
         f"--extra-gates={job.extra_gates}",
-        f"--timing-repeats={TIMING_REPEATS}",
+        f"--timing-repeats={timing_repeats}",
         "--out=/out/sentinel.json",
     ]
 
@@ -281,6 +282,17 @@ def plan_baselines(cells: list[Cell], repeats: int) -> list[Job]:
     ]
 
 
+def plan_memory(wires: int | None, repeats: int) -> list[Job]:
+    """Peak memory with the state vector dominating. Nothing gets counted, so these are quick."""
+    if wires is None:
+        return []
+    return [
+        Job("memory", backend, wires, circuit="memory", repeat=repeat)
+        for backend in BACKENDS
+        for repeat in range(repeats)
+    ]
+
+
 def plan_cell_jobs(cell: Cell, repeats: int, device_gates: int) -> list[Job]:
     base = Job("full", cell.backend, cell.wires, cell.circuit, cell.rounds)
     jobs = [replace(base, repeat=repeat) for repeat in range(repeats)]
@@ -352,6 +364,18 @@ def summarise_cell(
     return summary
 
 
+def summarise_memory(outcomes: dict[Job, Outcome]) -> list[dict]:
+    """Peak resident size per backend, leaving out any run that failed: problems_with reports it."""
+    runs: dict[tuple[str, int], list[int]] = {}
+    for job, outcome in outcomes.items():
+        if job.role == "memory" and not validate_outcome(outcome):
+            runs.setdefault((job.backend, job.wires), []).append(outcome.sentinel["max_rss_kb"])
+    return [
+        {"backend": backend, "wires": wires, "max_rss_kb": _metric(values)}
+        for (backend, wires), values in runs.items()
+    ]
+
+
 def problems_with(outcomes: dict[Job, Outcome], versions: dict[str, str]) -> list[str]:
     """Everything that makes this run unfit to publish."""
     problems = []
@@ -373,11 +397,13 @@ def run_suite(
     cpus: list[int],
     busy_check: bool,
     keep_raw: Path | None = None,
+    memory_wires: int | None = None,
 ) -> dict:
     image = container.ensure_image()
     if not stack.lock_path.exists():
         stacks.write_lock(stack, image)
     versions = stacks.locked_versions(stack.lock_path)
+    lock_sha256 = stacks.lock_sha256(stack.lock_path)
     stack_dir = stacks.install(stack, image)
 
     started = datetime.now(UTC)
@@ -387,7 +413,7 @@ def run_suite(
     workspace.chmod(0o755)
     try:
         runner = Runner(image, stack_dir, workspace, cpus)
-        outcomes = _measure(runner, cells, repeats, busy_check)
+        outcomes = _measure(runner, cells, repeats, busy_check, memory_wires)
         if keep_raw:
             untrusted.copy_plain_files(workspace / "runs", keep_raw)
     finally:
@@ -420,7 +446,7 @@ def run_suite(
         "host": host_facts(),
         "stack": {
             "id": stack.id,
-            "lock_sha256": stacks.lock_sha256(stack.lock_path),
+            "lock_sha256": lock_sha256,
             "pennylane": versions.get("pennylane"),
             "pennylane-lightning": versions.get("pennylane-lightning"),
             "pennylane-catalyst": versions.get("pennylane-catalyst"),
@@ -429,6 +455,7 @@ def run_suite(
         "repeats": repeats,
         "cpus": len(cpus),
         "cells": summaries,
+        "memory": summarise_memory(outcomes),
         "busy_check": _busy_summary(outcomes, cells) if busy_check else None,
         "availability": builds.availability(),
         "valid": not problems,
@@ -455,9 +482,11 @@ def _busy_jobs(cell: Cell) -> list[Job]:
     return [full, native_job(cell, busy=True)]
 
 
-def _measure(runner: Runner, cells: list[Cell], repeats: int, busy_check: bool):
+def _measure(
+    runner: Runner, cells: list[Cell], repeats: int, busy_check: bool, memory_wires: int | None
+):
     # Gate counts come from the native runs, and the canary's size comes from the gate counts.
-    native_jobs = [native_job(cell) for cell in cells]
+    native_jobs = [native_job(cell) for cell in cells] + plan_memory(memory_wires, repeats)
     if busy_check:
         native_jobs.append(native_job(reference_cell(cells), busy=True))
     outcomes = runner.run_all(native_jobs)

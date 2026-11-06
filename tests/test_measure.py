@@ -48,11 +48,47 @@ def test_baselines_are_per_backend_and_size_not_per_circuit():
 
 def test_job_labels_are_unique_across_the_suite():
     labels = []
-    for cell in SUITES["m0"]:
+    for cell in SUITES["full"]:
         labels += [job.label for job in measure.plan_cell_jobs(cell, 3, 700)]
         labels.append(measure.native_job(cell).label)
-    labels += [job.label for job in measure.plan_baselines(SUITES["m0"], 3)]
+    labels += [job.label for job in measure.plan_baselines(SUITES["full"], 3)]
+    labels += [job.label for job in measure.plan_memory(25, 3)]
     assert len(labels) == len(set(labels))
+
+
+def test_memory_runs_once_per_repeat_on_every_backend_and_outside_valgrind():
+    jobs = measure.plan_memory(25, 2)
+    assert len(jobs) == 6
+    assert {job.backend for job in jobs} == {"default", "lightning", "qjit"}
+    assert {job.mode for job in jobs} == {"native"}
+    assert "--timing-repeats=1" in measure.workload_args(jobs[0])
+
+
+def test_a_suite_without_a_memory_size_measures_none():
+    assert measure.plan_memory(None, 3) == []
+
+
+def test_memory_is_summarised_per_backend_and_a_failed_run_is_left_out():
+    jobs = measure.plan_memory(4, 3)[:3]
+    good = {"result": [0.0] * 4, "max_rss_kb": 100}
+    outcomes = {
+        jobs[0]: Outcome(jobs[0], sentinel=good),
+        jobs[1]: Outcome(jobs[1], sentinel=good | {"max_rss_kb": 110}),
+        jobs[2]: Outcome(jobs[2], error="exit 137: killed"),
+    }
+    summary = measure.summarise_memory(outcomes)
+    assert summary == [
+        {
+            "backend": "default",
+            "wires": 4,
+            "max_rss_kb": {
+                "net": 105,
+                "runs": [100, 110],
+                "spread_pct": 10 / 105 * 100,
+                "noise": 10,
+            },
+        }
+    ]
 
 
 def test_a_clean_exit_without_a_sentinel_is_not_a_measurement():

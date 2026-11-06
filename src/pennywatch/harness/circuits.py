@@ -1,10 +1,36 @@
 """The benchmark circuits. Each one exercises a different part of the stack."""
 
 import math
+from collections.abc import Callable
+from dataclasses import dataclass
 
+import numpy as np
 import pennylane as qml
 
-from pennywatch.harness.expected import basis_bits
+from pennywatch.harness.expected import (
+    basis_bits,
+    qpe_phase,
+    variational_angles,
+)
+
+SHOTS = 10_000
+SEED = 1234
+
+
+def _floats(result) -> list[float]:
+    return [float(value) for value in result]
+
+
+@dataclass(frozen=True)
+class Circuit:
+    """A circuit and how it gets run. Most need only the first field."""
+
+    body: Callable
+    answer: Callable = (
+        _floats  # what the stack returned, as the one number per wire the host checks
+    )
+    gradient_of: list | None = None  # differentiate at these angles instead of evaluating
+    shots: int | None = None
 
 
 def _z_on_every_wire(wires: int) -> list:
@@ -34,7 +60,7 @@ def qft(wires: int, rounds: int, extra: int):
             qml.QFT(wires=range(wires))
         return _z_on_every_wire(wires)
 
-    return circuit
+    return Circuit(circuit)
 
 
 def _flip_sign_of(bits: list[int]) -> None:
@@ -63,7 +89,7 @@ def grover(wires: int, rounds: int, extra: int):
             qml.GroverOperator(wires=range(wires))
         return _z_on_every_wire(wires)
 
-    return circuit
+    return Circuit(circuit)
 
 
 # Transverse-field Ising chain. The constants are part of the golden values in expected.py.
@@ -72,18 +98,107 @@ TROTTER_FIELD = 0.7
 TROTTER_TIME = 1.0
 
 
+def _ising_hamiltonian(wires: int):
+    terms = [qml.PauliZ(i) @ qml.PauliZ(i + 1) for i in range(wires - 1)]
+    terms += [qml.PauliX(i) for i in range(wires)]
+    coeffs = [TROTTER_COUPLING] * (wires - 1) + [TROTTER_FIELD] * wires
+    return qml.Hamiltonian(coeffs, terms)
+
+
 def trotter(wires: int, rounds: int, extra: int):
     """Hamiltonian evolution through a second-order product formula, `rounds` steps long."""
 
     def circuit():
-        terms = [qml.PauliZ(i) @ qml.PauliZ(i + 1) for i in range(wires - 1)]
-        terms += [qml.PauliX(i) for i in range(wires)]
-        coeffs = [TROTTER_COUPLING] * (wires - 1) + [TROTTER_FIELD] * wires
         _canary_gates(wires, extra)
-        qml.TrotterProduct(qml.Hamiltonian(coeffs, terms), TROTTER_TIME, n=rounds, order=2)
+        qml.TrotterProduct(_ising_hamiltonian(wires), TROTTER_TIME, n=rounds, order=2)
         return _z_on_every_wire(wires)
 
-    return circuit
+    return Circuit(circuit)
 
 
-CIRCUITS = {"qft": qft, "grover": grover, "trotter": trotter}
+def qpe(wires: int, rounds: int, extra: int):
+    """Quantum phase estimation of a phase gate, through the template, with its inverse QFT. Each
+    round runs it and undoes it, so the last run still reads out the exact phase."""
+    target = wires - 1
+    estimation = range(wires - 1)
+    angle = 2 * math.pi * qpe_phase(wires)
+
+    def circuit():
+        qml.PauliX(target)
+        _canary_gates(wires, extra)
+        unitary = qml.PhaseShift(angle, wires=target)
+        for _ in range(rounds):
+            qml.QuantumPhaseEstimation(unitary, estimation_wires=estimation)
+            qml.adjoint(qml.QuantumPhaseEstimation)(unitary, estimation_wires=estimation)
+        qml.QuantumPhaseEstimation(unitary, estimation_wires=estimation)
+        return _z_on_every_wire(wires)
+
+    return Circuit(circuit)
+
+
+def variational(wires: int, rounds: int, extra: int):
+    """An Ising energy over layers of RY, RZ and a CNOT ladder, differentiated by the adjoint
+    method. The gradient is the point, so this is the only circuit that takes arguments."""
+
+    def circuit(angles):
+        _canary_gates(wires, extra)
+        for layer in range(rounds):
+            for wire in range(wires):
+                qml.RY(angles[layer][wire][0], wires=wire)
+                qml.RZ(angles[layer][wire][1], wires=wire)
+            for wire in range(wires - 1):
+                qml.CNOT(wires=[wire, wire + 1])
+        return qml.expval(_ising_hamiltonian(wires))
+
+    def first_layer_ry(gradient) -> list[float]:
+        return _floats(np.asarray(gradient)[0, :, 0])
+
+    return Circuit(circuit, answer=first_layer_ry, gradient_of=variational_angles(wires, rounds))
+
+
+def sampling(wires: int, rounds: int, extra: int):
+    """Finite shots, which go through each stack's sampler and nothing else here does. Each round
+    entangles every wire and undoes it, so every shot gives the starting bits and the answer is
+    exact whatever the random numbers were."""
+
+    def circuit():
+        qml.BasisState(basis_bits(wires), wires=range(wires))
+        _canary_gates(wires, extra)
+        for _ in range(rounds):
+            qml.Hadamard(0)
+            for wire in range(wires - 1):
+                qml.CNOT(wires=[wire, wire + 1])
+            for wire in reversed(range(wires - 1)):
+                qml.CNOT(wires=[wire, wire + 1])
+            qml.Hadamard(0)
+        return qml.sample(wires=range(wires))
+
+    def z_from_shots(samples) -> list[float]:
+        return _floats(1 - 2 * np.asarray(samples).mean(axis=0))
+
+    return Circuit(circuit, answer=z_from_shots, shots=SHOTS)
+
+
+def memory(wires: int, rounds: int, extra: int):
+    """A state vector that fills memory, for peak memory. Only a few gates: run natively, since
+    Valgrind couldn't hold this many wires for long."""
+
+    def circuit():
+        for wire in range(wires):
+            qml.Hadamard(wire)
+        for wire in range(wires - 1):
+            qml.CNOT(wires=[wire, wire + 1])
+        return _z_on_every_wire(wires)
+
+    return Circuit(circuit)
+
+
+CIRCUITS = {
+    "qft": qft,
+    "grover": grover,
+    "trotter": trotter,
+    "qpe": qpe,
+    "variational": variational,
+    "sampling": sampling,
+    "memory": memory,
+}
