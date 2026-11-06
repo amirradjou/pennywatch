@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import time
+from dataclasses import replace
 
 import pytest
 
@@ -271,6 +272,64 @@ def test_each_repeat_of_a_cell_runs_under_its_own_layout(tmp_path):
 def test_a_layout_is_the_same_on_every_machine_and_every_night():
     assert measure.container.layout_padding(0) == "x" * 16
     assert measure.container.layout_padding(2) == "x" * 64
+
+
+def _canary_outcomes(canary_counts):
+    jobs = measure.plan_cell_jobs(QFT, repeats=3, device_gates=700)
+    canary = next(job for job in jobs if job.role == "canary")
+    jobs += [replace(canary, repeat=layout) for layout in range(1, 3)]
+    base = {0: 1_000_000_000, 1: 1_100_000_000, 2: 1_200_000_000}
+    outcomes = {}
+    for job in jobs:
+        total = canary_counts.get(job.repeat) if job.role == "canary" else base[job.repeat]
+        counts = Counts(python=total) if total else None
+        outcomes[job] = Outcome(job, counts=counts, sentinel={})
+    return jobs, outcomes
+
+
+def test_a_canary_that_was_seen_gets_no_retries():
+    jobs, outcomes = _canary_outcomes({0: 1_010_000_000})
+    first = [j for j in jobs if j.role != "canary" or j.repeat == 0]
+    assert measure.canary_retries(QFT, first, outcomes, 3) == []
+
+
+def test_a_canary_that_missed_is_tried_on_the_other_layouts():
+    jobs, outcomes = _canary_outcomes({0: 999_000_000})
+    first = [j for j in jobs if j.role != "canary" or j.repeat == 0]
+    retries = measure.canary_retries(QFT, first, outcomes, 3)
+    assert [(job.role, job.repeat) for job in retries] == [("canary", 1), ("canary", 2)]
+    assert all(job.extra_gates == 7 for job in retries)
+
+
+def test_a_single_repeat_has_no_other_layout_to_try():
+    jobs, outcomes = _canary_outcomes({0: 999_000_000})
+    first = [j for j in jobs if j.role != "canary" or j.repeat == 0]
+    assert measure.canary_retries(QFT, first, outcomes, 1) == []
+
+
+def test_retried_canaries_are_judged_together():
+    jobs, outcomes = _canary_outcomes({0: 999_000_000, 1: 1_110_000_000, 2: 1_210_000_000})
+    native = Outcome(measure.native_job(QFT), sentinel={})
+    summary = measure.summarise_cell(QFT, outcomes, jobs, [], native)
+    assert summary["canary"]["detected"]
+    assert summary["canary"]["delta"] == 10_000_000
+    assert len(summary["canary"]["pairs"]) == 3
+
+
+def test_only_what_is_not_counted_runs_in_a_writable_directory(monkeypatch, tmp_path):
+    seen = {}
+
+    def fake(argv, timeout):
+        seen[next(a for a in argv if a.startswith("--name="))] = argv
+        return 1, ""
+
+    monkeypatch.setattr(measure, "run_keeping_tail", fake)
+    runner = measure.Runner("image", tmp_path, tmp_path, [0])
+    runner.execute(measure.native_job(QFT), 0)
+    runner.execute(full_job(), 0)
+    argvs = list(seen.values())
+    assert "--workdir=/tmp" in argvs[0]
+    assert "--workdir=/tmp" not in argvs[1]
 
 
 def test_the_canary_is_judged_against_the_full_run_on_its_own_layout():

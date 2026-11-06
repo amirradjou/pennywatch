@@ -190,6 +190,9 @@ class Runner:
             *container.sandbox_args(
                 cpu, self.stack_dir, self.source, output, layout=job.repeat, overlay=self.overlay
             ),
+            # Catalyst 0.14's specs writes a file to the working directory, and crashes if it can't.
+            # Only for what isn't counted: the counted runs all keep one directory.
+            *(["--workdir=/tmp"] if job.mode in UNCOUNTED_MODES else []),
             self.image,
             *command,
         ]
@@ -374,17 +377,35 @@ def summarise_cell(
             ],
         }
 
-    # Compared with the full run on the same layout, since layouts differ by more than its 1%.
-    canary = next(job for job in jobs if job.role == "canary")
-    paired = next(job for job in full if job.repeat == canary.repeat)
-    if outcomes[canary].counts and outcomes[paired].counts:
-        summary["canary"] = analysis.canary_verdict(
-            outcomes[canary].counts.total,
-            outcomes[paired].counts.total,
-            canary.extra_gates,
-            cell.backend,
-        )
+    pairs = canary_pairs(jobs, outcomes)
+    if pairs:
+        extra_gates = next(job.extra_gates for job in jobs if job.role == "canary")
+        summary["canary"] = analysis.canary_verdict(pairs, extra_gates, cell.backend)
     return summary
+
+
+def canary_pairs(jobs: list[Job], outcomes: dict[Job, Outcome]) -> list[tuple[int, int]]:
+    """Each canary with the full run on its own layout, since layouts differ by more than its 1%."""
+    full = {job.repeat: outcomes[job].counts for job in jobs if job.role == "full"}
+    return [
+        (outcomes[job].counts.total, full[job.repeat].total)
+        for job in jobs
+        if job.role == "canary" and outcomes[job].counts and full.get(job.repeat)
+    ]
+
+
+def canary_retries(
+    cell: Cell, jobs: list[Job], outcomes: dict[Job, Outcome], repeats: int
+) -> list[Job]:
+    """More canaries for a cell whose first one missed, on the layouts it hasn't tried. Nothing for
+    a cell that failed outright, or where the first canary was seen, which is nearly all of them."""
+    pairs = canary_pairs(jobs, outcomes)
+    canary = next((job for job in jobs if job.role == "canary"), None)
+    if not pairs or canary is None:
+        return []
+    if analysis.canary_verdict(pairs, canary.extra_gates, cell.backend)["detected"]:
+        return []
+    return [replace(canary, repeat=layout) for layout in range(1, repeats)]
 
 
 def summarise_memory(outcomes: dict[Job, Outcome]) -> list[dict]:
@@ -533,7 +554,16 @@ def _measure(
         jobs += plan_cell_jobs(cell, repeats, device_gates)
     if busy_check:
         jobs.append(_busy_jobs(reference_cell(cells))[0])
-    return outcomes | runner.run_all(jobs)
+    outcomes |= runner.run_all(jobs)
+
+    retries = [
+        job
+        for cell in cells
+        for job in canary_retries(
+            cell, [job for job in outcomes if _belongs_to(job, cell)], outcomes, repeats
+        )
+    ]
+    return outcomes | runner.run_all(retries) if retries else outcomes
 
 
 def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | None:

@@ -22,20 +22,24 @@ def noise(values: list[int]) -> int:
     return max(values) - min(values)
 
 
-def canary_verdict(canary: int, same_layout: int, extra_gates: int, backend: str) -> dict:
-    """Did the circuit with 1% extra gates show up? If not, the night's numbers can't be trusted."""
-    cost = same_layout
-    delta = canary - cost
+def canary_verdict(pairs: list[tuple[int, int]], extra_gates: int, backend: str) -> dict:
+    """Did the circuit with 1% extra gates show up? If not, the build's numbers can't be trusted.
+
+    Each pair is (canary, full run on the same layout). One pair is usually enough. A canary's own
+    allocations can nudge the layout, though, so on a cell where it adds only 0.1% one pair can hide
+    it. The median of several shows the signal if the instrument works, and not if it doesn't."""
+    delta = int(median(canary - full for canary, full in pairs))
+    cost = int(median(full for _, full in pairs))
     jitter = NOISE_FLOOR[backend]
     ratio = delta / jitter
     return {
         "extra_gates": extra_gates,
-        "count": canary,
+        "pairs": [list(pair) for pair in pairs],
         "delta": delta,
         "delta_pct": delta / cost * 100 if cost else None,
         "noise": jitter,
         "noise_ratio": ratio,
-        "detected": delta > 0 and ratio >= CANARY_MIN_NOISE_RATIO,
+        "detected": ratio >= CANARY_MIN_NOISE_RATIO,
     }
 
 

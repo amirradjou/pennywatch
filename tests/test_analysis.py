@@ -20,7 +20,7 @@ def test_a_single_run_has_no_noise_of_its_own():
 
 
 def test_canary_well_above_the_noise_is_detected():
-    verdict = analysis.canary_verdict(1_010_000_000, 1_000_000_000, 7, "qjit")
+    verdict = analysis.canary_verdict([(1_010_000_000, 1_000_000_000)], 7, "qjit")
     assert verdict["detected"]
     assert verdict["delta"] == 10_000_000
     assert verdict["noise"] == analysis.NOISE_FLOOR["qjit"]
@@ -30,23 +30,43 @@ def test_canary_well_above_the_noise_is_detected():
 
 
 def test_canary_lost_in_the_noise_is_missed():
-    assert not analysis.canary_verdict(1_001_000_000, 1_000_000_000, 7, "qjit")["detected"]
+    assert not analysis.canary_verdict([(1_001_000_000, 1_000_000_000)], 7, "qjit")["detected"]
 
 
 def test_a_canary_that_got_cheaper_is_missed():
-    assert not analysis.canary_verdict(900_000_000, 1_000_000_000, 7, "default")["detected"]
+    assert not analysis.canary_verdict([(900_000_000, 1_000_000_000)], 7, "default")["detected"]
 
 
 def test_a_canary_of_one_extra_instruction_is_missed():
-    assert not analysis.canary_verdict(1_000_000_001, 1_000_000_000, 1, "default")["detected"]
+    assert not analysis.canary_verdict([(1_000_000_001, 1_000_000_000)], 1, "default")["detected"]
 
 
 def test_the_floor_depends_on_the_backend():
     run = 1_000_000_000
-    assert analysis.canary_verdict(run + 5_000_000, run, 3, "lightning")["detected"]
-    assert not analysis.canary_verdict(run + 1_000_000, run, 3, "lightning")["detected"]
-    assert analysis.canary_verdict(run + 7_500_000, run, 3, "qjit")["detected"]
-    assert not analysis.canary_verdict(run + 3_000_000, run, 3, "qjit")["detected"]
+    assert analysis.canary_verdict([(run + 5_000_000, run)], 3, "lightning")["detected"]
+    assert not analysis.canary_verdict([(run + 1_000_000, run)], 3, "lightning")["detected"]
+    assert analysis.canary_verdict([(run + 7_500_000, run)], 3, "qjit")["detected"]
+    assert not analysis.canary_verdict([(run + 3_000_000, run)], 3, "qjit")["detected"]
+
+
+def test_the_median_of_several_pairs_outvotes_one_unlucky_layout():
+    pairs = [
+        (998_000_000, 1_000_000_000),
+        (1_105_000_000, 1_100_000_000),
+        (1_205_400_000, 1_200_000_000),
+    ]
+    verdict = analysis.canary_verdict(pairs, 3, "lightning")
+    assert verdict["detected"]
+    assert verdict["delta"] == 5_000_000
+
+
+def test_several_pairs_do_not_rescue_a_canary_that_is_not_there():
+    pairs = [
+        (1_000_100_000, 1_000_000_000),
+        (1_099_900_000, 1_100_000_000),
+        (1_200_000_000, 1_200_000_000),
+    ]
+    assert not analysis.canary_verdict(pairs, 3, "lightning")["detected"]
 
 
 def test_relative_range():

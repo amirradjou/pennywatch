@@ -1,0 +1,146 @@
+# Plan
+
+The spec and the milestone tracker. A milestone is done when its "Done when" holds.
+
+## Why
+
+Quantum software lives or dies by its costs: how many instructions a simulation takes, how much memory
+it holds, how many gates a circuit compiles to. Those costs can drift one pull request at a time, and
+nobody notices until they add up. PennyLane's repositories have a `!benchmark` command for pull
+requests, but I found no public history of results across builds. pennywatch is the outside view: the
+same circuits on every build, a history anyone can read, and an explanation of each change.
+
+## What it measures
+
+| Metric | How | Counts as a change when |
+|---|---|---|
+| **Instructions** (the main signal) | Valgrind's Cachegrind, single-threaded, circuit only | 0.5% or more, and the runs of the two builds don't overlap |
+| **Gates and depth** | At the top level, the device level and under `qjit`; exact integers | any change, reported as a change rather than a fault |
+| **Compile cost** | Instructions spent in Catalyst's `qjit`, including its compiler process | as for instructions |
+| **Imports** | Instructions to import the stack and create the device | as for instructions |
+| **Peak memory** | Maximum resident size at 25 wires, where the state vector dominates, outside Valgrind | 1.0% or more, and the runs don't overlap |
+| Wall-clock time | Recorded for context | never: see below |
+
+## What the instrument can and can't do
+
+Measured on 2026-11-06 with the final harness unless it says otherwise, on PennyLane 0.45.1, Lightning
+0.45.0 and Catalyst 0.15.0.
+
+| Question | Result |
+|---|---|
+| Are instruction counts stable? | Repeat runs on one memory layout agree to about 0.005%, but that overstates it: see below |
+| Does memory layout move them? | Yes. 16 extra bytes of environment moved `trotter/lightning` by **0.58%**, with the same code on the same machine. Python's call counts stay exact (3,175,935 in each of six layouts), so the extra work is inside the interpreter |
+| Do GitHub's runners agree? | With the median of 3 layouts, within **0.28%** at worst and about 0.03% typically, on four runners across AMD EPYC and Intel Xeon. On single layouts they differed by up to 0.85% |
+| Can a small slowdown be seen? | The canary (1% extra gates, at least 3) showed up on every cell at 11 to 737 times the noise, compared with the full run on the same layout. Its delta holds steady across layouts: 5.3M to 5.7M on `trotter/lightning`, while the totals move 15M |
+| Does a busy machine disturb them? | With four spinning processes the count moved **0.0008%**, while wall-clock time was **4.0 times slower** |
+| Is wall-clock time usable instead? | The same circuit in one process ranged by 32% on a quiet machine, so a 1% regression is invisible in it |
+| Do gate counts show the compile stack? | The same QFT is 5 gates at the top level and 721 at the device level |
+| Are dev builds installable? | Yes, in seconds. Catalyst has about 60 on TestPyPI since 2026-08-08, nearly one a day |
+| Do the versions fit together? | Only as a set: Catalyst `0.16.0.dev135` pins PennyLane `0.46.0.dev142` and Lightning `0.46.0.dev34` exactly |
+| Does the API hold still? | No: `specs` rejects a plain QNode on recent dev builds, and on old stacks it can't read a compiled one. An adapter covers these |
+
+### Why the plan changed
+
+The first version of this plan rested on "instruction counts are stable to 0.006%". That was true and
+misleading. Five runners then split into groups on one circuit, and identical counts turned up on
+different CPU models while one CPU model gave several, which ruled out the hardware. The cause is the
+classic one from Mytkowicz et al., *Producing Wrong Data Without Doing Anything Obviously Wrong*:
+
+| Extra bytes in the environment | `trotter/lightning` | Compared with none |
+|---:|---:|---:|
+| 0 | 4,840,656,642 | |
+| 8 | 4,841,052,581 | +0.008% |
+| 16 | 4,868,644,221 | **+0.578%** |
+| 64 | 4,842,874,798 | +0.046% |
+| 256 | 4,851,241,429 | +0.219% |
+| 1024 | 4,842,797,271 | +0.044% |
+| 4000 | 4,842,620,153 | +0.041% |
+| 8000 | 4,842,729,250 | +0.043% |
+
+Repeat runs agree because they all share one layout, and a real pull request shifts the layout too. So:
+
+- Each repeat runs under its own layout, and a cell's figure is the median.
+- A change only counts if the runs of the two builds are apart, as well as being 0.5% or more.
+- A canary adds less than the layout noise, so it's compared with the full run on the same layout.
+- Builds can be compared across runners. Re-measuring the previous build on the same machine, which
+  the plan held in reserve at twice the cost, isn't needed.
+
+Most cells barely notice: `grover/default` moves 0.001% across layouts. The sensitive ones are
+`trotter/lightning` (0.34%), `qpe/lightning` (0.30%) and `sampling/lightning` (up to 0.49%).
+
+## How it works
+
+1. **Detect.** Watch TestPyPI for a new Catalyst dev build. Its exact pins define one coherent stack.
+   Stable releases are measured the same way, from PyPI, with PennyLane and Lightning of the matching
+   series and third-party packages as they stood when the set was complete.
+2. **Measure.** One fresh process per circuit, layout and stack, in a container pinned by digest (Python,
+   Valgrind, gcc), with fixed seeds and one thread. Each cell also measures a canary, and each circuit's
+   answer has to be right: a crash after the imports still gives a stable count. If a canary goes
+   undetected, the instrument is broken and the build's results are thrown out, not published.
+3. **Compare** against the previous build.
+4. **Explain.** A change is narrowed to the pull requests merged between the two builds. The Python and
+   native functions that moved rank them. Then, as far as each package allows:
+   - PennyLane is pure Python, so it can be bisected commit by commit on top of the older stack, which
+     also separates it from everything else.
+   - Lightning needs a C++ build per step, so it stops at the candidates unless a change is worth the
+     wait.
+   - Catalyst is too heavy to build per commit, so it stops at the candidates and says so.
+5. **Publish.** Results are JSON files in the repo, rendered as a static page. There is no server.
+
+**Security.** Running nightly dev builds means running code from TestPyPI, where names aren't as well
+guarded as on PyPI. So only the three named packages may come from it, everything else comes from PyPI,
+and the measuring job has a read-only token and no secrets. Measured code runs with no network in a
+read-only container. A separate job publishes, runs nothing from TestPyPI, and treats everything the
+measuring job uploaded as hostile.
+
+### Circuits
+
+Chosen so each one exercises something different, on `default.qubit`, `lightning.qubit` and
+`lightning.qubit` under `qjit`:
+
+| Circuit | Exercises | Wires | Answer checked against |
+|---|---|---:|---|
+| QFT | Controlled phases, swaps | 18 | QFT^4 = I |
+| Grover | Multi-controlled gates | 18 | Textbook amplitudes |
+| Trotter | Hamiltonian evolution by a product formula | 18 | A separate NumPy simulation |
+| QPE | The phase estimation template and its inverse | 12 | An exact binary phase |
+| Variational | Adjoint gradients | 18 | A separate NumPy reverse sweep, itself checked against the parameter-shift rule |
+| Sampling | Finite shots, through each stack's sampler | 18 | Every shot reads the starting bits |
+
+QPE stays small because `default.qubit` builds a dense matrix for its inverse QFT: see
+[findings](findings.md).
+
+## Milestones
+
+| | Milestone | Done when | Status |
+|---|---|---|---|
+| M0 | The instrument | `pennywatch run` reproduces the table above from code in a pinned image. Three circuits on three stacks. The canary is detected every time. Runs on two different days agree within 0.05%. The same suite on GitHub Actions: spread between runners measured and written down, and the comparison method chosen from it | STATUS_M0 |
+| M1 | History | All six circuits on the last eight stable releases, with an API adapter. Every step of 0.5% or more re-measured and listed with its numbers | STATUS_M1 |
+| M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | STATUS_M2 |
+| M3 | Explanation | For at least three real changes from M1 or M2, it names the responsible pull request or a candidate list, checked by reading the diff or bisecting. Wrong answers counted and published | STATUS_M3 |
+| M4 | Public page | The repo is public under MIT, with a static page showing each metric's history and what changed, credits, and the limits below. The Action's cost is under GitHub's free allowance | STATUS_M4 |
+| M5 | Upstream | At least one finding reported by hand and judged valid by the maintainers, or a fix merged | Not started, and by hand only |
+
+## Limits
+
+- **Instructions aren't time.** They don't see cache misses, branch prediction or memory bandwidth, so a
+  change that only affects those is missed. The history complements real timing; it doesn't replace it.
+- **Layout noise hides small changes.** On the sensitive cells a real change has to clear the spread of
+  layouts, which can be several tenths of a percent, so it can be missed below that.
+- **Single-threaded, CPU only.** OpenMP scaling and GPU devices are out of scope, and Valgrind 3.24 can't
+  run AVX-512, so those kernels aren't measured.
+- **Small circuits.** Valgrind runs about 30 times slower, so the suite stays around 18 qubits and can't
+  see effects that only appear at scale.
+- **It may find little.** The stack is well engineered and already benchmarked inside. "No regressions in
+  N builds, and the canary caught every injected one" is a real and acceptable result.
+- **TestPyPI can change.** Old dev builds may not stay available, so past results may not be
+  reproducible for ever.
+- **A dense path can dominate a cell.** `qpe/default` is mostly `default.qubit` building a dense matrix,
+  which is real but says little about the rest of its cost.
+
+## Reporting upstream
+
+The PennyLane ecosystem's [AI tool policy](https://github.com/PennyLaneAI/pennylane/blob/master/AI_Policy.md)
+applies to pull requests, issues and comments, so everything sent upstream is written and understood by
+a person, and any substantial tool use is labelled as the policy asks. This repo's automation never
+posts to any PennyLane repository.
