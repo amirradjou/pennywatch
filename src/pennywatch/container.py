@@ -10,6 +10,8 @@ IMAGE_DIR = REPO_ROOT / "docker"
 IMAGE_INPUTS = ("Dockerfile", "packages.txt")
 
 MEMORY_LIMIT = "3g"
+PIDS_LIMIT = 1024
+FILE_SIZE_LIMIT = 2 * 1024 * 1024 * 1024
 SPINNERS = 4
 
 # Fixed so that nothing about the host reaches the process. One thread each, because Valgrind
@@ -24,6 +26,9 @@ MEASURE_ENV = {
     "MKL_NUM_THREADS": "1",
     "JAX_PLATFORMS": "cpu",
 }
+
+
+HARDENING = ["--cap-drop=ALL", "--security-opt=no-new-privileges"]
 
 
 def image_tag() -> str:
@@ -70,12 +75,13 @@ def sandbox_args(cpu: int, stack: Path, source: Path, output: Path) -> list[str]
         "--cpus=1",
         f"--cpuset-cpus={cpu}",
         f"--memory={MEMORY_LIMIT}",
+        f"--pids-limit={PIDS_LIMIT}",
+        f"--ulimit=fsize={FILE_SIZE_LIMIT}",
         "--network=none",
         "--read-only",
         "--tmpfs=/tmp:rw,exec,size=2g",  # exec: Catalyst loads the library it just built from here
         "--hostname=pennywatch",
-        "--cap-drop=ALL",
-        "--security-opt=no-new-privileges",
+        *HARDENING,
         user_flag(),
         *environment,
         f"--volume={stack}:/stack:ro",

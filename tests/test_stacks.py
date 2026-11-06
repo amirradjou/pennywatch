@@ -1,6 +1,12 @@
 import tomllib
 
-from pennywatch.stacks import Stack, exact_pins, locked_versions, project_file
+from pennywatch.stacks import (
+    COMPILE_BYTECODE,
+    Stack,
+    exact_pins,
+    locked_versions,
+    project_file,
+)
 
 DEV_REQUIRES = [
     "pennylane==0.46.0-dev142",
@@ -61,3 +67,8 @@ def test_locked_versions(tmp_path):
         '[[packages]]\nname = "a"\nversion = "1"\n[[packages]]\nname = "b"\nversion = "2"\n'
     )
     assert locked_versions(lock) == {"a": "1", "b": "2"}
+
+
+def test_compiling_bytecode_cannot_run_a_wheels_pth_file():
+    # -S stops site from processing .pth files, which is the only way a wheel runs code at install.
+    assert "-S" in COMPILE_BYTECODE

@@ -1,7 +1,6 @@
 """Running the suite: a fresh container per measured process, then outcomes into results."""
 
 import hashlib
-import json
 import os
 import platform
 import queue
@@ -9,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -17,7 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from statistics import median
 
-from pennywatch import analysis, builds, cachegrind, container, stacks
+from pennywatch import analysis, builds, cachegrind, container, stacks, untrusted
 from pennywatch.cachegrind import Counts
 from pennywatch.harness import expected
 from pennywatch.suite import Cell
@@ -26,6 +26,7 @@ SCHEMA = 1
 JOB_TIMEOUT_S = 3600
 CANARY_FRACTION = 0.01
 TIMING_REPEATS = 10
+OUTPUT_TAIL_BYTES = 4096
 HARNESS_DIR = Path(__file__).parent / "harness"
 
 # Valgrind's own settings are part of the instrument. --trace-children takes in Catalyst's compiler,
@@ -89,22 +90,56 @@ def workload_args(job: Job) -> list[str]:
     ]
 
 
+def _is_number(value) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool)
+
+
 def validate_outcome(outcome: Outcome) -> str | None:
     """Why this outcome can't be used, or None. An exit code of 0 isn't enough: the count from a
-    crashed or skipped circuit looks just as stable as a real one."""
+    crashed or skipped circuit looks just as stable as a real one. The sentinel was written by the
+    code under test, so its shape is checked before anything relies on it."""
     if outcome.error:
         return outcome.error
     job = outcome.job
-    if outcome.sentinel is None:
+    sentinel = outcome.sentinel
+    if sentinel is None:
         return "no sentinel: the process did not reach its end"
+    versions = sentinel.get("versions", {})
+    if not isinstance(versions, dict) or not all(isinstance(v, str) for v in versions.values()):
+        return "the sentinel's versions are malformed"
     if job.mode in ("full", "native"):
-        result = outcome.sentinel.get("result")
+        result = sentinel.get("result")
         if result is None:
             return "the sentinel has no result"
+        if not isinstance(result, list) or not all(_is_number(value) for value in result):
+            return "the sentinel's result is malformed"
         mismatch = expected.mismatch(job.circuit, job.wires, job.rounds, result)
         if mismatch:
             return f"wrong answer: {mismatch}"
     return None
+
+
+def run_keeping_tail(argv: list[str], timeout: float) -> tuple[int, str]:
+    """Run a command and keep only the end of its output: the code under test decides how much it
+    prints, and the host's memory shouldn't depend on that."""
+    process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    tail = bytearray()
+
+    def drain() -> None:
+        while chunk := process.stdout.read1(65536):
+            tail.extend(chunk)
+            del tail[:-OUTPUT_TAIL_BYTES]
+
+    reader = threading.Thread(target=drain, daemon=True)
+    reader.start()
+    try:
+        code = process.wait(timeout)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        raise
+    finally:
+        reader.join(timeout=10)
+    return code, tail.decode(errors="replace")
 
 
 class Runner:
@@ -143,17 +178,15 @@ class Runner:
         ]
         started = time.monotonic()
         try:
-            done = subprocess.run(argv, capture_output=True, text=True, timeout=JOB_TIMEOUT_S)
+            code, tail = run_keeping_tail(argv, JOB_TIMEOUT_S)
         except subprocess.TimeoutExpired:
             subprocess.run(["docker", "kill", name], capture_output=True, check=False)
             return Outcome(job, error=f"timed out after {JOB_TIMEOUT_S} s")
         outcome = Outcome(job, elapsed_s=time.monotonic() - started)
-        if done.returncode != 0:
-            outcome.error = f"exit {done.returncode}: {done.stderr.strip()[-400:]}"
+        if code != 0:
+            outcome.error = f"exit {code}: {tail.strip()[-400:]}"
             return outcome
-        sentinel = output / "sentinel.json"
-        if sentinel.exists():
-            outcome.sentinel = json.loads(sentinel.read_text())
+        outcome.sentinel = untrusted.read_sentinel(output / "sentinel.json")
         if job.mode != "native":
             outcome.counts = cachegrind.collect(output)
         return outcome
@@ -328,7 +361,7 @@ def problems_with(outcomes: dict[Job, Outcome], versions: dict[str, str]) -> lis
             for package, version in outcome.sentinel["versions"].items():
                 # Installed builds report 0.46.0-dev142 where the lock says 0.46.0.dev142.
                 if version.replace("-dev", ".dev") != versions.get(package):
-                    problems.append(f"{job.label}: {package} is {version}, not the locked version")
+                    problems.append(f"{job.label}: {package[:40]} is not the locked version")
     return problems
 
 
@@ -355,7 +388,7 @@ def run_suite(
         runner = Runner(image, stack_dir, workspace, cpus)
         outcomes = _measure(runner, cells, repeats, busy_check)
         if keep_raw:
-            shutil.copytree(workspace / "runs", keep_raw, dirs_exist_ok=True)
+            untrusted.copy_plain_files(workspace / "runs", keep_raw)
     finally:
         shutil.rmtree(workspace, ignore_errors=True)
 
@@ -449,13 +482,11 @@ def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | Non
     busy_wall = (outcomes[busy_native].sentinel or {}).get("wall_s")
     if not (quiet and busy_counts and quiet_wall and busy_wall):
         return None
-    baseline = median(quiet)
     return {
         "cell": cell.name,
         "spinners": container.SPINNERS,
         "quiet_gross": quiet,
         "busy_gross": busy_counts.total,
-        "counts_moved_pct": abs(busy_counts.total - baseline) / baseline * 100,
         "quiet_wall_s": median(quiet_wall),
         "busy_wall_s": median(busy_wall),
         "wall_ratio": median(busy_wall) / median(quiet_wall),

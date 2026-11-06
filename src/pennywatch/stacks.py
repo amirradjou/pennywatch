@@ -29,6 +29,18 @@ PINNED_BY_CATALYST = ("pennylane", "pennylane-lightning")
 # marker is never true, which is how uv removes a dependency.
 DROPPED_DEPENDENCY = "pennylane-lightning-kokkos; python_version < '3'"
 
+COMPILE_BYTECODE = [
+    "/stack/bin/python",
+    "-I",
+    "-S",
+    "-m",
+    "compileall",
+    "-q",
+    "-j",
+    "2",
+    "/stack/lib/python3.12/site-packages",
+]
+
 _PIN = re.compile(r"^([A-Za-z0-9._-]+)\s*==\s*([^\s;,]+)$")
 
 
@@ -117,8 +129,14 @@ def lock_sha256(lock_path: Path) -> str:
 
 
 def install(stack: Stack, image: str) -> Path:
-    """Install the locked wheels once per lock file. Bytecode is compiled here and the directory is
-    mounted read-only afterwards, so no measured run ever pays for writing it."""
+    """Install the locked wheels once per lock file, in two steps, because only the first may have
+    the network and the shared cache.
+
+    Unpacking wheels runs nothing from them. Compiling bytecode starts Python, and Python runs any
+    .pth file a wheel installed unless told not to, so that step is offline and passes -S. Bytecode
+    is compiled here and the directory is mounted read-only afterwards, so no measured run ever pays
+    for writing it.
+    """
     target = cache_dir() / "stacks" / f"{stack.id}-{lock_sha256(stack.lock_path)[:12]}"
     if target.is_dir():
         return target
@@ -127,11 +145,28 @@ def install(stack: Stack, image: str) -> Path:
     partial = Path(tempfile.mkdtemp(prefix=f"{target.name}.", dir=target.parent))
     partial.chmod(0o755)
     shutil.copyfile(stack.lock_path, partial / "pylock.toml")
-    script = (
+    unpack = (
         "uv venv --quiet --allow-existing --python /usr/local/bin/python /stack && "
-        "uv pip sync --quiet --python /stack/bin/python --compile-bytecode /stack/pylock.toml"
+        "uv pip sync --quiet --python /stack/bin/python /stack/pylock.toml"
     )
-    _in_image(image, ["sh", "-c", script], partial, "/stack")
+    _in_image(image, ["sh", "-c", unpack], partial, "/stack")
+    subprocess.run(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--cpus=2",
+            "--network=none",
+            *container.HARDENING,
+            container.user_flag(),
+            "-e",
+            "HOME=/tmp",
+            f"--volume={partial}:/stack",
+            image,
+            *COMPILE_BYTECODE,
+        ],
+        check=True,
+    )
     partial.rename(target)
     return target
 
@@ -150,6 +185,7 @@ def _in_image(image: str, command: list[str], mount: Path, at: str, workdir: str
             "run",
             "--rm",
             "--cpus=2",
+            *container.HARDENING,
             container.user_flag(),
             "-e",
             "HOME=/tmp",

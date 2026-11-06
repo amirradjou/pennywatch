@@ -9,6 +9,8 @@ image pins. So the linker is recorded but kept out of the total.
 from dataclasses import dataclass
 from pathlib import Path
 
+from pennywatch import untrusted
+
 LINKER_PROGRAMS = {"gcc", "cc", "collect2", "ld", "as"}
 
 
@@ -56,6 +58,7 @@ def collect(directory: Path) -> Counts:
     if not files:
         raise ValueError(f"no Cachegrind output in {directory}")
     for path in files:
-        command, summary = read_out_file(path.read_text(errors="replace"))
+        text = untrusted.read_file(path, untrusted.CACHEGRIND_LIMIT).decode(errors="replace")
+        command, summary = read_out_file(text)
         totals[process_kind(command)] += summary
     return Counts(**totals)

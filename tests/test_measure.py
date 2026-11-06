@@ -1,3 +1,5 @@
+import subprocess
+import sys
 import time
 
 import pytest
@@ -150,3 +152,33 @@ def test_dev_version_spellings_count_as_the_same_version():
     versions = {"pennylane": "0.46.0-dev142"}
     outcome = Outcome(job, counts=Counts(python=1), sentinel={"versions": versions})
     assert measure.problems_with({job: outcome}, {"pennylane": "0.46.0.dev142"}) == []
+
+
+def test_a_result_of_the_wrong_type_is_not_a_measurement():
+    outcome = Outcome(full_job(), counts=Counts(python=5), sentinel={"result": "1.0"})
+    assert "malformed" in measure.validate_outcome(outcome)
+
+
+def test_a_result_holding_non_numbers_is_not_a_measurement():
+    outcome = Outcome(full_job(), counts=Counts(python=5), sentinel={"result": [True, "x"]})
+    assert "malformed" in measure.validate_outcome(outcome)
+
+
+def test_malformed_versions_are_not_a_measurement():
+    sentinel = {"result": RIGHT_ANSWER, "versions": "0.45.1"}
+    outcome = Outcome(full_job(), counts=Counts(python=5), sentinel=sentinel)
+    assert "versions" in measure.validate_outcome(outcome)
+
+
+def test_only_the_tail_of_a_flood_of_output_is_kept():
+    code = "import sys; sys.stdout.write('x' * 2_000_000 + 'the end'); sys.exit(3)"
+    returncode, tail = measure.run_keeping_tail([sys.executable, "-c", code], timeout=30)
+    assert returncode == 3
+    assert tail.endswith("the end")
+    assert len(tail) == measure.OUTPUT_TAIL_BYTES
+
+
+def test_a_command_that_outlives_its_timeout_is_killed():
+    code = "import time; time.sleep(60)"
+    with pytest.raises(subprocess.TimeoutExpired):
+        measure.run_keeping_tail([sys.executable, "-c", code], timeout=0.2)
