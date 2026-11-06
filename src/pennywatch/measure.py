@@ -1,0 +1,460 @@
+"""Running the suite: a fresh container per measured process, then outcomes into results."""
+
+import hashlib
+import json
+import os
+import platform
+import queue
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass, replace
+from datetime import UTC, datetime
+from pathlib import Path
+from statistics import median
+
+from pennywatch import analysis, builds, cachegrind, container, stacks
+from pennywatch.cachegrind import Counts
+from pennywatch.harness import expected
+from pennywatch.suite import Cell
+
+SCHEMA = 1
+JOB_TIMEOUT_S = 3600
+CANARY_FRACTION = 0.01
+TIMING_REPEATS = 10
+HARNESS_DIR = Path(__file__).parent / "harness"
+
+# Valgrind's own settings are part of the instrument. --trace-children takes in Catalyst's compiler,
+# which is a child process.
+VALGRIND = [
+    "valgrind",
+    "--tool=cachegrind",
+    "--cache-sim=no",
+    "--branch-sim=no",
+    "--trace-children=yes",
+    "--cachegrind-out-file=/out/cachegrind.%p",
+    "--log-file=/out/valgrind.%p.log",
+]
+PYTHON = ["/stack/bin/python", "-P", "-s", "-m", "pennywatch.harness.workload"]
+
+
+@dataclass(frozen=True)
+class Job:
+    """One measured process."""
+
+    role: str  # imports | compile | full | canary | native
+    backend: str
+    wires: int
+    circuit: str = "qft"  # the imports baseline never builds it, but the workload wants a name
+    rounds: int = 1
+    extra_gates: int = 0
+    repeat: int = 0
+    busy: bool = False
+
+    @property
+    def label(self) -> str:
+        busy = "-busy" if self.busy else ""
+        if self.role == "imports":
+            return f"imports-{self.backend}-{self.wires}w-{self.repeat}"
+        return f"{self.circuit}-{self.backend}-{self.role}{busy}-{self.repeat}"
+
+    @property
+    def mode(self) -> str:
+        return "full" if self.role == "canary" else self.role
+
+
+@dataclass
+class Outcome:
+    job: Job
+    counts: Counts | None = None
+    sentinel: dict | None = None
+    error: str | None = None
+    elapsed_s: float = 0.0
+
+
+def workload_args(job: Job) -> list[str]:
+    return [
+        f"--mode={job.mode}",
+        f"--circuit={job.circuit}",
+        f"--backend={job.backend}",
+        f"--wires={job.wires}",
+        f"--rounds={job.rounds}",
+        f"--extra-gates={job.extra_gates}",
+        f"--timing-repeats={TIMING_REPEATS}",
+        "--out=/out/sentinel.json",
+    ]
+
+
+def validate_outcome(outcome: Outcome) -> str | None:
+    """Why this outcome can't be used, or None. An exit code of 0 isn't enough: the count from a
+    crashed or skipped circuit looks just as stable as a real one."""
+    if outcome.error:
+        return outcome.error
+    job = outcome.job
+    if outcome.sentinel is None:
+        return "no sentinel: the process did not reach its end"
+    if job.mode in ("full", "native"):
+        result = outcome.sentinel.get("result")
+        if result is None:
+            return "the sentinel has no result"
+        mismatch = expected.mismatch(job.circuit, job.wires, job.rounds, result)
+        if mismatch:
+            return f"wrong answer: {mismatch}"
+    return None
+
+
+class Runner:
+    """Runs jobs in containers, at most one per CPU slot."""
+
+    def __init__(self, image: str, stack_dir: Path, workspace: Path, cpus: list[int]):
+        self.image = image
+        self.stack_dir = stack_dir
+        self.workspace = workspace
+        self.cpus = cpus
+        self.source = workspace / "src"
+        package = self.source / "pennywatch"
+        # A clean copy, because a __pycache__ left in the checkout would change what Python does at
+        # import and so the count.
+        shutil.copytree(
+            HARNESS_DIR, package / "harness", ignore=shutil.ignore_patterns("__pycache__")
+        )
+        shutil.copyfile(HARNESS_DIR.parent / "__init__.py", package / "__init__.py")
+
+    def execute(self, job: Job, cpu: int) -> Outcome:
+        output = self.workspace / "runs" / job.label
+        output.mkdir(parents=True)
+        command = [*PYTHON, *workload_args(job)]
+        if job.mode != "native":
+            command = [*VALGRIND, *command]
+        if job.busy:
+            command = container.with_spinners(command)
+        name = f"pennywatch-{os.getpid()}-{job.label}"
+        argv = [
+            "docker",
+            "run",
+            f"--name={name}",
+            *container.sandbox_args(cpu, self.stack_dir, self.source, output),
+            self.image,
+            *command,
+        ]
+        started = time.monotonic()
+        try:
+            done = subprocess.run(argv, capture_output=True, text=True, timeout=JOB_TIMEOUT_S)
+        except subprocess.TimeoutExpired:
+            subprocess.run(["docker", "kill", name], capture_output=True, check=False)
+            return Outcome(job, error=f"timed out after {JOB_TIMEOUT_S} s")
+        outcome = Outcome(job, elapsed_s=time.monotonic() - started)
+        if done.returncode != 0:
+            outcome.error = f"exit {done.returncode}: {done.stderr.strip()[-400:]}"
+            return outcome
+        sentinel = output / "sentinel.json"
+        if sentinel.exists():
+            outcome.sentinel = json.loads(sentinel.read_text())
+        if job.mode != "native":
+            outcome.counts = cachegrind.collect(output)
+        return outcome
+
+    def run_all(self, jobs: list[Job]) -> dict[Job, Outcome]:
+        return run_on_slots(jobs, self.cpus, self.execute)
+
+
+def run_on_slots(
+    jobs: list[Job], cpus: list[int], execute: Callable[[Job, int], Outcome]
+) -> dict[Job, Outcome]:
+    """Run jobs in parallel with each holding one CPU. Counts don't depend on load, so parallel runs
+    are safe, and the limit is there for the laptop's sake."""
+    free = queue.SimpleQueue()
+    for cpu in cpus:
+        free.put(cpu)
+    total = len(jobs)
+    finished = []
+
+    def on_a_slot(job: Job) -> Outcome:
+        cpu = free.get()
+        try:
+            outcome = execute(job, cpu)
+        except Exception as error:  # noqa: BLE001 - one bad job must not lose the others
+            outcome = Outcome(job, error=f"{type(error).__name__}: {error}")
+        finally:
+            free.put(cpu)
+        finished.append(job)
+        problem = validate_outcome(outcome)
+        count = f"{outcome.counts.total:,}" if outcome.counts else "-"
+        status = f"FAILED: {problem}" if problem else count
+        print(
+            f"[{len(finished)}/{total}] {job.label} {outcome.elapsed_s:.0f}s {status}",
+            file=sys.stderr,
+            flush=True,
+        )
+        return outcome
+
+    with ThreadPoolExecutor(max_workers=len(cpus)) as pool:
+        return dict(zip(jobs, pool.map(on_a_slot, jobs), strict=True))
+
+
+def harness_sha256() -> str:
+    digest = hashlib.sha256()
+    for path in sorted(HARNESS_DIR.glob("*.py")):
+        digest.update(path.name.encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def git_revision() -> dict:
+    def git(*arguments: str) -> str:
+        return subprocess.run(
+            ["git", "-C", str(container.REPO_ROOT), *arguments],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+
+    return {"commit": git("rev-parse", "HEAD"), "dirty": bool(git("status", "--porcelain"))}
+
+
+def host_facts() -> dict:
+    """What's needed to explain a difference between machines. Nothing that identifies this one."""
+    model = "unknown"
+    with open("/proc/cpuinfo") as file:
+        for line in file:
+            if line.startswith("model name"):
+                model = line.split(":", 1)[1].strip()
+                break
+    return {
+        "cpu": model,
+        "logical_cpus": os.cpu_count(),
+        "kernel": platform.release(),
+        "github_actions": os.environ.get("GITHUB_ACTIONS") == "true",
+    }
+
+
+def canary_gates(device_gates: int) -> int:
+    return max(1, round(device_gates * CANARY_FRACTION))
+
+
+def plan_baselines(cells: list[Cell], repeats: int) -> list[Job]:
+    """One imports baseline per backend and size: creating the device is subtracted as well."""
+    return [
+        Job("imports", backend, wires, repeat=repeat)
+        for backend, wires in sorted({(cell.backend, cell.wires) for cell in cells})
+        for repeat in range(repeats)
+    ]
+
+
+def plan_cell_jobs(cell: Cell, repeats: int, device_gates: int) -> list[Job]:
+    base = Job("full", cell.backend, cell.wires, cell.circuit, cell.rounds)
+    jobs = [replace(base, repeat=repeat) for repeat in range(repeats)]
+    jobs.append(replace(base, role="canary", extra_gates=canary_gates(device_gates)))
+    if cell.backend == "qjit":
+        jobs += [replace(base, role="compile", repeat=repeat) for repeat in range(repeats)]
+    return jobs
+
+
+def native_job(cell: Cell, busy: bool = False) -> Job:
+    return Job("native", cell.backend, cell.wires, cell.circuit, cell.rounds, busy=busy)
+
+
+def _gross(outcomes: dict[Job, Outcome], jobs: list[Job]) -> list[int]:
+    return [outcomes[job].counts.total for job in jobs if outcomes[job].counts]
+
+
+def summarise_cell(
+    cell: Cell, outcomes: dict[Job, Outcome], jobs: list[Job], baselines: list[Job], native: Outcome
+) -> dict:
+    full = [job for job in jobs if job.role == "full"]
+    imports = _gross(outcomes, baselines)
+    gross = _gross(outcomes, full)
+    summary = {**asdict(cell), "name": cell.name}
+    if native.sentinel:
+        summary |= {
+            key: native.sentinel.get(key)
+            for key in (
+                "gates",
+                "wall_s",
+                "compile_s",
+                "max_rss_kb",
+                "max_rss_children_kb",
+                "bare_qnode_specs",
+            )
+        }
+    if not gross or not imports:
+        return summary
+
+    net_cost = analysis.net(gross, imports)
+    first = outcomes[full[0]].counts
+    summary["instructions"] = {
+        "net": net_cost,
+        "gross": gross,
+        "imports": imports,
+        "spread_pct": analysis.spread_pct(gross, net_cost),
+        "imports_spread_pct": analysis.spread_pct(imports, net_cost),
+        "noise": analysis.noise(gross, imports, net_cost),
+        "processes": asdict(first),
+    }
+
+    compile_jobs = [job for job in jobs if job.role == "compile"]
+    compile_runs = _gross(outcomes, compile_jobs)
+    if compile_runs:
+        compile_net = analysis.net(compile_runs, imports)
+        summary["compile"] = {
+            "net": compile_net,
+            "gross": compile_runs,
+            "spread_pct": analysis.spread_pct(compile_runs, compile_net),
+            # Exact from run to run so far, unlike the Python process around it.
+            "compiler_process": [
+                outcomes[job].counts.compiler for job in compile_jobs if outcomes[job].counts
+            ],
+        }
+
+    canary = next(job for job in jobs if job.role == "canary")
+    if outcomes[canary].counts:
+        summary["canary"] = analysis.canary_verdict(
+            outcomes[canary].counts.total, gross, imports, canary.extra_gates
+        )
+    return summary
+
+
+def problems_with(outcomes: dict[Job, Outcome], versions: dict[str, str]) -> list[str]:
+    """Everything that makes this run unfit to publish."""
+    problems = []
+    for job, outcome in outcomes.items():
+        if problem := validate_outcome(outcome):
+            problems.append(f"{job.label}: {problem}")
+        elif outcome.sentinel:
+            for package, version in outcome.sentinel["versions"].items():
+                # Installed builds report 0.46.0-dev142 where the lock says 0.46.0.dev142.
+                if version.replace("-dev", ".dev") != versions.get(package):
+                    problems.append(f"{job.label}: {package} is {version}, not the locked version")
+    return problems
+
+
+def run_suite(
+    cells: list[Cell],
+    stack: stacks.Stack,
+    repeats: int,
+    cpus: list[int],
+    busy_check: bool,
+    keep_raw: Path | None = None,
+) -> dict:
+    image = container.ensure_image()
+    if not stack.lock_path.exists():
+        stacks.write_lock(stack, image)
+    versions = stacks.locked_versions(stack.lock_path)
+    stack_dir = stacks.install(stack, image)
+
+    started = datetime.now(UTC)
+    workspace = Path(tempfile.mkdtemp(prefix="run-", dir=stacks.cache_dir()))
+    workspace.chmod(0o755)
+    try:
+        runner = Runner(image, stack_dir, workspace, cpus)
+        outcomes = _measure(runner, cells, repeats, busy_check)
+        if keep_raw:
+            shutil.copytree(workspace / "runs", keep_raw, dirs_exist_ok=True)
+    finally:
+        shutil.rmtree(workspace, ignore_errors=True)
+
+    summaries = []
+    for cell in cells:
+        jobs = [job for job in outcomes if _belongs_to(job, cell)]
+        baselines = [
+            job
+            for job in outcomes
+            if job.role == "imports" and (job.backend, job.wires) == (cell.backend, cell.wires)
+        ]
+        summaries.append(
+            summarise_cell(cell, outcomes, jobs, baselines, outcomes[native_job(cell)])
+        )
+
+    problems = problems_with(outcomes, versions)
+    problems += [
+        f"{summary['name']}: the canary was not detected"
+        for summary in summaries
+        if "canary" in summary and not summary["canary"]["detected"]
+    ]
+    return {
+        "schema": SCHEMA,
+        "started_at": started.isoformat(timespec="seconds"),
+        "finished_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "pennywatch": {**git_revision(), "harness_sha256": harness_sha256()},
+        "image": {"tag": image, **container.tool_versions(image)},
+        "host": host_facts(),
+        "stack": {
+            "id": stack.id,
+            "lock_sha256": stacks.lock_sha256(stack.lock_path),
+            "pennylane": versions.get("pennylane"),
+            "pennylane-lightning": versions.get("pennylane-lightning"),
+            "pennylane-catalyst": versions.get("pennylane-catalyst"),
+            "packages": versions,
+        },
+        "repeats": repeats,
+        "cpus": len(cpus),
+        "cells": summaries,
+        "busy_check": _busy_summary(outcomes, cells) if busy_check else None,
+        "availability": builds.availability(),
+        "valid": not problems,
+        "problems": problems,
+    }
+
+
+def _belongs_to(job: Job, cell: Cell) -> bool:
+    return (
+        job.role in ("full", "canary", "compile")
+        and not job.busy
+        and (job.circuit, job.backend, job.wires, job.rounds)
+        == (cell.circuit, cell.backend, cell.wires, cell.rounds)
+    )
+
+
+def reference_cell(cells: list[Cell]) -> Cell:
+    """The cell for the busy-machine check: Lightning, with the least Python around it."""
+    return next((cell for cell in cells if cell.backend == "lightning"), cells[0])
+
+
+def _busy_jobs(cell: Cell) -> list[Job]:
+    full = Job("full", cell.backend, cell.wires, cell.circuit, cell.rounds, busy=True)
+    return [full, native_job(cell, busy=True)]
+
+
+def _measure(runner: Runner, cells: list[Cell], repeats: int, busy_check: bool):
+    # Gate counts come from the native runs, and the canary's size comes from the gate counts.
+    native_jobs = [native_job(cell) for cell in cells]
+    if busy_check:
+        native_jobs.append(native_job(reference_cell(cells), busy=True))
+    outcomes = runner.run_all(native_jobs)
+
+    jobs = plan_baselines(cells, repeats)
+    for cell in cells:
+        sentinel = outcomes[native_job(cell)].sentinel
+        device_gates = sentinel["gates"]["device"]["gates"] if sentinel else 100
+        jobs += plan_cell_jobs(cell, repeats, device_gates)
+    if busy_check:
+        jobs.append(_busy_jobs(reference_cell(cells))[0])
+    return outcomes | runner.run_all(jobs)
+
+
+def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | None:
+    cell = reference_cell(cells)
+    busy_full, busy_native = _busy_jobs(cell)
+    quiet = _gross(
+        outcomes, [job for job in outcomes if _belongs_to(job, cell) and job.role == "full"]
+    )
+    busy_counts = outcomes[busy_full].counts
+    quiet_wall = (outcomes[native_job(cell)].sentinel or {}).get("wall_s")
+    busy_wall = (outcomes[busy_native].sentinel or {}).get("wall_s")
+    if not (quiet and busy_counts and quiet_wall and busy_wall):
+        return None
+    baseline = median(quiet)
+    return {
+        "cell": cell.name,
+        "spinners": container.SPINNERS,
+        "quiet_gross": quiet,
+        "busy_gross": busy_counts.total,
+        "counts_moved_pct": abs(busy_counts.total - baseline) / baseline * 100,
+        "quiet_wall_s": median(quiet_wall),
+        "busy_wall_s": median(busy_wall),
+        "wall_ratio": median(busy_wall) / median(quiet_wall),
+    }

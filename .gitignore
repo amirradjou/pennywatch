@@ -33,3 +33,6 @@ htmlcov/
 # Claude Code project files: local only, never committed
 .claude/
 CLAUDE.md
+
+# A rejected run is kept for debugging and never published
+results/*.rejected.json
