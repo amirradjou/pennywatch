@@ -47,10 +47,13 @@ uv run pennywatch explain 0.14.1 0.15.0 --cell qft/default
 uv run pennywatch explain 0.14.1 0.15.0 --cell qft/default --bisect
 ```
 
-This re-measures the cell on both builds, then lists what merged between them, most likely first:
+This re-measures the cell on both builds, then lists what merged between them:
 
-- Each pull request scores the Python calls that moved in the files it touched. That's a pointer for a
-  person to check, and it can be wrong.
+- Each pull request scores the Python calls that moved in the files it touched, and the list starts with
+  the highest. That order is a weak pointer: on real changes it hasn't yet put the cause first. See
+  [explanations](explanations.md).
+- For a step in the imports, the score comes from Python's import timer instead, with each outside
+  package charged to the file of PennyLane that imported it.
 - `--bisect` runs PennyLane alone at each commit on top of the older stack. If the newest PennyLane
   alone doesn't give most of the step, it says the cause is elsewhere. Commits that can't be measured
   are stepped around, and if the step is among them, the answer is the range.

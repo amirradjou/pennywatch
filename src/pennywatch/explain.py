@@ -199,8 +199,10 @@ def call_changes(before: dict[str, int], after: dict[str, int], top: int) -> lis
 def rank_candidates(
     merged: list[upstream.Merged], moved_calls: list[list]
 ) -> list[tuple[int, upstream.Merged]]:
-    """Most likely first: a pull request scores the calls that moved in the files it touched. Ties
-    keep merge order. This is a pointer for a person to check, not a verdict."""
+    """A pull request scores the calls that moved in the files it touched, and ties keep merge
+    order. This is a weak pointer: on real changes it put the cause anywhere from 14th to outside
+    the top 30 of 591, because broad refactors touch the same files. Only a bisect gives an answer.
+    """
     weight: dict[str, int] = {}
     for name, before, after in moved_calls:
         path = name.rsplit(":", 1)[0]
@@ -623,7 +625,8 @@ def render(explanation: Explanation) -> str:
         lines.append("")
     for package, changes in explanation.candidates.items():
         lines.append(
-            f"**{package}:** {len(changes)} commits between the builds. Most likely first:"
+            f"**{package}:** {len(changes)} commits between the builds, those touching code that "
+            "moved first. That order is a weak pointer, not a verdict:"
         )
         lines.append("")
         lines += [
