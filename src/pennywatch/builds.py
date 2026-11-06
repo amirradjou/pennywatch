@@ -1,8 +1,6 @@
 """What exists upstream: how many dev builds, since when, and what the newest Catalyst pins."""
 
-import json
 import urllib.error
-import urllib.request
 
 from pennywatch import stacks
 
@@ -22,22 +20,19 @@ def summarise_releases(releases: dict[str, list[dict]]) -> dict:
     }
 
 
-def _fetch_json(url: str) -> dict:
-    with urllib.request.urlopen(url, timeout=60) as response:
-        return json.load(response)
-
-
 def availability() -> dict | None:
     """TestPyPI's dev builds, or None if it can't be reached: context, not a result."""
     try:
         packages = {
             package: summarise_releases(
-                _fetch_json(f"https://test.pypi.org/pypi/{package}/json")["releases"]
+                stacks.fetch_json(f"https://test.pypi.org/pypi/{package}/json")["releases"]
             )
             for package in PACKAGES
         }
         newest = packages[stacks.CATALYST]["last"]["version"]
-        info = _fetch_json(f"https://test.pypi.org/pypi/{stacks.CATALYST}/{newest}/json")["info"]
+        info = stacks.fetch_json(f"https://test.pypi.org/pypi/{stacks.CATALYST}/{newest}/json")[
+            "info"
+        ]
     except (urllib.error.URLError, TimeoutError, KeyError, TypeError) as error:
         print(f"could not read TestPyPI: {error}")
         return None

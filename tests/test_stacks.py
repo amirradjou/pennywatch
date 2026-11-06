@@ -1,5 +1,8 @@
 import tomllib
 
+import pytest
+
+from pennywatch import stacks
 from pennywatch.stacks import (
     COMPILE_BYTECODE,
     Stack,
@@ -34,8 +37,62 @@ def test_a_dev_version_means_testpypi():
 
 def test_stable_stack_uses_only_pypi():
     project = tomllib.loads(project_file(Stack("0.15.0"), {}))
-    assert project["project"]["dependencies"] == ["pennylane-catalyst==0.15.0"]
+    assert project["project"]["dependencies"] == [
+        "pennylane-catalyst==0.15.0",
+        "pennylane==0.45.*",
+        "pennylane-lightning==0.45.*",
+    ]
     assert "tool" not in project
+
+
+def test_catalyst_0_10_goes_with_pennylane_0_40_whatever_its_metadata_says():
+    assert stacks.pennylane_series("0.10.0") == "0.40"
+    assert stacks.pennylane_series("0.8.1") == "0.38"
+
+
+def _files(upload_time):
+    return [{"upload_time_iso_8601": upload_time}]
+
+
+def test_the_newest_of_a_series_compares_numbers_and_skips_withdrawn_and_dev_releases():
+    releases = {
+        "0.45.2": [],
+        "0.45.1": _files("2026-06-01T00:00:00Z"),
+        "0.45.0": _files("2026-05-01T00:00:00Z"),
+        "0.45.10.dev1": _files("2026-09-01T00:00:00Z"),
+        "0.450.0": _files("2026-10-01T00:00:00Z"),
+    }
+    assert stacks.newest_of_series(releases, "0.45") == releases["0.45.1"]
+    releases["0.45.10"] = _files("2026-07-01T00:00:00Z")
+    assert stacks.newest_of_series(releases, "0.45") == releases["0.45.10"]
+
+
+def test_a_series_with_no_release_is_an_error():
+    with pytest.raises(ValueError, match="series 0.99"):
+        stacks.newest_of_series({"0.45.0": _files("2026-05-01T00:00:00Z")}, "0.99")
+
+
+def test_a_stable_stack_is_resolved_as_of_the_last_upload_of_its_set(monkeypatch):
+    releases = {
+        "pennylane": {"0.45.1": _files("2026-06-01T10:00:00.5Z")},
+        "pennylane-lightning": {"0.45.0": _files("2026-05-01T00:00:00Z")},
+    }
+    monkeypatch.setattr(
+        stacks, "fetch_json", lambda url: {"releases": releases[url.split("/")[-2]]}
+    )
+    catalyst = _files("2026-05-12T00:00:00Z")
+    assert stacks.as_of(Stack("0.15.0"), catalyst, {}) == "2026-06-01T10:00:01Z"
+
+
+def test_a_dev_stack_is_resolved_as_of_the_last_upload_of_its_pins(monkeypatch):
+    uploads = {
+        "https://test.pypi.org/pypi/pennylane/0.46.0.dev142/json": "2026-11-01T00:00:00Z",
+        "https://test.pypi.org/pypi/pennylane-lightning/0.46.0.dev34/json": "2026-11-02T00:00:00Z",
+    }
+    monkeypatch.setattr(stacks, "fetch_json", lambda url: {"urls": _files(uploads[url])})
+    pins = {"pennylane": "0.46.0.dev142", "pennylane-lightning": "0.46.0.dev34"}
+    catalyst = _files("2026-11-03T00:00:00Z")
+    assert stacks.as_of(Stack("0.16.0.dev134"), catalyst, pins) == "2026-11-03T00:00:01Z"
 
 
 def test_only_the_three_named_packages_may_come_from_testpypi():
