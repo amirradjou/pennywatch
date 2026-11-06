@@ -49,7 +49,7 @@ def base_result(cells):
 def test_stability_names_the_worst_cell():
     cells = [measured_cell("qft/lightning", spread=0.006), measured_cell("qft/qjit", spread=0.02)]
     row = report.stability_row(base_result(cells))
-    assert "qft/qjit" in row and "0.020%" in row
+    assert "qft/qjit" in row and "0.0200%" in row
 
 
 def test_canary_row_counts_detections_and_names_the_weakest():
@@ -117,11 +117,18 @@ def test_busy_row_measures_the_movement_against_the_net_cost():
         "busy_check": {
             "cell": "qft/lightning",
             "spinners": 4,
-            "quiet_gross": [10_000_000_000, 10_000_000_000, 10_000_000_000],
-            "busy_gross": 10_000_180_000,
+            "quiet_runs": [1_800_000_000, 1_800_000_000, 1_800_000_000],
+            "busy_count": 1_800_180_000,
             "wall_ratio": 3.8,
         }
     }
     row = report.busy_row(result)
-    assert "0.010%" in row  # 180,000 on a net cost of 1.8 billion
+    assert "0.0100%" in row  # 180,000 of 1.8 billion
     assert "3.8 times slower" in row
+
+
+def test_imports_row_lists_each_backend_once():
+    cell = measured_cell() | {"imports": {"net": 8_300_000_000, "spread_pct": 0.00002}}
+    row = report.imports_row(base_result([cell, cell]))
+    assert row.count("lightning") == 1
+    assert "8.30B" in row

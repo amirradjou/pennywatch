@@ -26,8 +26,8 @@ def stability_row(result: dict) -> str:
     spread = worst["instructions"]["spread_pct"]
     return (
         f"{result['repeats']} runs of each of {len(cells)} cells: typically "
-        f"{_pct(typical)} apart, at worst **{_pct(spread)}** ({worst['name']}, on "
-        f"{_billions(worst['instructions']['net'])} above the imports)"
+        f"{_pct(typical, 4)} apart, at worst **{_pct(spread, 4)}** ({worst['name']}, of "
+        f"{_billions(worst['instructions']['net'])}), counted from after the imports"
     )
 
 
@@ -50,11 +50,10 @@ def busy_row(result: dict) -> str:
     if not busy:
         return "Not measured in this run"
     cell = next(c for c in result["cells"] if c["name"] == busy["cell"])
-    # Against the net cost, like every other figure: the gross count is mostly imports.
-    moved = abs(busy["busy_gross"] - median(busy["quiet_gross"]))
+    moved = abs(busy["busy_count"] - median(busy["quiet_runs"]))
     return (
         f"With {busy['spinners']} spinning processes on {busy['cell']}, counts moved "
-        f"**{_pct(moved / cell['instructions']['net'] * 100)}** while wall-clock time was "
+        f"**{_pct(moved / cell['instructions']['net'] * 100, 4)}** while wall-clock time was "
         f"**{busy['wall_ratio']:.1f} times slower**"
     )
 
@@ -100,6 +99,22 @@ def compiler_row(result: dict) -> str:
     return "Net compile cost under qjit: " + "; ".join(parts)
 
 
+def imports_row(result: dict) -> str:
+    cells = {c["backend"]: c["imports"] for c in result["cells"] if "imports" in c}
+    if not cells:
+        return "Not measured"
+    parts = [
+        f"{backend} {_billions(imports['net'])}"
+        + (
+            f" (spread {_pct(imports['spread_pct'], 4)})"
+            if imports["spread_pct"] is not None
+            else ""
+        )
+        for backend, imports in cells.items()
+    ]
+    return "Counted separately, per backend: " + ", ".join(parts)
+
+
 def builds_row(result: dict) -> str:
     available = result.get("availability")
     if not available:
@@ -141,6 +156,7 @@ def question_table(result: dict) -> str:
         ("Is wall-clock time usable instead?", wall_row(result)),
         ("Do gate counts show the compile stack?", gates_row(result)),
         ("What does compiling cost?", compiler_row(result)),
+        ("What do the imports cost?", imports_row(result)),
         ("Are dev builds installable?", builds_row(result)),
         ("Do the versions fit together?", pins_row(result)),
         ("Does the API hold still?", api_row(result)),
@@ -151,7 +167,7 @@ def question_table(result: dict) -> str:
 
 def cell_table(result: dict) -> str:
     lines = [
-        "| Cell | Net instructions | Spread | Compile | Canary | Device gates | Depth |",
+        "| Cell | Instructions | Spread | Compile | Canary | Device gates | Depth |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for cell in result["cells"]:
@@ -163,11 +179,11 @@ def cell_table(result: dict) -> str:
         canary_text = "failed"
         if canary:
             mark = "" if canary["detected"] else " MISSED"
-            canary_text = f"+{_pct(canary['delta_pct'], 2)}, {canary['noise_ratio']:.0f}×{mark}"
+            canary_text = f"{canary['delta_pct']:+.2f}%, {canary['noise_ratio']:.0f}×{mark}"
         device = cell.get("gates", {}).get("qjit") or cell.get("gates", {}).get("device") or {}
         compile_net = _billions(cell["compile"]["net"]) if "compile" in cell else ""
         lines.append(
-            f"| {cell['name']} | {instructions['net']:,} | {_pct(instructions['spread_pct'])} "
+            f"| {cell['name']} | {instructions['net']:,} | {_pct(instructions['spread_pct'], 4)} "
             f"| {compile_net} | {canary_text} | {device.get('gates', '')} "
             f"| {device.get('depth', '')} |"
         )

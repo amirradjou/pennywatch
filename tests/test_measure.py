@@ -124,7 +124,7 @@ def _cell_outcomes(cell, gross=(1000, 1001, 1000), canary=1100):
     return jobs, outcomes
 
 
-def test_summary_nets_out_the_imports_and_judges_the_canary():
+def test_summary_reports_the_cost_and_judges_the_canary():
     baselines = [Job("imports", "lightning", 18, repeat=r) for r in range(3)]
     jobs, outcomes = _cell_outcomes(QFT)
     for job in baselines:
@@ -133,11 +133,25 @@ def test_summary_nets_out_the_imports_and_judges_the_canary():
 
     summary = measure.summarise_cell(QFT, outcomes, jobs, baselines, native)
 
-    assert summary["instructions"]["net"] == 900
-    assert summary["instructions"]["spread_pct"] == pytest.approx(1 / 900 * 100)
+    assert summary["instructions"]["net"] == 1000
+    assert summary["instructions"]["spread_pct"] == pytest.approx(0.1)
+    assert summary["imports"]["net"] == 100
     assert summary["canary"]["detected"]
     assert summary["gates"] == {"device": {"gates": 700}}
     assert "compile" not in summary
+
+
+def test_summary_keeps_the_compilers_own_count_for_qjit():
+    jobs, outcomes = _cell_outcomes(QJIT)
+    for job in jobs:
+        if job.role == "compile":
+            outcomes[job] = Outcome(job, counts=Counts(python=500, compiler=70), sentinel={})
+    native = Outcome(measure.native_job(QJIT), sentinel={})
+
+    summary = measure.summarise_cell(QJIT, outcomes, jobs, [], native)
+
+    assert summary["compile"]["net"] == 570
+    assert summary["compile"]["compiler_process"] == [70, 70, 70]
 
 
 def test_a_version_other_than_the_locked_one_is_a_problem():

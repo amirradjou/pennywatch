@@ -4,30 +4,34 @@ The sentinel is written last and carries the circuit's answer. A run counts only
 the answer is right, because a crash after the imports still gives a stable count.
 
 Modes:
-  imports  the baseline subtracted from the others: imports and device creation
-  compile  also Catalyst's compile, without running (qjit only)
-  full     also runs the circuit
+  imports  counts only the imports and creating the device
+  compile  counts only Catalyst's compile (qjit only)
+  full     counts only compiling, if any, and running the circuit
   native   not for Valgrind: wall-clock time, peak memory and gate counts
 """
 
+from pennywatch.harness import instrument
+
+# First thing, before even the standard library's imports. What gets counted before this line is
+# Python's own startup, the same in every run.
+instrument.stop()
+
 import argparse
+import gc
 import json
 import os
 import resource
 import time
 from importlib import metadata
 
-import pennylane as qml
-
-from pennywatch.harness import adapter, circuits
-
 DEVICES = {"default": "default.qubit", "lightning": "lightning.qubit", "qjit": "lightning.qubit"}
+CIRCUITS = ("grover", "qft", "trotter")
 
 
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", required=True, choices=["imports", "compile", "full", "native"])
-    parser.add_argument("--circuit", required=True, choices=sorted(circuits.CIRCUITS))
+    parser.add_argument("--circuit", required=True, choices=CIRCUITS)
     parser.add_argument("--backend", required=True, choices=sorted(DEVICES))
     parser.add_argument("--wires", required=True, type=int)
     parser.add_argument("--rounds", required=True, type=int)
@@ -41,7 +45,7 @@ def floats(result) -> list[float]:
     return [float(value) for value in result]
 
 
-def native_report(args, qnode) -> dict:
+def native_report(qml, adapter, args, qnode) -> dict:
     report = {}
     started = time.perf_counter()
     function = qml.qjit(qnode) if args.backend == "qjit" else qnode
@@ -64,10 +68,25 @@ def native_report(args, qnode) -> dict:
     return report
 
 
+def settle_collector() -> None:
+    """Enter the counted region with the garbage collector in the same state every time. The imports
+    vary, which moves the collector's allocation counters, which moves where collections land inside
+    the circuit. Freezing also keeps a full collection from walking everything the imports left."""
+    gc.collect()
+    gc.freeze()
+
+
 def main(argv=None) -> None:
     args = parse_args(argv)
+    if args.mode == "imports":
+        instrument.start()
+
+    import pennylane as qml
+
+    from pennywatch.harness import adapter, circuits
+
     if args.backend == "qjit":
-        import catalyst  # noqa: F401 - qml.qjit needs it, and it belongs in the baseline
+        import catalyst  # noqa: F401 - qml.qjit needs it, and it's slow enough to measure
 
     device = qml.device(DEVICES[args.backend], wires=args.wires)
     report = {"mode": args.mode}
@@ -75,18 +94,27 @@ def main(argv=None) -> None:
     if args.mode != "imports":
         body = circuits.CIRCUITS[args.circuit](args.wires, args.rounds, args.extra_gates)
         qnode = qml.QNode(body, device)
+        if args.mode in ("compile", "full"):
+            settle_collector()
         if args.mode == "compile":
             if args.backend != "qjit":
                 raise SystemExit("compile mode is for the qjit backend")
+            instrument.start()
             # A QNode without arguments compiles when qjit is applied, not at the first call.
-            if qml.qjit(qnode).compiled_function is None:
+            compiled = qml.qjit(qnode).compiled_function
+            instrument.stop()
+            if compiled is None:
                 raise SystemExit("qjit returned without compiling")
         elif args.mode == "full":
+            instrument.start()
             function = qml.qjit(qnode) if args.backend == "qjit" else qnode
-            report["result"] = floats(function())
+            result = function()
+            instrument.stop()
+            report["result"] = floats(result)
         else:
-            report |= native_report(args, qnode)
+            report |= native_report(qml, adapter, args, qnode)
 
+    instrument.stop()
     report["versions"] = {
         package: metadata.version(package)
         for package in ("pennylane", "pennylane-lightning", "pennylane-catalyst")

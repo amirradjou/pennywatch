@@ -1,46 +1,36 @@
-"""The arithmetic: turning raw counts into a net cost, a noise figure and a canary verdict."""
+"""The arithmetic: turning raw counts into a cost, a noise figure and a canary verdict."""
 
 from statistics import median
 
-# A canary must clear both. 1% extra gates has to stand well clear of the noise, otherwise the
-# instrument couldn't tell a real 1% from jitter.
+# 1% extra gates has to stand well clear of the noise, otherwise the instrument couldn't tell a real
+# 1% from jitter.
 CANARY_MIN_NOISE_RATIO = 10.0
-# A single run has no spread to read noise from, so assume the worst the spike saw (0.023%), rounded
-# up.
-ASSUMED_NOISE_PCT = 0.05
+# A single run has no range to read noise from, so assume about twice the worst range measured.
+ASSUMED_NOISE = 1_000_000
 
 
-def spread_pct(values: list[int], base: float) -> float | None:
-    """Range of repeated runs as a percentage of `base`. None if a single run has no range."""
-    if len(values) < 2 or base == 0:
+def spread_pct(values: list[int]) -> float | None:
+    """Range of repeated runs as a percentage of their median. None if there is only one run."""
+    if len(values) < 2 or median(values) == 0:
         return None
-    return (max(values) - min(values)) / base * 100
+    return (max(values) - min(values)) / median(values) * 100
 
 
-def net(gross: list[int], imports: list[int]) -> int:
-    return int(median(gross)) - int(median(imports))
+def noise(values: list[int]) -> int:
+    return max(values) - min(values) if len(values) > 1 else ASSUMED_NOISE
 
 
-def noise(gross: list[int], imports: list[int], net_cost: int) -> int:
-    """The jitter of a net figure: it inherits the range of the runs and of the baseline."""
-    if len(gross) < 2 and len(imports) < 2:
-        return int(net_cost * ASSUMED_NOISE_PCT / 100)
-    return (max(gross) - min(gross)) + (max(imports) - min(imports))
-
-
-def canary_verdict(
-    canary_gross: int, gross: list[int], imports: list[int], extra_gates: int
-) -> dict:
+def canary_verdict(canary: int, runs: list[int], extra_gates: int) -> dict:
     """Did the circuit with 1% extra gates show up? If not, the night's numbers can't be trusted."""
-    net_cost = net(gross, imports)
-    delta = canary_gross - int(median(gross))
-    jitter = noise(gross, imports, net_cost)
+    cost = int(median(runs))
+    delta = canary - cost
+    jitter = noise(runs)
     ratio = delta / jitter if jitter else float("inf")
     return {
         "extra_gates": extra_gates,
-        "gross": canary_gross,
+        "count": canary,
         "delta": delta,
-        "delta_pct": delta / net_cost * 100 if net_cost else None,
+        "delta_pct": delta / cost * 100 if cost else None,
         "noise": jitter,
         "noise_ratio": ratio,
         "detected": delta > 0 and ratio >= CANARY_MIN_NOISE_RATIO,

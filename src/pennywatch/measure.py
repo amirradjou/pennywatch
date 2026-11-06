@@ -270,7 +270,8 @@ def canary_gates(device_gates: int) -> int:
 
 
 def plan_baselines(cells: list[Cell], repeats: int) -> list[Job]:
-    """One imports baseline per backend and size: creating the device is subtracted as well."""
+    """What the imports and creating the device cost, once per backend and size. They aren't part of
+    any other count, so this is a figure in its own right and not a baseline."""
     return [
         Job("imports", backend, wires, repeat=repeat)
         for backend, wires in sorted({(cell.backend, cell.wires) for cell in cells})
@@ -291,16 +292,25 @@ def native_job(cell: Cell, busy: bool = False) -> Job:
     return Job("native", cell.backend, cell.wires, cell.circuit, cell.rounds, busy=busy)
 
 
-def _gross(outcomes: dict[Job, Outcome], jobs: list[Job]) -> list[int]:
+def _counts(outcomes: dict[Job, Outcome], jobs: list[Job]) -> list[int]:
     return [outcomes[job].counts.total for job in jobs if outcomes[job].counts]
+
+
+def _metric(runs: list[int]) -> dict:
+    return {
+        "net": int(median(runs)),
+        "runs": runs,
+        "spread_pct": analysis.spread_pct(runs),
+        "noise": analysis.noise(runs),
+    }
 
 
 def summarise_cell(
     cell: Cell, outcomes: dict[Job, Outcome], jobs: list[Job], baselines: list[Job], native: Outcome
 ) -> dict:
     full = [job for job in jobs if job.role == "full"]
-    imports = _gross(outcomes, baselines)
-    gross = _gross(outcomes, full)
+    runs = _counts(outcomes, full)
+    imports = _counts(outcomes, baselines)
     summary = {**asdict(cell), "name": cell.name}
     if native.sentinel:
         summary |= {
@@ -314,29 +324,18 @@ def summarise_cell(
                 "bare_qnode_specs",
             )
         }
-    if not gross or not imports:
+    if imports:
+        summary["imports"] = _metric(imports)
+    if not runs:
         return summary
 
-    net_cost = analysis.net(gross, imports)
-    first = outcomes[full[0]].counts
-    summary["instructions"] = {
-        "net": net_cost,
-        "gross": gross,
-        "imports": imports,
-        "spread_pct": analysis.spread_pct(gross, net_cost),
-        "imports_spread_pct": analysis.spread_pct(imports, net_cost),
-        "noise": analysis.noise(gross, imports, net_cost),
-        "processes": asdict(first),
-    }
+    summary["instructions"] = {**_metric(runs), "processes": asdict(outcomes[full[0]].counts)}
 
     compile_jobs = [job for job in jobs if job.role == "compile"]
-    compile_runs = _gross(outcomes, compile_jobs)
+    compile_runs = _counts(outcomes, compile_jobs)
     if compile_runs:
-        compile_net = analysis.net(compile_runs, imports)
         summary["compile"] = {
-            "net": compile_net,
-            "gross": compile_runs,
-            "spread_pct": analysis.spread_pct(compile_runs, compile_net),
+            **_metric(compile_runs),
             # Exact from run to run so far, unlike the Python process around it.
             "compiler_process": [
                 outcomes[job].counts.compiler for job in compile_jobs if outcomes[job].counts
@@ -346,7 +345,7 @@ def summarise_cell(
     canary = next(job for job in jobs if job.role == "canary")
     if outcomes[canary].counts:
         summary["canary"] = analysis.canary_verdict(
-            outcomes[canary].counts.total, gross, imports, canary.extra_gates
+            outcomes[canary].counts.total, runs, canary.extra_gates
         )
     return summary
 
@@ -474,7 +473,7 @@ def _measure(runner: Runner, cells: list[Cell], repeats: int, busy_check: bool):
 def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | None:
     cell = reference_cell(cells)
     busy_full, busy_native = _busy_jobs(cell)
-    quiet = _gross(
+    quiet = _counts(
         outcomes, [job for job in outcomes if _belongs_to(job, cell) and job.role == "full"]
     )
     busy_counts = outcomes[busy_full].counts
@@ -485,8 +484,8 @@ def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | Non
     return {
         "cell": cell.name,
         "spinners": container.SPINNERS,
-        "quiet_gross": quiet,
-        "busy_gross": busy_counts.total,
+        "quiet_runs": quiet,
+        "busy_count": busy_counts.total,
         "quiet_wall_s": median(quiet_wall),
         "busy_wall_s": median(busy_wall),
         "wall_ratio": median(busy_wall) / median(quiet_wall),

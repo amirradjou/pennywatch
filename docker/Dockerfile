@@ -17,3 +17,6 @@ RUN printf '%s\n' \
     && rm -rf /var/lib/apt/lists/* /tmp/packages.txt
 
 RUN pip install --no-cache-dir --root-user-action=ignore uv==0.12.15
+
+COPY instrument.c /opt/pennywatch/instrument.c
+RUN gcc -O2 -shared -fPIC -o /opt/pennywatch/libinstrument.so /opt/pennywatch/instrument.c

@@ -10,6 +10,8 @@ def _metrics(result: dict) -> dict[tuple[str, str], float]:
             metrics[(cell["name"], "net")] = cell["instructions"]["net"]
         if "compile" in cell:
             metrics[(cell["name"], "compile")] = cell["compile"]["net"]
+        if "imports" in cell:
+            metrics[(cell["name"], "imports")] = cell["imports"]["net"]
     return metrics
 
 

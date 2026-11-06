@@ -13,7 +13,11 @@ def _z_on_every_wire(wires: int) -> list:
 
 def _canary_gates(wires: int, extra: int) -> None:
     """The canary's extra gates. RX(2 pi) is -I, a global phase, so the expected answer still holds
-    while the simulator does the full work of a non-diagonal gate."""
+    while the simulator does the full work of a non-diagonal gate.
+
+    They go first, before any entanglement, and never last: on default.qubit the final gate decides
+    the memory layout of the state, which changes what every measurement costs. Appended at the end,
+    7 gates made a run 23 million instructions cheaper and 3 made another 95 million dearer."""
     for i in range(extra):
         qml.RX(2 * math.pi, wires=i % wires)
 
@@ -25,9 +29,9 @@ def qft(wires: int, rounds: int, extra: int):
 
     def circuit():
         qml.BasisState(basis_bits(wires), wires=range(wires))
+        _canary_gates(wires, extra)
         for _ in range(4 * rounds):
             qml.QFT(wires=range(wires))
-        _canary_gates(wires, extra)
         return _z_on_every_wire(wires)
 
     return circuit
@@ -51,12 +55,12 @@ def grover(wires: int, rounds: int, extra: int):
     """Multi-controlled gates, searching for the same bit string the QFT starts from."""
 
     def circuit():
+        _canary_gates(wires, extra)
         for wire in range(wires):
             qml.Hadamard(wire)
         for _ in range(rounds):
             _flip_sign_of(basis_bits(wires))
             qml.GroverOperator(wires=range(wires))
-        _canary_gates(wires, extra)
         return _z_on_every_wire(wires)
 
     return circuit
@@ -75,8 +79,8 @@ def trotter(wires: int, rounds: int, extra: int):
         terms = [qml.PauliZ(i) @ qml.PauliZ(i + 1) for i in range(wires - 1)]
         terms += [qml.PauliX(i) for i in range(wires)]
         coeffs = [TROTTER_COUPLING] * (wires - 1) + [TROTTER_FIELD] * wires
-        qml.TrotterProduct(qml.Hamiltonian(coeffs, terms), TROTTER_TIME, n=rounds, order=2)
         _canary_gates(wires, extra)
+        qml.TrotterProduct(qml.Hamiltonian(coeffs, terms), TROTTER_TIME, n=rounds, order=2)
         return _z_on_every_wire(wires)
 
     return circuit

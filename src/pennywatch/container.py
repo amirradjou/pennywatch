@@ -7,7 +7,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 IMAGE_DIR = REPO_ROOT / "docker"
-IMAGE_INPUTS = ("Dockerfile", "packages.txt")
+IMAGE_INPUTS = ("Dockerfile", "packages.txt", "instrument.c")
 
 MEMORY_LIMIT = "3g"
 PIDS_LIMIT = 1024
