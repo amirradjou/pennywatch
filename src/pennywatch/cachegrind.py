@@ -62,3 +62,44 @@ def collect(directory: Path) -> Counts:
         command, summary = read_out_file(text)
         totals[process_kind(command)] += summary
     return Counts(**totals)
+
+
+def read_functions(text: str) -> dict[str, int]:
+    """Instructions per function in one Cachegrind output file. Its lines are `fn=<name>`, then one
+    `<line number> <count>` per source line, and a function can appear under several files."""
+    functions: dict[str, int] = {}
+    current = None
+    for line in text.splitlines():
+        if line.startswith("fn="):
+            current = line[3:]
+            functions.setdefault(current, 0)
+        elif current is not None and line[:1].isdigit():
+            functions[current] += int(line.split()[1])
+    return functions
+
+
+def collect_functions(directory: Path) -> dict[str, int]:
+    """Instructions per function, summed over the processes of one run. The link step is left out,
+    as it is from the total."""
+    totals: dict[str, int] = {}
+    for path in sorted(directory.glob("cachegrind.*")):
+        text = untrusted.read_file(path, untrusted.CACHEGRIND_LIMIT).decode(errors="replace")
+        command, _ = read_out_file(text)
+        if process_kind(command) == "linker":
+            continue
+        for name, count in read_functions(text).items():
+            totals[name] = totals.get(name, 0) + count
+    return totals
+
+
+def function_changes(
+    before: dict[str, int], after: dict[str, int], top: int = 20
+) -> list[tuple[str, int, int]]:
+    """The functions that moved most between two runs, largest movement first."""
+    moved = [
+        (name, before.get(name, 0), after.get(name, 0))
+        for name in before.keys() | after.keys()
+        if before.get(name, 0) != after.get(name, 0)
+    ]
+    moved.sort(key=lambda row: (-abs(row[2] - row[1]), row[0]))
+    return moved[:top]

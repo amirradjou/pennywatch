@@ -151,7 +151,7 @@ def test_one_exploding_job_does_not_lose_the_others():
     assert outcomes[jobs[2]].counts == Counts(python=1)
 
 
-def _cell_outcomes(cell, gross=(1000, 1001, 1000), canary=1100):
+def _cell_outcomes(cell, gross=(1000, 1001, 1000), canary=10_000_000):
     jobs = measure.plan_cell_jobs(cell, repeats=len(gross), device_gates=700)
     outcomes = {}
     for job in jobs:

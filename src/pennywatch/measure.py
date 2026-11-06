@@ -359,7 +359,7 @@ def summarise_cell(
     canary = next(job for job in jobs if job.role == "canary")
     if outcomes[canary].counts:
         summary["canary"] = analysis.canary_verdict(
-            outcomes[canary].counts.total, runs, canary.extra_gates
+            outcomes[canary].counts.total, runs, canary.extra_gates, cell.backend
         )
     return summary
 

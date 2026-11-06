@@ -1,5 +1,6 @@
 import pytest
 
+from pennywatch import cachegrind
 from pennywatch.cachegrind import Counts, collect, process_kind, read_out_file
 
 OUT_FILE = """desc: Trigger: Program termination
@@ -62,3 +63,44 @@ def test_collect_sums_every_process_by_kind(tmp_path):
 def test_collect_refuses_an_empty_run(tmp_path):
     with pytest.raises(ValueError, match="no Cachegrind output"):
         collect(tmp_path)
+
+
+FUNCTIONS = """cmd: /stack/bin/python -m x
+events: Ir
+fl=a.c
+fn=first
+10 5
+11 7
+fn=second
+3 100
+fl=b.c
+fn=first
+1 1
+summary: 113
+"""
+
+
+def test_functions_are_summed_across_source_lines_and_files():
+    assert cachegrind.read_functions(FUNCTIONS) == {"first": 13, "second": 100}
+
+
+def test_counts_are_summed_over_processes_but_not_the_link_step(tmp_path):
+    (tmp_path / "cachegrind.1").write_text(FUNCTIONS)
+    (tmp_path / "cachegrind.2").write_text(FUNCTIONS.replace("/stack/bin/python", "catalyst"))
+    (tmp_path / "cachegrind.3").write_text(FUNCTIONS.replace("/stack/bin/python", "ld"))
+    assert cachegrind.collect_functions(tmp_path) == {"first": 26, "second": 200}
+
+
+def test_function_changes_come_largest_first_and_leave_out_what_did_not_move():
+    before = {"same": 5, "small": 10, "big": 100, "gone": 7}
+    after = {"same": 5, "small": 11, "big": 50, "new": 3}
+    assert cachegrind.function_changes(before, after) == [
+        ("big", 100, 50),
+        ("gone", 7, 0),
+        ("new", 0, 3),
+        ("small", 10, 11),
+    ]
+
+
+def test_function_changes_stop_at_the_limit():
+    assert len(cachegrind.function_changes({"a": 1, "b": 2}, {}, top=1)) == 1
