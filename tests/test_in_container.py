@@ -40,7 +40,9 @@ def test_every_small_circuit_gives_the_right_answer_on_every_backend(runner):
 
 def test_the_canary_keeps_the_expected_answer(runner):
     cell = SUITES["smoke"][0]
-    job = measure.Job("native", cell.backend, cell.wires, cell.circuit, cell.rounds, extra_gates=5)
+    job = measure.Job(
+        "native", cell.backend, cell.wires, cell.circuit, cell.rounds, extra_gates=5, repeat=7
+    )
     outcome = runner.run_all([job])[job]
     assert measure.validate_outcome(outcome) is None
     assert outcome.sentinel["gates"]["device"]["gates"] > 5
