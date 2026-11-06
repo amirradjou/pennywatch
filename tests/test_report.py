@@ -110,3 +110,18 @@ def test_wall_row_draws_no_conclusion_from_a_steady_clock():
     cell = measured_cell()
     cell["wall_s"] = [9.0, 1.0, 1.001]
     assert "invisible" not in report.wall_row(base_result([cell]))
+
+
+def test_busy_row_measures_the_movement_against_the_net_cost():
+    result = base_result([measured_cell()]) | {
+        "busy_check": {
+            "cell": "qft/lightning",
+            "spinners": 4,
+            "quiet_gross": [10_000_000_000, 10_000_000_000, 10_000_000_000],
+            "busy_gross": 10_000_180_000,
+            "wall_ratio": 3.8,
+        }
+    }
+    row = report.busy_row(result)
+    assert "0.010%" in row  # 180,000 on a net cost of 1.8 billion
+    assert "3.8 times slower" in row

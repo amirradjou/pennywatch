@@ -34,6 +34,7 @@ SUITES = {
     # For checking the plumbing in seconds. Its numbers mean nothing.
     "smoke": [
         *_on_every_backend("qft", wires=6, rounds=1),
+        *_on_every_backend("grover", wires=6, rounds=2),
         *_on_every_backend("trotter", wires=6, rounds=2),
     ],
 }

@@ -49,9 +49,12 @@ def busy_row(result: dict) -> str:
     busy = result.get("busy_check")
     if not busy:
         return "Not measured in this run"
+    cell = next(c for c in result["cells"] if c["name"] == busy["cell"])
+    # Against the net cost, like every other figure: the gross count is mostly imports.
+    moved = abs(busy["busy_gross"] - median(busy["quiet_gross"]))
     return (
         f"With {busy['spinners']} spinning processes on {busy['cell']}, counts moved "
-        f"**{_pct(busy['counts_moved_pct'])}** while wall-clock time was "
+        f"**{_pct(moved / cell['instructions']['net'] * 100)}** while wall-clock time was "
         f"**{busy['wall_ratio']:.1f} times slower**"
     )
 

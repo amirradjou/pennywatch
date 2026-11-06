@@ -31,3 +31,5 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["tests"]
+addopts = "-m 'not docker'"
+markers = ["docker: needs Docker and the pinned image, and takes minutes"]
