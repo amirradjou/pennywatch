@@ -75,7 +75,7 @@ This re-measures the cell on both builds, then lists what merged between them, m
 | Workflow | Runs | Does |
 |---|---|---|
 | CI | every pull request | Lint and tests |
-| Measure | by hand, or a push to `measure/**` | The suite on several runners at once, to see how far they agree |
+| Measure | by hand, or a push to `measure/spread-*` | The suite on several runners at once, to see how far they agree |
 | History | by hand, or a push to `measure/history` | The last eight stable releases |
 | Nightly | 08:23 UTC, or a push to `measure/nightly` | The newest unmeasured dev build, published to the `data` branch |
 | Pages | after Nightly | The public page, once the repo is public |

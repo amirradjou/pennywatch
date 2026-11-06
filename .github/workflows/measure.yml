@@ -15,10 +15,10 @@ on:
       suite:
         description: Which suite
         default: full
-  # A workflow can't be dispatched until it's on the default branch, so pushing to measure/* also
-  # starts it.
+  # A workflow can't be dispatched until it's on the default branch, so pushing here also starts it.
+  # Not measure/**, which would also catch the branches that start History and Nightly.
   push:
-    branches: ["measure/**"]
+    branches: ["measure/spread-**"]
 
 # This runs nightly code from TestPyPI: a read-only token, no secrets, and the code itself runs in a
 # container with no network. Actions are pinned by SHA for the same reason.

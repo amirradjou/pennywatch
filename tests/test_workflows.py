@@ -1,6 +1,7 @@
 """The checks on workflow files that a wrong edit would otherwise only reveal at night."""
 
 import re
+from fnmatch import fnmatch
 from pathlib import Path
 
 import pytest
@@ -34,3 +35,16 @@ def test_only_publish_and_pages_may_write():
     for path in WORKFLOWS:
         if path.name != "nightly.yml":
             assert "contents: write" not in path.read_text(), path.name
+
+
+def test_a_branch_that_starts_one_measuring_workflow_starts_no_other():
+    triggers = {}
+    for path in WORKFLOWS:
+        match = re.search(r'branches: \["(measure/[^"]+)"\]', path.read_text())
+        if match:
+            triggers[path.name] = match[1]
+    assert set(triggers) == {"measure.yml", "history.yml", "nightly.yml"}
+    for name, pattern in triggers.items():
+        for other, branch in triggers.items():
+            if other != name:
+                assert not fnmatch(branch, pattern.replace("**", "*")), (name, other)
