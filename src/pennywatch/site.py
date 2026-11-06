@@ -113,6 +113,26 @@ def _track(results: list[dict]) -> dict:
     return {"builds": [build_info(result) for result in ordered], "panels": panels(ordered)}
 
 
+def explanation_entry(saved: dict) -> tuple[str, dict]:
+    """A saved explanation, as the key of the step it explains and what the page says about it. The
+    page only links to GitHub, and only prints these as text."""
+    key = f"{saved['before']['stack']}..{saved['after']['stack']}/{saved['cell']}/{saved['metric']}"
+    bisect = saved.get("bisect") or {}
+    if bisect.get("found") and bisect.get("subject"):
+        return key, {"text": str(bisect["subject"])[:120], "url": bisect.get("url")}
+    if bisect.get("verdict"):
+        return key, {"text": str(bisect["verdict"])[:160], "url": None}
+    count = sum(len(changes) for changes in (saved.get("candidates") or {}).values())
+    return key, {"text": f"{count} candidates, not narrowed further", "url": None}
+
+
+def load_explanations(directory: Path | None) -> dict:
+    if directory is None or not directory.is_dir():
+        return {}
+    entries = (explanation_entry(json.loads(path.read_text())) for path in directory.glob("*.json"))
+    return dict(entries)
+
+
 def step_rows(steps: list[history.Step], explanations: dict | None = None) -> list[dict]:
     explanations = explanations or {}
     rows = []

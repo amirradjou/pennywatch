@@ -94,6 +94,7 @@ def _parser() -> argparse.ArgumentParser:
     page.add_argument("--stable", type=Path, default=Path("results/stable"))
     page.add_argument("--second-set", type=Path, default=Path("results/stable-repeat"))
     page.add_argument("--data", type=Path, help="the data branch's checkout, with nightly results")
+    page.add_argument("--explanations", type=Path, default=Path("results/explanations"))
     page.add_argument("--out", type=Path, default=Path("site"))
     return parser
 
@@ -181,7 +182,8 @@ def site_command(args: argparse.Namespace) -> int:
         history.find_steps(stable) + history.find_steps(nightly),
         history.load_results(_json_files(args.second_set)),
     )
-    print(site.write(site.page_data(stable, nightly, steps, gaps), args.out))
+    explanations = site.load_explanations(args.explanations)
+    print(site.write(site.page_data(stable, nightly, steps, gaps, explanations), args.out))
     return 0
 
 

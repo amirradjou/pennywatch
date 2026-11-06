@@ -113,3 +113,49 @@ def test_the_page_uses_only_inline_code():
     assert not re.search(r"<link[^>]+stylesheet", html)
     assert "innerHTML" not in html
     assert "/*DATA*/" not in html
+
+
+def _saved(**extra):
+    return {
+        "cell": "qft/qjit",
+        "metric": "instructions",
+        "before": {"stack": "catalyst-0.9.0"},
+        "after": {"stack": "catalyst-0.10.0"},
+        "candidates": {"pennylane": [{}, {}], "pennylane-catalyst": [{}]},
+        **extra,
+    }
+
+
+KEY = "catalyst-0.9.0..catalyst-0.10.0/qft/qjit/instructions"
+
+
+def test_a_bisected_change_links_to_its_pull_request():
+    bisect = {"found": "abc", "subject": "Fix adjoint (#7)", "url": "https://github.com/x/y/pull/7"}
+    assert site.explanation_entry(_saved(bisect=bisect)) == (
+        KEY,
+        {"text": "Fix adjoint (#7)", "url": "https://github.com/x/y/pull/7"},
+    )
+
+
+def test_a_bisect_that_stopped_says_why():
+    entry = site.explanation_entry(_saved(bisect={"verdict": "the cause is elsewhere"}))[1]
+    assert entry == {"text": "the cause is elsewhere", "url": None}
+
+
+def test_with_no_bisect_it_says_how_many_candidates_there_are():
+    entry = site.explanation_entry(_saved())[1]
+    assert entry["text"] == "3 candidates, not narrowed further"
+
+
+def test_saved_explanations_are_matched_to_their_steps(tmp_path):
+    (tmp_path / "a.json").write_text(json.dumps(_saved()))
+    explanations = site.load_explanations(tmp_path)
+    steps = history.find_steps([result("0.9.0", 100), result("0.10.0", 110)])
+    rows = site.step_rows(steps, explanations)
+    row = next(r for r in rows if r["cell"] == "qft/qjit" and r["metric"] == "instructions")
+    assert row["explanation"]["text"] == "3 candidates, not narrowed further"
+
+
+def test_no_directory_of_explanations_is_no_explanations(tmp_path):
+    assert site.load_explanations(tmp_path / "missing") == {}
+    assert site.load_explanations(None) == {}
