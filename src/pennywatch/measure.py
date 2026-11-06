@@ -347,6 +347,8 @@ def run_suite(
     stack_dir = stacks.install(stack, image)
 
     started = datetime.now(UTC)
+    # Read now, because the harness is copied now: edits during a long run don't affect it.
+    provenance = {**git_revision(), "harness_sha256": harness_sha256()}
     workspace = Path(tempfile.mkdtemp(prefix="run-", dir=stacks.cache_dir()))
     workspace.chmod(0o755)
     try:
@@ -379,7 +381,7 @@ def run_suite(
         "schema": SCHEMA,
         "started_at": started.isoformat(timespec="seconds"),
         "finished_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "pennywatch": {**git_revision(), "harness_sha256": harness_sha256()},
+        "pennywatch": provenance,
         "image": {"tag": image, **container.tool_versions(image)},
         "host": host_facts(),
         "stack": {
