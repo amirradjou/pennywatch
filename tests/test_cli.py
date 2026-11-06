@@ -73,3 +73,29 @@ def test_a_build_that_cannot_be_measured_is_saved_as_rejected_with_the_reason(
     assert saved["cells"] == []
     assert saved["problems"] == ["not on the index"]
     assert "not on the index" in capsys.readouterr().out
+
+
+def _with_stack(tmp_path, version, net):
+    path = tmp_path / f"catalyst-{version}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "valid": True,
+                "stack": {"id": f"catalyst-{version}", "pennylane-catalyst": version},
+                "cells": [{"name": "qft/qjit", "instructions": {"net": net}}],
+            }
+        )
+    )
+    return str(path)
+
+
+def test_steps_can_be_limited_to_the_newest_two_builds(tmp_path, capsys):
+    paths = [
+        _with_stack(tmp_path, "0.16.0.dev1", 100),
+        _with_stack(tmp_path, "0.16.0.dev2", 200),
+        _with_stack(tmp_path, "0.16.0.dev3", 200),
+    ]
+    assert cli.main(["steps", *paths]) == 0
+    assert "+100.00%" in capsys.readouterr().out
+    assert cli.main(["steps", "--latest", *paths]) == 0
+    assert "No steps." in capsys.readouterr().out

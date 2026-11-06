@@ -50,7 +50,8 @@ def busy_row(result: dict) -> str:
     if not busy:
         return "Not measured in this run"
     cell = next(c for c in result["cells"] if c["name"] == busy["cell"])
-    moved = abs(busy["busy_count"] - median(busy["quiet_runs"]))
+    # The busy run uses the first layout, so it's compared with the quiet run on that layout.
+    moved = abs(busy["busy_count"] - busy["quiet_runs"][0])
     return (
         f"With {busy['spinners']} spinning processes on {busy['cell']}, counts moved "
         f"**{_pct(moved / cell['instructions']['net'] * 100, 4)}** while wall-clock time was "

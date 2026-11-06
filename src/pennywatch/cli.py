@@ -69,6 +69,7 @@ def _parser() -> argparse.ArgumentParser:
         "--second-set", type=Path, nargs="*", default=[], help="separate results to confirm against"
     )
     steps.add_argument("--series", action="store_true", help="also print each metric's history")
+    steps.add_argument("--latest", action="store_true", help="only the newest two builds")
 
     waiting = commands.add_parser("pending", help="which dev builds to measure next, as JSON")
     waiting.add_argument("--data", type=Path, required=True, help="where published results live")
@@ -153,6 +154,8 @@ def compare_command(args: argparse.Namespace) -> int:
 
 def steps_command(args: argparse.Namespace) -> int:
     results = history.load_results(args.results)
+    if args.latest:
+        results = history.in_build_order(results)[-2:]
     found = history.find_steps(results)
     if args.second_set:
         found = history.confirm_steps(found, history.load_results(args.second_set))

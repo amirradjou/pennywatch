@@ -103,6 +103,13 @@ jobs:
           pattern: measured-*
       - name: Check and store
         run: uv run pennywatch accept downloaded --into data | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Say what changed
+        run: |
+          shopt -s nullglob
+          results=(data/nightly/catalyst-*.json)
+          if (( ${#results[@]} >= 2 )); then
+            uv run pennywatch steps --latest "${results[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Push
         working-directory: data
         run: |
