@@ -25,6 +25,8 @@ from pennywatch.suite import BACKENDS, Cell
 SCHEMA = 2
 JOB_TIMEOUT_S = 3600
 CANARY_FRACTION = 0.01
+# On a small circuit 1% rounds to a gate or two, which the noise can hide.
+CANARY_MIN_GATES = 3
 TIMING_REPEATS = 10
 OUTPUT_TAIL_BYTES = 4096
 HARNESS_DIR = Path(__file__).parent / "harness"
@@ -285,20 +287,17 @@ def host_facts() -> dict:
 
 
 def canary_gates(device_gates: int) -> int:
-    return max(1, round(device_gates * CANARY_FRACTION))
+    return max(CANARY_MIN_GATES, round(device_gates * CANARY_FRACTION))
 
 
-def plan_baselines(cells: list[Cell], repeats: int) -> list[Job]:
+def plan_baselines(cells: list[Cell]) -> list[Job]:
     """What the imports and creating the device cost, per backend, at the suite's largest size.
-    They aren't part of any other count, so this is a figure in its own right and not a baseline."""
+    They aren't part of any other count, so this is a figure in its own right and not a baseline.
+    One run each: across layouts they moved 0.05% at most, and they're slow to repeat."""
     widest: dict[str, int] = {}
     for cell in cells:
         widest[cell.backend] = max(widest.get(cell.backend, 0), cell.wires)
-    return [
-        Job("imports", backend, wires, repeat=repeat)
-        for backend, wires in sorted(widest.items())
-        for repeat in range(repeats)
-    ]
+    return [Job("imports", backend, wires) for backend, wires in sorted(widest.items())]
 
 
 def plan_memory(wires: int | None, repeats: int) -> list[Job]:
@@ -527,7 +526,7 @@ def _measure(
         native_jobs.append(native_job(reference_cell(cells), busy=True))
     outcomes = runner.run_all(native_jobs)
 
-    jobs = plan_baselines(cells, repeats)
+    jobs = plan_baselines(cells)
     for cell in cells:
         sentinel = outcomes[native_job(cell)].sentinel
         device_gates = sentinel["gates"]["device"]["gates"] if sentinel else 100

@@ -12,6 +12,8 @@ from dataclasses import asdict, dataclass
 from itertools import pairwise
 from pathlib import Path
 
+from pennywatch.untrusted import clean_name
+
 COUNTED_STEP_PCT = 0.5
 # Set from measured noise: see the README's limits.
 MEMORY_STEP_PCT = 1.0
@@ -20,12 +22,12 @@ MEMORY_STEP_PCT = 1.0
 CONFIRM_TOLERANCE_POINTS = 0.25
 CONFIRM_TOLERANCE_SHARE = 0.25
 
-_VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:[.-]dev(\d+))?$")
+_VERSION = re.compile(r"(\d+)\.(\d+)\.(\d+)(?:[.-]dev(\d+))?")
 
 
 def version_key(version: str) -> tuple[int, int, int, float]:
     """Sorts by release, with a dev build before the release it leads to."""
-    match = _VERSION.match(version)
+    match = _VERSION.fullmatch(version)
     if match is None:
         raise ValueError(f"not a version this project knows: {version}")
     major, minor, patch, dev = match.groups()
@@ -200,8 +202,9 @@ def render_steps(steps: list[Step]) -> str:
         "|---|---|---|---:|---:|---:|---|",
     ]
     for step in steps:
+        between = f"{clean_name(step.before_stack)} → {clean_name(step.after_stack)}"
         lines.append(
-            f"| {step.before_stack} → {step.after_stack} | {step.cell} | {step.metric} "
+            f"| {between} | {clean_name(step.cell)} | {clean_name(step.metric)} "
             f"| {_number(step.before)} | {_number(step.after)} | {_change(step)} "
             f"| {_status(step)} |"
         )
@@ -213,10 +216,10 @@ def render_series(results: list[dict], metric: str = "instructions") -> str:
     ordered = in_build_order(results)
     tables = [metrics_of(result) for result in ordered]
     cells = sorted({cell for table in tables for (cell, name) in table if name == metric})
-    versions = " | ".join(result["stack"]["pennylane-catalyst"] for result in ordered)
+    versions = " | ".join(clean_name(result["stack"]["pennylane-catalyst"]) for result in ordered)
     lines = [f"| {metric} | {versions} |", "|---|" + "---:|" * len(ordered)]
     for cell in cells:
         values = (table.get((cell, metric)) for table in tables)
         row = " | ".join("" if value is None else f"{value / 1e9:.3f}B" for value in values)
-        lines.append(f"| {cell} | {row} |")
+        lines.append(f"| {clean_name(cell)} | {row} |")
     return "\n".join(lines) + "\n"

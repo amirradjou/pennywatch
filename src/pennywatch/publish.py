@@ -13,18 +13,20 @@ import tomllib
 from pathlib import Path
 from urllib.parse import urlparse
 
-from pennywatch import history, stacks
+from pennywatch import history, stacks, untrusted
+from pennywatch.suite import BACKENDS
 
 MAX_RESULT_BYTES = 2 * 1024 * 1024
 MAX_LOCK_BYTES = 2 * 1024 * 1024
 MAX_STRING = 2000
 MAX_DEPTH = 8
 # Only the three packages this project watches may come from TestPyPI.
+GATE_LEVELS = ("top", "device", "qjit")
 PYPI_FILES = "files.pythonhosted.org"
 TESTPYPI_FILES = "test-files.pythonhosted.org"
 
-_CELL_NAME = re.compile(r"^[a-z]+/[a-z]+$")
-_PRINTABLE = re.compile(r"^[\x20-\x7e\n→]*$")
+_CELL_NAME = re.compile(r"[a-z]+/[a-z]+")
+_PRINTABLE = re.compile(r"[\x20-\x7e\n\u2192]*")
 
 
 class Rejected(ValueError):
@@ -46,7 +48,7 @@ def _check_values(value, depth: int = 0) -> None:
         for item in value:
             _check_values(item, depth + 1)
     elif isinstance(value, str):
-        if len(value) > MAX_STRING or not _PRINTABLE.match(value):
+        if len(value) > MAX_STRING or not _PRINTABLE.fullmatch(value):
             raise Rejected("a string is too long or holds unexpected characters")
     elif isinstance(value, float):
         if not math.isfinite(value):
@@ -60,17 +62,32 @@ def _is_count(value) -> bool:
 
 
 def _check_cell(cell: dict) -> None:
-    if not isinstance(cell, dict) or not _CELL_NAME.match(str(cell.get("name"))):
+    if not isinstance(cell, dict) or not _CELL_NAME.fullmatch(str(cell.get("name"))):
         raise Rejected("a cell has no usable name")
     for metric in ("instructions", "compile", "imports"):
         if metric in cell and not _is_count(cell[metric].get("net")):
             raise Rejected(f"{cell['name']}: {metric} isn't a count")
     for level, counts in (cell.get("gates") or {}).items():
+        if level not in GATE_LEVELS:
+            raise Rejected(f"{cell['name']}: gates at an unknown level")
         if not isinstance(counts, dict):
             raise Rejected(f"{cell['name']}: gates at {level} aren't a table")
         for field in ("gates", "depth"):
             if field in counts and not _is_count(counts[field]):
                 raise Rejected(f"{cell['name']}: {field} at {level} isn't a count")
+
+
+def _check_memory(entries) -> None:
+    if not isinstance(entries, list):
+        raise Rejected("memory isn't a list")
+    for entry in entries:
+        if not isinstance(entry, dict) or entry.get("backend") not in BACKENDS:
+            raise Rejected("memory for an unknown backend")
+        if not _is_count(entry.get("wires")):
+            raise Rejected("memory without a size")
+        peak = entry.get("max_rss_kb")
+        if not isinstance(peak, dict) or not _is_count(peak.get("net")):
+            raise Rejected("memory without a count")
 
 
 def parse_result(data: bytes) -> dict:
@@ -102,6 +119,7 @@ def parse_result(data: bytes) -> dict:
         raise Rejected("valid, but with nothing in it")
     for cell in result["cells"]:
         _check_cell(cell)
+    _check_memory(result.get("memory") or [])
     return result
 
 
@@ -142,8 +160,15 @@ def done_builds(data_dir: Path) -> set[str]:
     }
 
 
-def accept(artifacts: Path, data_dir: Path) -> list[str]:
-    """Store every acceptable result under `artifacts` in `data_dir`, and say what happened."""
+def accept(artifacts: Path, data_dir: Path, planned: set[str] | None = None) -> list[str]:
+    """Store every acceptable result under `artifacts` in `data_dir`, and say what happened. With
+    `planned`, a result for any other build is refused, so that one artifact can't decide which
+    builds count as the newest. The lines go to the job's log, where a line starting with `::` is a
+    command to the runner, so each one starts with something fixed and has no line breaks."""
+    return [f"- {untrusted.clean_name(line)}" for line in _accept(artifacts, data_dir, planned)]
+
+
+def _accept(artifacts: Path, data_dir: Path, planned: set[str] | None) -> list[str]:
     outcomes = []
     for path in sorted(artifacts.rglob("catalyst-*.json")):
         if path.is_symlink() or not path.is_file():
@@ -155,6 +180,9 @@ def accept(artifacts: Path, data_dir: Path) -> list[str]:
             outcomes.append(f"{path.name}: refused, {error}")
             continue
         version = result["stack"]["pennylane-catalyst"]
+        if planned is not None and version not in planned:
+            outcomes.append(f"{version}: refused, not one of the builds planned for this run")
+            continue
         name = f"catalyst-{version}"
         lock_problem = None
         lock_data = None

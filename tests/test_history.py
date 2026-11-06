@@ -37,9 +37,10 @@ def test_dev_builds_sort_before_their_release_and_numbers_sort_as_numbers():
     ]
 
 
-def test_an_unknown_version_is_an_error_and_not_a_guess():
+@pytest.mark.parametrize("version", ["latest", "0.15.0\n", "0.15.0; rm -rf", "../0.15.0"])
+def test_an_unknown_version_is_an_error_and_not_a_guess(version):
     with pytest.raises(ValueError, match="not a version"):
-        version_key("latest")
+        version_key(version)
 
 
 @pytest.mark.parametrize(
@@ -164,6 +165,13 @@ def test_the_steps_table_gives_the_numbers_and_the_status():
     assert "| catalyst-0.8.1 → catalyst-0.9.0 | qft/default | instructions |" in text
     assert "+10.00%" in text
     assert "not re-measured" in text
+
+
+def test_the_table_cannot_carry_a_hostile_name():
+    step = history.Step("a", "b", "qft/qjit", "gates.x|y\n::set-output", 1, 2, 100.0, ())
+    text = history.render_steps([step])
+    assert "x/y?::set-output" in text
+    assert len(text.splitlines()) == 3
 
 
 def test_no_steps_says_so():

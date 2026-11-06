@@ -102,7 +102,11 @@ jobs:
           path: downloaded
           pattern: measured-*
       - name: Check and store
-        run: uv run pennywatch accept downloaded --into data | tee -a "$GITHUB_STEP_SUMMARY"
+        env:
+          PLANNED: ${{ needs.plan.outputs.versions }}
+        run: >-
+          uv run pennywatch accept downloaded --into data --planned "$PLANNED"
+          | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Say what changed
         run: |
           shopt -s nullglob

@@ -86,7 +86,8 @@ def profile_report(adapter, qml, args, circuit, program, seed) -> dict:
 
     calls: dict[str, int] = {}
     for (path, _, name), (_, total, _, _, _) in pstats.Stats(profiler).stats.items():
-        short = path.split("site-packages/", 1)[-1]
+        # An overlaid package is at /overlay, and has to match the same file when it's installed.
+        short = path.split("site-packages/", 1)[-1].removeprefix("/overlay/")
         if total >= MIN_PROFILED_CALLS:
             # Built-ins are named with their address, which differs in every process.
             key = re.sub(r"0x[0-9a-f]+", "0x", f"{short}:{name}")

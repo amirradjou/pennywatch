@@ -137,8 +137,9 @@ def qpe(wires: int, rounds: int, extra: int):
 
 
 def variational(wires: int, rounds: int, extra: int):
-    """An Ising energy over layers of RY, RZ and a CNOT ladder, differentiated by the adjoint
-    method. The gradient is the point, so this is the only circuit that takes arguments."""
+    """A two-wire correlation over layers of RY, RZ and a CNOT ladder, differentiated by the adjoint
+    method. The gradient is the point, so this is the only circuit that takes arguments. Not an
+    Ising energy: default.qubit builds a dense matrix for a Hamiltonian here, 1 TiB at 18 wires."""
 
     def circuit(angles):
         _canary_gates(wires, extra)
@@ -148,7 +149,7 @@ def variational(wires: int, rounds: int, extra: int):
                 qml.RZ(angles[layer][wire][1], wires=wire)
             for wire in range(wires - 1):
                 qml.CNOT(wires=[wire, wire + 1])
-        return qml.expval(_ising_hamiltonian(wires))
+        return qml.expval(qml.PauliZ(0) @ qml.PauliZ(wires - 1))
 
     def first_layer_ry(gradient) -> list[float]:
         return _floats(np.asarray(gradient)[0, :, 0])

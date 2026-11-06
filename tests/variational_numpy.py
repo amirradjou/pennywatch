@@ -6,9 +6,6 @@ against the parameter-shift rule, which needs nothing but the forward simulation
 
 import numpy as np
 
-COUPLING = 1.0
-FIELD = 0.7
-
 Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
 
 
@@ -44,17 +41,10 @@ def _cnot(state: np.ndarray, control: int, target: int) -> np.ndarray:
     return result
 
 
-def _energy_gradient(state: np.ndarray) -> np.ndarray:
-    """H |state> for the Ising chain, whose <state|H|state> the circuit measures."""
-    wires = state.ndim
-    result = np.zeros_like(state)
+def _observable(state: np.ndarray) -> np.ndarray:
+    """Z on the first wire and Z on the last, applied to a state."""
     indices = np.indices(state.shape, sparse=True)
-    for wire in range(wires - 1):
-        parity = (indices[wire] + indices[wire + 1]) % 2
-        result += COUPLING * (1 - 2 * parity) * state
-    for wire in range(wires):
-        result += FIELD * np.flip(state, axis=wire)
-    return result
+    return state * (1 - 2 * indices[0]) * (1 - 2 * indices[-1])
 
 
 def _gates(angles: list) -> list[tuple]:
@@ -88,21 +78,21 @@ def _initial(wires: int) -> np.ndarray:
     return state
 
 
-def energy(angles: list) -> float:
+def expectation(angles: list) -> float:
     state = _initial(len(angles[0]))
     for gate in _gates(angles):
         state = _forward(state, gate)
-    return float(np.real(np.vdot(state, _energy_gradient(state))))
+    return float(np.real(np.vdot(state, _observable(state))))
 
 
 def first_layer_ry_gradient(angles: list) -> list[float]:
-    """dE/d(RY angle) for each wire of the first layer, by one forward and one reverse sweep."""
+    """d<O>/d(RY angle) for each wire of the first layer, by one forward and one reverse sweep."""
     wires = len(angles[0])
     gates = _gates(angles)
     state = _initial(wires)
     for gate in gates:
         state = _forward(state, gate)
-    bra = _energy_gradient(state)
+    bra = _observable(state)
     gradient = {}
     for position in range(len(gates) - 1, -1, -1):
         gate = gates[position]
@@ -121,8 +111,8 @@ def parameter_shift_gradient(angles: list) -> list[float]:
     for wire in range(len(angles[0])):
         shifted = [[list(pair) for pair in layer] for layer in angles]
         shifted[0][wire][0] += np.pi / 2
-        plus = energy(shifted)
+        plus = expectation(shifted)
         shifted[0][wire][0] -= np.pi
-        minus = energy(shifted)
+        minus = expectation(shifted)
         values.append((plus - minus) / 2)
     return values

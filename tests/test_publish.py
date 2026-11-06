@@ -67,6 +67,20 @@ def test_a_good_result_passes_unchanged():
         (encode(good_result(cells=[{"name": "a/b", "gates": {"top": {"gates": 1.5}}}])), "count"),
         (encode(good_result(cells=[{"name": "a/b", "gates": {"top": 1}}])), "table"),
         (encode(good_result(note="\x1b[31mred")), "unexpected characters"),
+        (encode(good_result(cells=[{"name": "a/b\n::set-output"}])), "name"),
+        (
+            encode(good_result(cells=[{"name": "a/b", "gates": {"x|y": {"gates": 1}}}])),
+            "unknown level",
+        ),
+        (encode(good_result(memory=[{"backend": "evil", "wires": 1}])), "unknown backend"),
+        (encode(good_result(memory=[{"backend": "qjit"}])), "without a size"),
+        (
+            encode(
+                good_result(memory=[{"backend": "qjit", "wires": 1, "max_rss_kb": {"net": "9"}}])
+            ),
+            "without a count",
+        ),
+        (encode(good_result(memory="x")), "isn't a list"),
         (encode(good_result(note="x" * 3000)), "too long"),
     ],
 )
@@ -130,7 +144,7 @@ def artifact(tmp_path, result, lock=GOOD_LOCK, name=None):
 def test_accepting_writes_the_result_and_its_lock(tmp_path):
     data = tmp_path / "data"
     outcomes = accept(artifact(tmp_path, good_result()), data)
-    assert outcomes == [f"{VERSION}: accepted"]
+    assert outcomes == [f"- {VERSION}: accepted"]
     assert json.loads((data / "nightly" / f"catalyst-{VERSION}.json").read_text()) == good_result()
     assert (data / "stacks" / f"catalyst-{VERSION}.pylock.toml").read_bytes() == GOOD_LOCK
 
@@ -154,7 +168,7 @@ def test_a_valid_result_with_a_bad_lock_is_only_a_rejection(tmp_path):
     data = tmp_path / "data"
     bad = b'[[packages]]\nname = "numpy"\nwheels = [{url = "https://evil.example/n.whl"}]'
     outcomes = accept(artifact(tmp_path, good_result(), lock=bad), data)
-    assert outcomes == [f"{VERSION}: recorded as rejected"]
+    assert outcomes == [f"- {VERSION}: recorded as rejected"]
     saved = json.loads((data / "nightly" / "rejected" / f"catalyst-{VERSION}.json").read_text())
     assert "evil.example" in saved["problems"][0]
     assert saved["valid"] is False
@@ -163,7 +177,7 @@ def test_a_valid_result_with_a_bad_lock_is_only_a_rejection(tmp_path):
 def test_a_valid_result_with_no_lock_is_only_a_rejection(tmp_path):
     data = tmp_path / "data"
     assert accept(artifact(tmp_path, good_result(), lock=None), data) == [
-        f"{VERSION}: recorded as rejected"
+        f"- {VERSION}: recorded as rejected"
     ]
 
 
@@ -185,6 +199,27 @@ def test_a_symlink_is_never_followed(tmp_path):
     data = tmp_path / "data"
     assert "not a plain file" in accept(folder, data)[0]
     assert not data.exists()
+
+
+def test_a_build_that_was_not_planned_is_refused(tmp_path):
+    data = tmp_path / "data"
+    outcomes = accept(artifact(tmp_path, good_result()), data, planned={"0.16.0.dev1"})
+    assert "not one of the builds planned" in outcomes[0]
+    assert not data.exists()
+
+
+def test_a_planned_build_is_accepted(tmp_path):
+    data = tmp_path / "data"
+    assert "accepted" in accept(artifact(tmp_path, good_result()), data, planned={VERSION})[0]
+
+
+def test_a_file_name_cannot_issue_a_command_to_the_runner(tmp_path):
+    folder = tmp_path / "artifacts"
+    folder.mkdir()
+    (folder / "catalyst-\n::add-mask::x.json").write_bytes(b"{")
+    line = accept(folder, tmp_path / "data")[0]
+    assert line.startswith("- ")
+    assert "\n" not in line
 
 
 def test_done_builds_include_the_rejected_ones(tmp_path):

@@ -23,8 +23,8 @@ def test_canary_is_one_percent_of_the_device_gates():
     assert measure.canary_gates(280) == 3
 
 
-def test_canary_always_adds_at_least_one_gate():
-    assert measure.canary_gates(10) == 1
+def test_a_small_circuits_canary_is_still_large_enough_to_see():
+    assert measure.canary_gates(10) == measure.CANARY_MIN_GATES
 
 
 def test_every_cell_gets_repeats_and_one_canary():
@@ -41,9 +41,8 @@ def test_only_qjit_measures_compile_separately():
 
 def test_baselines_are_per_backend_at_its_largest_size():
     cells = [QFT, Cell("qpe", "lightning", 12, 3), QJIT]
-    jobs = measure.plan_baselines(cells, repeats=2)
-    assert {(job.backend, job.wires) for job in jobs} == {("lightning", 18), ("qjit", 18)}
-    assert len(jobs) == 4
+    jobs = measure.plan_baselines(cells)
+    assert [(job.backend, job.wires) for job in jobs] == [("lightning", 18), ("qjit", 18)]
 
 
 def test_job_labels_are_unique_across_the_suite():
@@ -51,7 +50,7 @@ def test_job_labels_are_unique_across_the_suite():
     for cell in SUITES["full"]:
         labels += [job.label for job in measure.plan_cell_jobs(cell, 3, 700)]
         labels.append(measure.native_job(cell).label)
-    labels += [job.label for job in measure.plan_baselines(SUITES["full"], 3)]
+    labels += [job.label for job in measure.plan_baselines(SUITES["full"])]
     labels += [job.label for job in measure.plan_memory(25, 3)]
     assert len(labels) == len(set(labels))
 

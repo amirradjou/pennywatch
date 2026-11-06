@@ -39,8 +39,13 @@ SUITES = {
     "full": [
         *_FIRST_THREE,
         # Only 12 wires, because default.qubit builds a dense matrix for the template's inverse QFT.
-        *_on_every_backend("qpe", wires=12, rounds=3),
-        *_on_every_backend("variational", wires=18, rounds=13),
+        Cell("qpe", "default", wires=12, rounds=3),
+        Cell("qpe", "lightning", wires=12, rounds=3),
+        # One pass, with no inverse. Catalyst spends about 40 million instructions per gate on the
+        # rounds: they took 26 billion to compile, and the canary's 1% vanished in that noise.
+        Cell("qpe", "qjit", wires=12, rounds=0),
+        # Only 4 layers: compiling the gradient under qjit costs about 19 billion at 13.
+        *_on_every_backend("variational", wires=18, rounds=4),
         *_on_every_backend("sampling", wires=18, rounds=20),
     ],
     # For checking the plumbing in seconds. Its numbers mean nothing.
@@ -48,7 +53,7 @@ SUITES = {
         *_on_every_backend("qft", wires=6, rounds=1),
         *_on_every_backend("grover", wires=6, rounds=2),
         *_on_every_backend("trotter", wires=6, rounds=2),
-        *_on_every_backend("qpe", wires=6, rounds=1),
+        *_on_every_backend("qpe", wires=6, rounds=0),
         *_on_every_backend("variational", wires=6, rounds=2),
         *_on_every_backend("sampling", wires=6, rounds=2),
     ],

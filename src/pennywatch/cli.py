@@ -79,6 +79,7 @@ def _parser() -> argparse.ArgumentParser:
     accept = commands.add_parser("accept", help="check measured results and store them")
     accept.add_argument("artifacts", type=Path)
     accept.add_argument("--into", type=Path, required=True)
+    accept.add_argument("--planned", help="a JSON list: refuse results for any other build")
 
     why = commands.add_parser("explain", help="narrow a change down to its pull requests")
     why.add_argument("before", help="Catalyst version before the change")
@@ -218,7 +219,8 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(builds.pending(publish.done_builds(args.data), args.since, args.limit)))
         return 0
     if args.command == "accept":
-        for outcome in publish.accept(args.artifacts, args.into):
+        planned = set(json.loads(args.planned)) if args.planned else None
+        for outcome in publish.accept(args.artifacts, args.into, planned):
             print(outcome)
         return 0
     return compare_command(args)

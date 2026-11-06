@@ -39,3 +39,13 @@ time at every size.
 Peak RSS passed 8 GiB at 14 wires. At 18 wires a Grover circuit using `FlipSign` raises
 `_ArrayMemoryError` for 228 GiB. `GroverOperator` itself is decomposed from 13 wires up, by the same
 table as `QFT`.
+
+## `default.qubit` builds a dense matrix for a Hamiltonian under adjoint differentiation
+
+`qml.grad` of a QNode with `diff_method="adjoint"` on `default.qubit`, measuring `qml.expval` of a
+Hamiltonian on 18 wires, raises `_ArrayMemoryError` for 1.00 TiB, in
+`scipy/sparse/_base.py:_process_toarray_args`. Seen on PennyLane 0.38.0, 0.42.3 and 0.46.0.dev142.
+
+`lightning.qubit` runs the same gradient on the same 18 wires in about 0.6 s, and on PennyLane 0.38.0
+`qml.specs` of that QNode on `lightning.qubit` also raises `MemoryError` for 1.00 TiB, which it doesn't
+on 0.42.3. A two-wire observable has neither problem on any of them, so the suite now uses one.
