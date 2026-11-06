@@ -1,0 +1,754 @@
+{
+ "cell": "qft/default",
+ "metric": "imports",
+ "before": {
+  "stack": "catalyst-0.12.0",
+  "runs": [
+   4566895772,
+   4566843941,
+   4566574046
+  ],
+  "net": 4566843941
+ },
+ "after": {
+  "stack": "catalyst-0.13.0",
+  "runs": [
+   7959944669,
+   7959705146,
+   7959638240
+  ],
+  "net": 7959705146
+ },
+ "packages": [
+  "autoray 0.7.2 → 0.8.0",
+  "cachetools 6.1.0 → 7.0.5",
+  "certifi 2025.8.3 → 2026.2.25",
+  "charset-normalizer 3.4.3 → 3.4.5",
+  "gast 0.6.0 → 0.7.0",
+  "idna 3.10 → 3.11",
+  "jax 0.6.0 → 0.6.2",
+  "jaxlib 0.6.0 → 0.6.2",
+  "ml-dtypes 0.5.3 → 0.5.4",
+  "networkx 3.5 → 3.6.1",
+  "numpy 2.3.2 → 2.4.3",
+  "packaging 25.0 → 26.0",
+  "pennylane 0.42.3 → 0.43.3",
+  "pennylane-catalyst 0.12.0 → 0.13.0",
+  "pennylane-lightning 0.42.0 → 0.43.0",
+  "scipy 1.16.1 → 1.17.1",
+  "scipy-openblas32 0.3.30.0.2 → 0.3.31.126.1",
+  "termcolor 3.1.0 → 3.3.0",
+  "tomlkit 0.13.3 → 0.14.0",
+  "typing-extensions 4.14.1 → 4.15.0",
+  "urllib3 2.5.0 → 2.6.3",
+  "wheel 0.45.1 → 0.46.3"
+ ],
+ "python_functions": [
+  [
+   "pennylane/transforms/split_non_commuting.py",
+   543,
+   415467
+  ],
+  [
+   "pennylane/numpy.py",
+   141244,
+   85190
+  ],
+  [
+   "pennylane/devices/default_gaussian.py",
+   551,
+   53250
+  ],
+  [
+   "pennylane/capture/switches.py",
+   301341,
+   253325
+  ],
+  [
+   "pennylane/qaoa/mixers.py",
+   120400,
+   83875
+  ],
+  [
+   "pennylane/tape/tape.py",
+   36643,
+   212
+  ],
+  [
+   "pennylane/concurrency/executors/native/api.py",
+   406,
+   34685
+  ],
+  [
+   "pennylane/data/data_manager.py",
+   36302,
+   23640
+  ],
+  [
+   "pennylane/qchem/integrals.py",
+   22439,
+   33861
+  ],
+  [
+   "pennylane/math/single_dispatch.py",
+   54138,
+   42766
+  ],
+  [
+   "pennylane/capture/autograph/transformer.py",
+   48746,
+   42190
+  ],
+  [
+   "pennylane/math/matrix_manipulation.py",
+   95176,
+   91169
+  ],
+  [
+   "pennylane/decomposition/decomposition_graph.py",
+   7665,
+   3766
+  ],
+  [
+   "pennylane/numpy/random.py",
+   18356,
+   14710
+  ],
+  [
+   "pennylane/debugging/debugger.py",
+   16896,
+   13624
+  ]
+ ],
+ "c_functions": [
+  [
+   "???",
+   2822406815,
+   4991141092
+  ],
+  [
+   "_PyEval_EvalFrameDefault",
+   583120950,
+   1111308535
+  ],
+  [
+   "__tls_get_addr",
+   209193802,
+   326538760
+  ],
+  [
+   "_PyUnicode_JoinArray",
+   24564286,
+   97424023
+  ],
+  [
+   "PyUnicode_Splitlines",
+   103293,
+   46723868
+  ],
+  [
+   "_int_malloc",
+   31720703,
+   68388130
+  ],
+  [
+   "PyUnicode_New",
+   33438310,
+   69128429
+  ],
+  [
+   "PyUnicode_Substring",
+   6994603,
+   31494179
+  ],
+  [
+   "__memset_avx2_unaligned_erms",
+   58811689,
+   81151315
+  ],
+  [
+   "_PyObject_GC_New",
+   24638222,
+   40156856
+  ],
+  [
+   "_PyType_Lookup",
+   45340409,
+   60569496
+  ],
+  [
+   "PyList_Append",
+   18156852,
+   32588327
+  ],
+  [
+   "PyObject_GC_Del",
+   20409573,
+   33491053
+  ],
+  [
+   "free",
+   7954529,
+   18052164
+  ],
+  [
+   "PyUnicode_Format",
+   509256,
+   10448217
+  ]
+ ],
+ "candidates": {
+  "pennylane": [
+   {
+    "score": 589384,
+    "subject": "use `ruff` and `pyupgrade` to support `3.11`+ python language features (#7860)",
+    "pull_request": 7860,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7860"
+   },
+   {
+    "score": 420538,
+    "subject": "remove useless pylint disable (#8287)",
+    "pull_request": 8287,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8287"
+   },
+   {
+    "score": 416122,
+    "subject": "chore: add `strict=True` kwarg to `transforms` module (#8182)",
+    "pull_request": 8182,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8182"
+   },
+   {
+    "score": 414924,
+    "subject": "Fix incorrect doc examples for split-non-commuting (#7892)",
+    "pull_request": 7892,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7892"
+   },
+   {
+    "score": 414924,
+    "subject": "Implement strategy for smart shots distribution (#7988)",
+    "pull_request": 7988,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7988"
+   },
+   {
+    "score": 110703,
+    "subject": "Remove useless pylint suppressions (#8292)",
+    "pull_request": 8292,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8292"
+   },
+   {
+    "score": 58561,
+    "subject": "chore: rename `ancilla` to `auxiliary` in documentation (#8005)",
+    "pull_request": 8005,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8005"
+   },
+   {
+    "score": 57012,
+    "subject": "chore: organize all custom exceptions into `exceptions.py` (#7856)",
+    "pull_request": 7856,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7856"
+   },
+   {
+    "score": 40873,
+    "subject": "[doctest] update many modules (#8328)",
+    "pull_request": 8328,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8328"
+   },
+   {
+    "score": 38679,
+    "subject": "Resolve more TODO items (#8296)",
+    "pull_request": 8296,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8296"
+   },
+   {
+    "score": 36697,
+    "subject": "Deprecate `MeasurementProcess.expand` (#7953)",
+    "pull_request": 7953,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7953"
+   },
+   {
+    "score": 24430,
+    "subject": "merge `v0.43.0-docs` into `v0.43.0-rc0` (#8450)",
+    "pull_request": 8450,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8450"
+   },
+   {
+    "score": 19303,
+    "subject": "chore: deprecate `tensorflow` maintenance support (#7989)",
+    "pull_request": 7989,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7989"
+   },
+   {
+    "score": 12575,
+    "subject": "chore: add `strict=True` to `zip` in a few core modules (#8164)",
+    "pull_request": 8164,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8164"
+   },
+   {
+    "score": 12175,
+    "subject": "[circ. dep] enforce `templates.subroutines` module as \"auxiliary\" (#7865)",
+    "pull_request": 7865,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7865"
+   },
+   {
+    "score": 11619,
+    "subject": "Fix GPU selection issue in the Torch Interface (#8008)",
+    "pull_request": 8008,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8008"
+   },
+   {
+    "score": 9061,
+    "subject": "organize subroutines (#8333)",
+    "pull_request": 8333,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8333"
+   },
+   {
+    "score": 7087,
+    "subject": "Refactor decompositions to use dynamic wire allocation (#8024)",
+    "pull_request": 8024,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8024"
+   },
+   {
+    "score": 6556,
+    "subject": "feat: autograph: add support for pythonic index assignment w/ `jax.numpy` arrays (#8027)",
+    "pull_request": 8027,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8027"
+   },
+   {
+    "score": 6556,
+    "subject": "feat: autograph: add `disable_autograph` context manager (#8102)",
+    "pull_request": 8102,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8102"
+   },
+   {
+    "score": 6556,
+    "subject": "feat: autograph: support in-place array updates with operators (`*=`, `-=`, ...) (#8076)",
+    "pull_request": 8076,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8076"
+   },
+   {
+    "score": 5847,
+    "subject": "No longer squeeze singleton dimension in samples (#7944)",
+    "pull_request": 7944,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7944"
+   },
+   {
+    "score": 5672,
+    "subject": "Fall back to op.decompose if op is unsolved in decomposition graph (#8156)",
+    "pull_request": 8156,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8156"
+   },
+   {
+    "score": 4862,
+    "subject": "[circ. deps.] enforce `pulse` module as \"auxiliary\" (#7847)",
+    "pull_request": 7847,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7847"
+   },
+   {
+    "score": 4604,
+    "subject": "[Draft] Add `heuristic_resources` attribute to `DecompositionRule` (#8293)",
+    "pull_request": 8293,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8293"
+   },
+   {
+    "score": 4528,
+    "subject": "Refactor DecompositionGraph to two classes (#8031)",
+    "pull_request": 8031,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8031"
+   },
+   {
+    "score": 4527,
+    "subject": "DecompositionGraph can be solved with work wire constraint (#7963)",
+    "pull_request": 7963,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7963"
+   },
+   {
+    "score": 4160,
+    "subject": "Update `work_wire_type` to expect `\"zeroed\"` or `\"borrowed\"` (#7993)",
+    "pull_request": 7993,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/7993"
+   },
+   {
+    "score": 3899,
+    "subject": "Make the user warning of DecompGraph more generic (#8361)",
+    "pull_request": 8361,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8361"
+   },
+   {
+    "score": 3477,
+    "subject": "Port trotter and compact hamiltonian resource templates (#8303)",
+    "pull_request": 8303,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/8303"
+   }
+  ],
+  "pennylane-lightning": [
+   {
+    "score": 0,
+    "subject": "Version Bump to 0.43.0-dev (#1209)",
+    "pull_request": 1209,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1209"
+   },
+   {
+    "score": 0,
+    "subject": "Update pytest version (#1207)",
+    "pull_request": 1207,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1207"
+   },
+   {
+    "score": 0,
+    "subject": " Remove FIXMEs for pinning jax & catalyst version for CI with stable (#1211)",
+    "pull_request": 1211,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1211"
+   },
+   {
+    "score": 0,
+    "subject": "Update JAX version from 0.6.0 to 0.6.2 (#1200)",
+    "pull_request": 1200,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1200"
+   },
+   {
+    "score": 0,
+    "subject": "Skip applying Identity for Lightning-Qubit (#1212)",
+    "pull_request": 1212,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1212"
+   },
+   {
+    "score": 0,
+    "subject": "Remove jax dependency (#1214)",
+    "pull_request": 1214,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1214"
+   },
+   {
+    "score": 0,
+    "subject": "Add \"device\" as a supported MCM method that resolves to \"tree-traversal\" (#1210)",
+    "pull_request": 1210,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1210"
+   },
+   {
+    "score": 0,
+    "subject": "use `exceptions` module for custom errors (#1215)",
+    "pull_request": 1215,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1215"
+   },
+   {
+    "score": 0,
+    "subject": "Deprecate tests that have `QNode` call with shots kwarg (#1216)",
+    "pull_request": 1216,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1216"
+   },
+   {
+    "score": 0,
+    "subject": "Add `Kernel performance tuning` page to AVX index (#1217)",
+    "pull_request": 1217,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1217"
+   },
+   {
+    "score": 0,
+    "subject": "GPhase support with zero-qubit Lightning devices (#1205)",
+    "pull_request": 1205,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1205"
+   },
+   {
+    "score": 0,
+    "subject": "chore: drop support for Python 3.10 (#1224)",
+    "pull_request": 1224,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1224"
+   },
+   {
+    "score": 0,
+    "subject": "replace `DefaultExecutionConfig` with `ExecutionConfig()` (#1185)",
+    "pull_request": 1185,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1185"
+   },
+   {
+    "score": 0,
+    "subject": "Move MCMC validation to preprocess in `lightning.qubit` (#1222)",
+    "pull_request": 1222,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1222"
+   },
+   {
+    "score": 0,
+    "subject": "chore: drop support for testing `tensorflow` interface (#1225)",
+    "pull_request": 1225,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1225"
+   },
+   {
+    "score": 0,
+    "subject": "Deprecate device shots setting at init (#1221)",
+    "pull_request": 1221,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1221"
+   },
+   {
+    "score": 0,
+    "subject": "Remove squeezing from sample measurements (#1226)",
+    "pull_request": 1226,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1226"
+   },
+   {
+    "score": 0,
+    "subject": "Stop creating wheels if the PR is draft (#1233)",
+    "pull_request": 1233,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1233"
+   },
+   {
+    "score": 0,
+    "subject": "Bugfix for the stable-stable test with LGPU-MPI (#1237)",
+    "pull_request": 1237,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1237"
+   },
+   {
+    "score": 0,
+    "subject": "Bugfix/update stopping condition (#1239)",
+    "pull_request": 1239,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1239"
+   },
+   {
+    "score": 0,
+    "subject": "Feature release script (#1231)",
+    "pull_request": 1231,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1231"
+   },
+   {
+    "score": 0,
+    "subject": "chore: fix test now that `config.device_options` is immutable (#1242)",
+    "pull_request": 1242,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1242"
+   },
+   {
+    "score": 0,
+    "subject": "On-board lightning to using blacksmith runners (#1241)",
+    "pull_request": 1241,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1241"
+   },
+   {
+    "score": 0,
+    "subject": "Remove `--no-deps` for PL installation for LQ stable test (#1245)",
+    "pull_request": 1245,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1245"
+   },
+   {
+    "score": 0,
+    "subject": "Adjust `LightningBase.eval_jaxpr` compatible with independent shots (#1243)",
+    "pull_request": 1243,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1243"
+   },
+   {
+    "score": 0,
+    "subject": "Revert change to stopping condition & Remove sample squeezing from Lightning Tensor (#1246)",
+    "pull_request": 1246,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1246"
+   },
+   {
+    "score": 0,
+    "subject": "[nanobind] Nanobind Feature Branch PR [Base] (#1176)",
+    "pull_request": 1176,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1176"
+   },
+   {
+    "score": 0,
+    "subject": "Remove randomness for LQ MCMC (#1252)",
+    "pull_request": 1252,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1252"
+   },
+   {
+    "score": 0,
+    "subject": "Remove stopping condition for C(SProd) and C(Exp) (#1247)",
+    "pull_request": 1247,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1247"
+   },
+   {
+    "score": 0,
+    "subject": "Upgrade CI to Python 3.12, CIBuildWheel 3.1.4 + Fix docker build (#1248)",
+    "pull_request": 1248,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1248"
+   }
+  ],
+  "pennylane-catalyst": [
+   {
+    "score": 0,
+    "subject": "Prepare for next development cycle (#1857)",
+    "pull_request": 1857,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1857"
+   },
+   {
+    "score": 0,
+    "subject": "adjoint and ctrl op support in `from_plxpr` (#1844)",
+    "pull_request": 1844,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1844"
+   },
+   {
+    "score": 0,
+    "subject": "Build and upload Rc builds nightly to TestPyPi (#1625)",
+    "pull_request": 1625,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1625"
+   },
+   {
+    "score": 0,
+    "subject": "make input branch not required in the wheel CI (#1872)",
+    "pull_request": 1872,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1872"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#1871)",
+    "pull_request": 1871,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1871"
+   },
+   {
+    "score": 0,
+    "subject": "Enable variable-length arrays extension for runtime test suite (#1875)",
+    "pull_request": 1875,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1875"
+   },
+   {
+    "score": 0,
+    "subject": "Change rc wheel upload runner to x86  (#1879)",
+    "pull_request": 1879,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1879"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#1878)",
+    "pull_request": 1878,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1878"
+   },
+   {
+    "score": 0,
+    "subject": "Fix typo when renaming wheels (#1886)",
+    "pull_request": 1886,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1886"
+   },
+   {
+    "score": 0,
+    "subject": "Replace the VLA use with standard C++ code (#1887)",
+    "pull_request": 1887,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1887"
+   },
+   {
+    "score": 0,
+    "subject": "checkout input branch before building wheels (#1890)",
+    "pull_request": 1890,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1890"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#1891)",
+    "pull_request": 1891,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1891"
+   },
+   {
+    "score": 0,
+    "subject": "Adjoint and ctrl transform conversion in `from_plxpr` (#1850)",
+    "pull_request": 1850,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1850"
+   },
+   {
+    "score": 0,
+    "subject": "Update compilers in GitHub Actions to include Clang and fixed converted type  (#1888)",
+    "pull_request": 1888,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1888"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#1899)",
+    "pull_request": 1899,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1899"
+   },
+   {
+    "score": 0,
+    "subject": "add Hermitian observable support to `from_plxpr` (#1903)",
+    "pull_request": 1903,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1903"
+   },
+   {
+    "score": 0,
+    "subject": "Add forward capability with python 3.13 (#1881)",
+    "pull_request": 1881,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1881"
+   },
+   {
+    "score": 0,
+    "subject": "`for_loop` and `while_loop` conversion support outside a QNode (#1896)",
+    "pull_request": 1896,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1896"
+   },
+   {
+    "score": 0,
+    "subject": "Update the dev requirement for building Runtime (#1884)",
+    "pull_request": 1884,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1884"
+   },
+   {
+    "score": 0,
+    "subject": "Update jax to 0.6.2 (#1897)",
+    "pull_request": 1897,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1897"
+   },
+   {
+    "score": 0,
+    "subject": "Add Layer and Yield operations to QEC dialect (#1917)",
+    "pull_request": 1917,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1917"
+   },
+   {
+    "score": 0,
+    "subject": "Drop python3.10 support (#1915)",
+    "pull_request": 1915,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1915"
+   },
+   {
+    "score": 0,
+    "subject": "Fix Python version in mac cache keys (#1923)",
+    "pull_request": 1923,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1923"
+   },
+   {
+    "score": 0,
+    "subject": "Fix cache and patch issues with CI builds (#1924)",
+    "pull_request": 1924,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1924"
+   },
+   {
+    "score": 0,
+    "subject": "Fix incorrect logic in implementation of NullQubit::ReleaseQubit() (#1926)",
+    "pull_request": 1926,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1926"
+   },
+   {
+    "score": 0,
+    "subject": "Add single-qubit alloc and dealloc conversion patterns (#1920)",
+    "pull_request": 1920,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1920"
+   },
+   {
+    "score": 0,
+    "subject": "update deprecated import location for noise related transforms (#1918)",
+    "pull_request": 1918,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1918"
+   },
+   {
+    "score": 0,
+    "subject": "Support multi-wires Identity op (#1907)",
+    "pull_request": 1907,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1907"
+   },
+   {
+    "score": 0,
+    "subject": "Remove Observable (#1929)",
+    "pull_request": 1929,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1929"
+   },
+   {
+    "score": 0,
+    "subject": "[MLIR] (documentation) Add notes to the quantum dialect (#1927)",
+    "pull_request": 1927,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/1927"
+   }
+  ]
+ },
+ "bisect": null,
+ "candidate_counts": {
+  "pennylane": 414,
+  "pennylane-lightning": 56,
+  "pennylane-catalyst": 164
+ }
+}
