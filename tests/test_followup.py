@@ -310,6 +310,15 @@ def test_a_step_that_shows_again_is_recorded_as_confirmed(tmp_path):
     assert record["problems"] == []
 
 
+def test_a_host_that_isnt_an_object_is_just_left_out(tmp_path):
+    directory = came_back(tmp_path, 1000, 1990)
+    path = directory / f"catalyst-{dev(1)}.json"
+    path.write_text(json.dumps(json.loads(path.read_text()) | {"host": "x"}))
+    record = followup.record_one(STEP, directory, FIRST)
+    assert record["confirmed"] is True
+    assert record["second"]["host"] == ""
+
+
 def test_a_step_that_doesnt_show_again_is_recorded_as_not_confirmed(tmp_path):
     record = followup.record_one(STEP, came_back(tmp_path, 1000, 1001), FIRST)
     assert record["confirmed"] is False
@@ -422,6 +431,17 @@ def test_a_subject_cannot_break_out_of_its_code_span_or_the_table(tmp_path):
     row = next(line for line in body.splitlines() if line.startswith(f"| {dev(1)}"))
     assert row.count("|") == 7
     assert row.count("`") % 2 == 0
+
+
+def test_when_pennylane_isnt_the_cause_the_issue_says_where_the_candidates_are(tmp_path):
+    saved = explanation(
+        bisect={"verdict": "PennyLane alone gives 41% of the step, so the cause is elsewhere."},
+        candidate_counts={"pennylane": 40, "pennylane-lightning": 30, "pennylane-catalyst": 118},
+        candidates={"pennylane": [], "pennylane-lightning": [], "pennylane-catalyst": []},
+    )
+    _, body = followup.issue([recorded(tmp_path, saved=saved)])
+    assert "Bisect: `PennyLane alone gives 41% of the step, so the cause is elsewhere.`" in body
+    assert "candidate pull requests: 30 in Lightning, 118 in Catalyst" in body
 
 
 def test_steps_that_didnt_hold_are_counted_but_not_listed(tmp_path):

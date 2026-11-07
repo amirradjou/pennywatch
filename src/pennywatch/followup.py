@@ -472,11 +472,12 @@ def record_one(followup: FollowUp, directory: Path, results: list[dict], run_id:
         return record
     checked = history.confirm_steps([step], [before, after])[0]
     key = (followup.cell, followup.metric)
+    host = before.get("host")
     record["second"] = {
         "before": history.metrics_of(before).get(key),
         "after": history.metrics_of(after).get(key),
         "change_pct": checked.second_change_pct,
-        "host": untrusted.clean_name(before.get("host", {}).get("cpu", "")),
+        "host": untrusted.clean_name(host.get("cpu", "") if isinstance(host, dict) else ""),
     }
     record["confirmed"] = checked.confirmed
     explanation = directory / EXPLANATION_FILE
@@ -514,10 +515,28 @@ def record(
 # Telling the owner.
 
 
-def _code(text: object) -> str:
+PACKAGE_NAMES = {
+    "pennylane": "PennyLane",
+    "pennylane-lightning": "Lightning",
+    "pennylane-catalyst": "Catalyst",
+}
+
+
+def _code(text: object, limit: int = 100) -> str:
     """Untrusted text as a code span: GitHub turns nothing inside one into a link or a mention."""
     cleaned = _TRAILING_REFERENCE.sub("", untrusted.clean_name(text))
-    return f"`{cleaned[:100]}`"
+    return f"`{cleaned[:limit]}`"
+
+
+def _elsewhere(explanation: dict) -> str:
+    """Where the candidates are when PennyLane isn't the cause."""
+    counts = explanation.get("candidate_counts") or {}
+    named = [
+        f"{count} in {PACKAGE_NAMES.get(package, package)}"
+        for package, count in counts.items()
+        if package != "pennylane" and count
+    ]
+    return f"; candidate pull requests: {', '.join(named)}" if named else ""
 
 
 def _pct(value: float | None) -> str:
@@ -553,7 +572,7 @@ def cause(record: dict) -> str:
         more = f"; and {len(culprits) - 3} more" if len(culprits) > 3 else ""
         return "; ".join(parts) + more
     if bisect.get("verdict"):
-        return f"Bisect: {_code(bisect['verdict'])}"
+        return f"Bisect: {_code(bisect['verdict'], 200)}{_elsewhere(explanation)}"
     count = sum((explanation.get("candidate_counts") or {}).values())
     return f"{count} candidate pull requests, not narrowed further"
 
