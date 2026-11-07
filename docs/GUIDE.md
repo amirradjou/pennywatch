@@ -84,11 +84,14 @@ This re-measures the cell on both builds, then lists what merged between them:
 | Measure | by hand, or a push to `measure/spread-*` | The suite on several runners at once, to see how far they agree |
 | History | by hand, or a push to `measure/history` | The last eight stable releases |
 | Nightly | 08:23 UTC, or a push to `measure/nightly` | The newest unmeasured dev build, published to the `data` branch |
-| Pages | after Nightly | The public page, once the repo is public |
+| Pages | after Nightly, or a push to `main` that changes results or the page | The public page |
 
 `Nightly` with a `limit` above 1 works through older builds, newest first, and that's how the backfill
 runs. Only its publish job can write, it runs nothing from TestPyPI, and it treats everything the
 measuring job uploaded as hostile.
+
+GitHub turns a schedule off after 60 days with no activity in a public repo. If the page stops gaining
+builds, turn `Nightly` back on in the Actions tab.
 
 Nothing in this repo posts to any PennyLane repository.
 

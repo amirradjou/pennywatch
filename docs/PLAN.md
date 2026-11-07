@@ -30,7 +30,7 @@ and Catalyst 0.15.0, on a laptop and on GitHub's runners.
 |---|---|
 | Are instruction counts stable? | Repeat runs on one memory layout agree to about 0.005%, but that overstates it: see below |
 | Does memory layout move them? | Yes. 16 extra bytes of environment moved `trotter/lightning` by **0.58%**, with the same code on the same machine. Python's call counts stay exact (3,175,935 in each of six layouts), so the extra work is inside the interpreter |
-| Do GitHub's runners agree? | With the median of 3 layouts, within **0.28%** at worst and about 0.03% typically, on four runners across AMD EPYC and Intel Xeon. On single layouts they differed by up to 0.85%. A laptop agrees less well: to 0.22% on this stack, but by up to 0.94% on instructions and 2.8% on peak memory across all eight releases, where four runners agreed on memory to 0.09%. So builds are compared runner with runner. Public runners have four CPUs, not two, and agree just as well: on 2026-11-07 four of them agreed on 0.15.0 to 0.23% on instructions and 0.06% on memory, including the private runner that measured it for the history |
+| Do GitHub's runners agree? | With the median of 3 layouts, within **0.28%** at worst and about 0.03% typically, on four runners across AMD EPYC and Intel Xeon. On single layouts they differed by up to 0.85%. A laptop agrees less well: to 0.22% on this stack, but by up to 0.94% on instructions and 2.8% on peak memory across all eight releases, where four runners agreed on memory to 0.09%. So builds are compared runner with runner. Public runners have four CPUs, not two, and agree just as well: on 2026-11-07 four of them agreed on 0.15.0 to 0.23% on instructions and 0.06% on memory, and adding the private runner that measured it for the history doesn't widen that |
 | Can a small slowdown be seen? | The canary (1% extra gates, at least 3) showed up on 18 of 18 cells on this stack, and 144 of 144 across the eight releases, at 8 to 736 times the noise, compared with the full run on the same layout. Its delta holds steady across layouts: 5.3M to 5.7M on `trotter/lightning`, while the totals move 15M |
 | Does a busy machine disturb them? | With four spinning processes the count moved **0.0036%**, while wall-clock time was **3.5 times slower** |
 | Is wall-clock time usable instead? | The same circuit in one process ranged by 38%, so a 1% regression is invisible in it |
@@ -118,16 +118,17 @@ QPE stays small because `default.qubit` builds a dense matrix for its inverse QF
 |---|---|---|---|
 | M0 | The instrument | `pennywatch run` reproduces the table above from code in a pinned image. Three circuits on three stacks. The canary is detected every time. Runs on two different days agree within 0.05%. The same suite on GitHub Actions: spread between runners measured and written down, and the comparison method chosen from it | **Done.** The full suite on the laptop on 2026-11-06 and 2026-11-07 agrees to 0.025% at worst. Peak memory moved up to 0.35%, under its 0.5% threshold |
 | M1 | History | All six circuits on the last eight stable releases, with an API adapter. Every step of 0.5% or more re-measured and listed with its numbers | **Done.** 8 releases, 144 of 144 canaries, 166 steps in [the list](HISTORY.md). Measured again on a laptop, all 166 came back the same way round and 159 the same size; the list says why the other 7 didn't |
-| M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | Built, and proven once from TestPyPI to the `data` branch. The schedule starts once it's on `main`, and the backfill needs the repo public: see below |
+| M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | Built, and proven once from TestPyPI to the `data` branch. Scheduled from 2026-11-08, and the backfill of 64 builds started on 2026-11-07: see below |
 | M3 | Explanation | For at least three real changes from M1 or M2, it names the responsible pull request or a candidate list, checked by reading the diff or bisecting. Wrong answers counted and published | **Done.** 7 real changes in [explanations](explanations.md), with the wrong answers counted |
-| M4 | Public page | The repo is public under MIT, with a static page showing each metric's history and what changed, credits, and the limits below. The Action's cost is under GitHub's free allowance | Page, licence and workflow are ready. Needs the repo public |
+| M4 | Public page | The repo is public under MIT, with a static page showing each metric's history and what changed, credits, and the limits below. The Action's cost is under GitHub's free allowance | **Done.** Public since 2026-11-07 under MIT, which also makes Actions free, with [the page](https://amirradjou.github.io/pennywatch/) built by Actions |
 | M5 | Upstream | At least one finding reported by hand and judged valid by the maintainers, or a fix merged | Not started, and by hand only. Candidates are in [findings](findings.md) |
 
 ### What's left
 
-- **M2.** Merge to `main` to start the schedule. Measuring all 63 dev builds takes about 55 hours of runner time, far
-  past what a private repo gets, so the backfill waits for the repo to go public. Then fourteen nights unattended.
-- **M4.** Make the repo public, which also makes Actions free, then turn on Pages with GitHub Actions as the source.
+- **M2.** The backfill measures every dev build on TestPyPI, 64 of them, about 55 hours of runner time
+  spread across six runners at a time. Then fourteen nights unattended, to 2026-11-21. A night with no new
+  build is a gap explained by TestPyPI.
+- **M5.** By hand only: see [Reporting upstream](#reporting-upstream).
 
 ## Limits
 
