@@ -119,6 +119,11 @@ class Step:
     def is_counted(self) -> bool:
         return not self.metric.startswith(("gates.", "depth."))
 
+    @property
+    def key(self) -> str:
+        """The step's name, as the page, its explanations and follow-ups name it."""
+        return f"{self.before_stack}..{self.after_stack}/{self.cell}/{self.metric}"
+
 
 def in_build_order(results: list[dict]) -> list[dict]:
     return sorted(results, key=lambda r: version_key(r["stack"]["pennylane-catalyst"]))

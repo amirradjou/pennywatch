@@ -4,7 +4,7 @@ name: Pages
 # so this does nothing until the repo goes public.
 on:
   workflow_run:
-    workflows: [Nightly]
+    workflows: [Nightly, Follow-up]
     types: [completed]
   push:
     branches: [main]

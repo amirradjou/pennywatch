@@ -54,7 +54,8 @@ uv run pennywatch explain 0.12.0 0.13.0 --cell qft/default                   # w
 - **Every run proves itself.** Each circuit's answer has to be right, checked against something other
   than PennyLane, and a canary with 1% extra gates has to show up. Otherwise the build is thrown out.
 - **It narrows a change down.** PennyLane is pure Python, so it gets bisected commit by commit. Lightning
-  and Catalyst are too slow to build per commit, so those stop at a list of candidates and say so.
+  and Catalyst are too slow to build per commit, so those stop at a list of candidates and say so. After
+  each night, the newest changes are measured again on a fresh runner and explained without anyone asking.
 
 It can't see cache misses, GPUs, multi-threading or effects that only appear at scale, so it complements
 real timing and doesn't replace it. More in [the plan](docs/PLAN.md#limits).

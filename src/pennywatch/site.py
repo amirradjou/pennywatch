@@ -154,7 +154,7 @@ def step_rows(steps: list[history.Step], explanations: dict | None = None) -> li
     explanations = explanations or {}
     rows = []
     for step in steps:
-        key = f"{step.before_stack}..{step.after_stack}/{step.cell}/{step.metric}"
+        key = step.key
         rows.append(
             {
                 "before_stack": step.before_stack.removeprefix("catalyst-"),

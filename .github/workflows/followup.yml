@@ -1,0 +1,140 @@
+name: Follow-up
+
+# After each Nightly, the newest steps are measured again on fresh runners and explained, and the
+# owner hears about the ones that held, in an issue here.
+#
+# Following up runs nightly code from TestPyPI: a read-only token and no secrets, and the code itself
+# runs in a container with no network. Only `record` may write, and it runs nothing from TestPyPI
+# and treats what the follow-up jobs uploaded as hostile. Its issues stay in this repo and name
+# upstream pull requests without linking them, so nothing appears on their pages. Actions are
+# pinned by SHA for the same reason.
+on:
+  workflow_run:
+    workflows: [Nightly]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Steps to follow up in this run
+        default: "3"
+      step:
+        description: "One step by name, followed up or not: catalyst-A..catalyst-B/cell/metric"
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: followup
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      steps: ${{ steps.plan.outputs.steps }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: data
+          path: data
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Choose steps
+        id: plan
+        env:
+          LIMIT: ${{ inputs.limit || '3' }}
+          STEP: ${{ inputs.step || '' }}
+        run: |
+          steps=$(uv run --quiet pennywatch followup plan --data data --limit "$LIMIT" --step "$STEP")
+          echo "$steps"
+          echo "steps=$steps" >> "$GITHUB_OUTPUT"
+
+  follow:
+    needs: plan
+    if: needs.plan.outputs.steps != '[]'
+    name: follow up (${{ matrix.step.name }})
+    runs-on: ubuntu-24.04
+    # Two builds measured again, then a bisect that stops after 30 measurements.
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        step: ${{ fromJson(needs.plan.outputs.steps) }}
+    env:
+      STEP: ${{ toJson(matrix.step) }}
+      NAME: ${{ matrix.step.name }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: data
+          path: data
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Measure again and explain
+        run: uv run pennywatch followup run --step "$STEP" --locks data/stacks --out "followed/$NAME"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: followup-${{ matrix.step.name }}
+          path: followed/${{ matrix.step.name }}/
+          if-no-files-found: warn
+
+  record:
+    needs: [plan, follow]
+    if: always() && needs.plan.outputs.steps != '[]'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: data
+          path: data
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: downloaded
+          pattern: followup-*
+      - name: Check and record
+        env:
+          PLANNED: ${{ needs.plan.outputs.steps }}
+        run: >-
+          uv run pennywatch followup record downloaded --into data --planned "$PLANNED"
+          --run-id "$GITHUB_RUN_ID" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Push
+        working-directory: data
+        run: |
+          git add followups
+          if git diff --cached --quiet; then
+            echo "Nothing new to record." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "data: follow-ups from run $GITHUB_RUN_ID"
+          # Nightly may have published meanwhile; it writes other files, so a rebase is clean.
+          git pull --rebase --quiet origin data
+          git push origin HEAD:data
+      - name: Tell the owner
+        env:
+          PLANNED: ${{ needs.plan.outputs.steps }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title=$(uv run --quiet pennywatch followup issue --data data --planned "$PLANNED" --body issue.md)
+          if [ -n "$title" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file issue.md
+          else
+            echo "No step held, so no issue." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi

@@ -122,6 +122,27 @@ def test_the_search_stops_at_the_limit():
     assert len(result["culprits"]) == 3
 
 
+def test_a_bisect_with_a_budget_stops_and_keeps_what_it_found():
+    seen = []
+    staircase = _staircase({3: 30.0, 9: 50.0, 20: 20.0})
+
+    def measure(commit):
+        seen.append(commit)
+        return staircase(commit)
+
+    result = explain.bisect_all(_commits(32), 100.0, 200.0, measure, max_measured=7)
+    assert len(seen) == 7
+    assert result["stopped"] is True
+    assert result["measured"] == 7
+    assert [c["commit"] for c in result["culprits"]] == ["c9"]
+    assert result["unresolved"]
+
+
+def test_a_bisect_within_its_budget_says_it_did_not_stop():
+    result = explain.bisect_all(_commits(16), 100.0, 200.0, _staircase({5: 100.0}), max_measured=50)
+    assert result["stopped"] is False
+
+
 def test_a_part_among_broken_commits_is_reported_as_unresolved():
     staircase = _staircase({2: 50.0, 10: 50.0})
 

@@ -28,13 +28,42 @@ def test_every_workflow_starts_with_a_read_only_token(path):
     assert re.search(r"^permissions:\n  contents: read$", path.read_text(), re.M)
 
 
-def test_only_publish_and_pages_may_write():
-    nightly = next(path for path in WORKFLOWS if path.name == "nightly.yml").read_text()
-    assert nightly.count("contents: write") == 1
-    assert nightly.index("contents: write") > nightly.index("  publish:")
+def _text(name):
+    return next(path for path in WORKFLOWS if path.name == name).read_text()
+
+
+@pytest.mark.parametrize(("name", "job"), [("nightly.yml", "publish"), ("followup.yml", "record")])
+def test_only_the_job_that_runs_nothing_from_testpypi_may_write(name, job):
+    text = _text(name)
+    assert text.count("contents: write") == 1
+    assert text.index("contents: write") > text.index(f"  {job}:")
+
+
+def test_no_other_workflow_may_write():
     for path in WORKFLOWS:
-        if path.name != "nightly.yml":
+        if path.name not in {"nightly.yml", "followup.yml"}:
             assert "contents: write" not in path.read_text(), path.name
+
+
+def test_only_the_follow_up_record_may_open_issues():
+    for path in WORKFLOWS:
+        text = path.read_text()
+        if path.name == "followup.yml":
+            assert text.count("issues: write") == 1
+            assert text.index("issues: write") > text.index("  record:")
+        else:
+            assert "issues: write" not in text, path.name
+
+
+def test_follow_ups_start_after_nightly_and_pages_after_both():
+    assert "workflows: [Nightly]" in _text("followup.yml")
+    assert "workflows: [Nightly, Follow-up]" in _text("pages.yml")
+
+
+def test_a_follow_up_measures_under_several_layouts_too():
+    from pennywatch import followup
+
+    assert followup.REPEATS == 3
 
 
 def test_a_branch_that_starts_one_measuring_workflow_starts_no_other():

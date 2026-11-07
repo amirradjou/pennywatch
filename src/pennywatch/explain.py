@@ -359,15 +359,29 @@ def bisect_commits(commits: list[str], low: float, high: float, measure_commit) 
     }
 
 
+class _OutOfMeasurements(Exception):
+    """The bisect has used all the measurements it was given."""
+
+
 def bisect_all(
-    commits: list[str], low: float, high: float, measure_commit, max_found: int = MAX_CULPRITS
+    commits: list[str],
+    low: float,
+    high: float,
+    measure_commit,
+    max_found: int = MAX_CULPRITS,
+    max_measured: int | None = None,
 ) -> dict:
     """Every commit that moved a metric by a meaningful part of a step. A step often has several, so
-    after each find this looks on either side of it, reusing what it has already measured."""
+    after each find this looks on either side of it, reusing what it has already measured. With
+    `max_measured`, it stops after that many measurements and leaves the rest unresolved, so that a
+    job with a time limit still finishes with what it found."""
     known: dict[str, float | None] = {}
+    stopped = False
 
     def remembered(commit: str) -> float | None:
         if commit not in known:
+            if max_measured is not None and len(known) >= max_measured:
+                raise _OutOfMeasurements
             known[commit] = measure_commit(commit)
         return known[commit]
 
@@ -376,9 +390,15 @@ def bisect_all(
     unresolved: list[list[str]] = []
 
     def walk(segment: list[str], first: float, last: float) -> None:
+        nonlocal stopped
         if not segment or abs(last - first) < smallest or len(found) >= max_found:
             return
-        result = bisect_commits(segment, first, last, remembered)
+        try:
+            result = bisect_commits(segment, first, last, remembered)
+        except _OutOfMeasurements:
+            stopped = True
+            unresolved.append(segment)
+            return
         if result["found"] is None:
             unresolved.append(result["range"])
             return
@@ -395,6 +415,7 @@ def bisect_all(
         "culprits": sorted(found, key=lambda step: -abs(step["after"] - step["before"])),
         "unresolved": unresolved,
         "measured": len(known),
+        "stopped": stopped,
     }
 
 
@@ -409,6 +430,7 @@ def bisect_pennylane(
     cpus: list[int],
     metric: str,
     extras: tuple[str, ...] = (),
+    max_measured: int | None = None,
 ) -> dict:
     """Bisect PennyLane alone on top of the older stack, so nothing else can be the cause."""
 
@@ -443,7 +465,7 @@ def bisect_pennylane(
     commits = [change.commit for change in merged]
     if not commits or commits[-1] != last_commit:
         commits.append(last_commit)
-    outcome = bisect_all(commits, low, newest, run)
+    outcome = bisect_all(commits, low, newest, run, max_measured=max_measured)
     outcome["pennylane_alone"] = newest
     outcome["pennylane_share"] = share
     return outcome
@@ -489,6 +511,7 @@ def explain(
     bisect: bool = False,
     suite: str = "full",
     extras: tuple[str, ...] = (),
+    max_measured: int | None = None,
 ) -> Explanation:
     cell = find_cell(cell_name, suite)
     image = container.ensure_image()
@@ -531,6 +554,7 @@ def explain(
             list(cpus),
             metric,
             extras,
+            max_measured,
         )
         by_commit = {change.commit: change for change in merged["pennylane"]}
         for culprit in bisected.get("culprits", []):
@@ -579,7 +603,9 @@ def _render_bisect(bisected: dict, low: float) -> list[str]:
             f"{culprit['before']:,.0f} → {culprit['after']:,.0f}{portion}"
         )
     for commits in bisected.get("unresolved", []):
-        lines.append(f"- Somewhere among {len(commits)} commits that can't be measured")
+        lines.append(f"- Somewhere among {len(commits)} commits it couldn't resolve")
+    if bisected.get("stopped"):
+        lines.append(f"- It stopped there: {bisected['measured']} measurements was its limit")
     lines.append("")
     return lines
 

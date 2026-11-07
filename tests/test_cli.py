@@ -136,6 +136,34 @@ def test_the_page_counts_the_step_from_the_last_release_to_the_first_dev_build(t
     assert '"before_stack":"0.15.0","after_stack":"0.16.0.dev1"' in html
 
 
+def test_the_page_shows_what_a_follow_up_found(tmp_path):
+    data = tmp_path / "data"
+    (data / "nightly").mkdir(parents=True)
+    (data / "followups").mkdir()
+    _with_stack(data / "nightly", "0.16.0.dev1", 100)
+    _with_stack(data / "nightly", "0.16.0.dev2", 200)
+    key = "catalyst-0.16.0.dev1..catalyst-0.16.0.dev2/qft/qjit/instructions"
+    record = {
+        "key": key,
+        "confirmed": True,
+        "second": {"change_pct": 98.0},
+        "explanation": {
+            "cell": "qft/qjit",
+            "metric": "instructions",
+            "before": {"stack": "catalyst-0.16.0.dev1"},
+            "after": {"stack": "catalyst-0.16.0.dev2"},
+            "bisect": {"culprits": [{"subject": "Port QFT", "url": None}]},
+        },
+    }
+    (data / "followups" / "one.json").write_text(json.dumps(record))
+    none = str(tmp_path / "none")
+    arguments = ["site", "--stable", none, "--data", str(data), "--second-set", none]
+    assert cli.main([*arguments, "--explanations", none, "--out", str(tmp_path / "site")]) == 0
+    html = (tmp_path / "site" / "index.html").read_text()
+    assert '"confirmed":true,"second_change_pct":98.0' in html
+    assert '"text":"Port QFT"' in html
+
+
 def test_steps_can_be_limited_to_the_newest_two_builds(tmp_path, capsys):
     paths = [
         _with_stack(tmp_path, "0.16.0.dev1", 100),

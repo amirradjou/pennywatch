@@ -10,6 +10,7 @@ from pennywatch import (
     compare,
     container,
     explain,
+    followup,
     history,
     measure,
     publish,
@@ -80,6 +81,30 @@ def _parser() -> argparse.ArgumentParser:
     accept.add_argument("artifacts", type=Path)
     accept.add_argument("--into", type=Path, required=True)
     accept.add_argument("--planned", help="a JSON list: refuse results for any other build")
+
+    follow = commands.add_parser("followup", help="measure a nightly step again and explain it")
+    follow_commands = follow.add_subparsers(dest="followup", required=True)
+    follow_plan = follow_commands.add_parser("plan", help="which steps to follow up, as JSON")
+    follow_plan.add_argument("--data", type=Path, required=True)
+    follow_plan.add_argument("--stable", type=Path, default=Path("results/stable"))
+    follow_plan.add_argument("--limit", type=int, default=followup.LIMIT)
+    follow_plan.add_argument("--step", default="", help="one step by name, followed up or not")
+    follow_run = follow_commands.add_parser("run", help="measure one step again and explain it")
+    follow_run.add_argument("--step", required=True, help="one planned step, as JSON")
+    follow_run.add_argument("--out", type=Path, required=True)
+    follow_run.add_argument("--locks", type=Path, help="lock files of the first measurement")
+    follow_run.add_argument("--cpus", default="0,1")
+    follow_run.add_argument("--max-measured", type=int, default=followup.BISECT_MEASUREMENTS)
+    follow_record = follow_commands.add_parser("record", help="check what came back and store it")
+    follow_record.add_argument("artifacts", type=Path)
+    follow_record.add_argument("--into", type=Path, required=True)
+    follow_record.add_argument("--planned", required=True, help="the planned steps, as JSON")
+    follow_record.add_argument("--stable", type=Path, default=Path("results/stable"))
+    follow_record.add_argument("--run-id", default="")
+    follow_issue = follow_commands.add_parser("issue", help="an issue for the steps that held")
+    follow_issue.add_argument("--data", type=Path, required=True)
+    follow_issue.add_argument("--planned", required=True, help="the planned steps, as JSON")
+    follow_issue.add_argument("--body", type=Path, required=True, help="where to write the body")
 
     why = commands.add_parser("explain", help="narrow a change down to its pull requests")
     why.add_argument("before", help="Catalyst version before the change")
@@ -193,8 +218,52 @@ def site_command(args: argparse.Namespace) -> int:
         history.find_steps(stable + nightly),
         history.load_results(_json_files(args.second_set)),
     )
-    explanations = site.load_explanations(args.explanations)
+    records = followup.load(args.data)
+    steps = followup.apply(steps, records)
+    # A person's check beats a hand-run explanation, which beats a follow-up's.
+    explanations = followup.explanations(records) | site.load_explanations(args.explanations)
     print(site.write(site.page_data(stable, nightly, steps, gaps, explanations), args.out))
+    return 0
+
+
+def _planned(text: str) -> list[followup.FollowUp]:
+    return [followup.FollowUp.from_dict(item) for item in json.loads(text)]
+
+
+def followup_command(args: argparse.Namespace) -> int:
+    if args.followup == "plan":
+        planned = followup.plan(
+            history.load_results(_json_files(args.data / "nightly")),
+            followup.followed_keys(args.data),
+            limit=args.limit,
+            step=args.step,
+            stable=history.load_results(_json_files(args.stable)),
+        )
+        print(json.dumps([item.to_dict() for item in planned]))
+        return 0
+    if args.followup == "run":
+        return followup.run(
+            followup.FollowUp.from_dict(json.loads(args.step)),
+            args.out,
+            locks=args.locks,
+            cpus=tuple(int(cpu) for cpu in args.cpus.split(",")),
+            max_measured=args.max_measured,
+        )
+    if args.followup == "record":
+        results = history.load_results(_json_files(args.stable)) + history.load_results(
+            _json_files(args.into / "nightly")
+        )
+        for line in followup.record(
+            args.artifacts, args.into, _planned(args.planned), results, args.run_id
+        ):
+            print(line)
+        return 0
+    planned = {item.key for item in _planned(args.planned)}
+    written = followup.issue([r for r in followup.load(args.data) if r["key"] in planned])
+    if written is not None:
+        title, body = written
+        args.body.write_text(body)
+        print(title)
     return 0
 
 
@@ -229,6 +298,8 @@ def main(argv: list[str] | None = None) -> int:
         return site_command(args)
     if args.command == "explain":
         return explain_command(args)
+    if args.command == "followup":
+        return followup_command(args)
     if args.command == "pending":
         print(json.dumps(builds.pending(publish.done_builds(args.data), args.since, args.limit)))
         return 0
