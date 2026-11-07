@@ -30,7 +30,7 @@ and Catalyst 0.15.0, on a laptop and on GitHub's runners.
 |---|---|
 | Are instruction counts stable? | Repeat runs on one memory layout agree to about 0.005%, but that overstates it: see below |
 | Does memory layout move them? | Yes. 16 extra bytes of environment moved `trotter/lightning` by **0.58%**, with the same code on the same machine. Python's call counts stay exact (3,175,935 in each of six layouts), so the extra work is inside the interpreter |
-| Do GitHub's runners agree? | With the median of 3 layouts, within **0.28%** at worst and about 0.03% typically, on four runners across AMD EPYC and Intel Xeon. On single layouts they differed by up to 0.85%. The laptop agrees with them to 0.22% |
+| Do GitHub's runners agree? | With the median of 3 layouts, within **0.28%** at worst and about 0.03% typically, on four runners across AMD EPYC and Intel Xeon. On single layouts they differed by up to 0.85%. A laptop agrees less well: to 0.22% on this stack, but by up to 0.94% on instructions and 2.8% on peak memory across all eight releases, where four runners agreed on memory to 0.09%. So builds are compared runner with runner |
 | Can a small slowdown be seen? | The canary (1% extra gates, at least 3) showed up on 18 of 18 cells on this stack, and 144 of 144 across the eight releases, at 8 to 736 times the noise, compared with the full run on the same layout. Its delta holds steady across layouts: 5.3M to 5.7M on `trotter/lightning`, while the totals move 15M |
 | Does a busy machine disturb them? | With four spinning processes the count moved **0.0036%**, while wall-clock time was **3.5 times slower** |
 | Is wall-clock time usable instead? | The same circuit in one process ranged by 38%, so a 1% regression is invisible in it |
@@ -65,6 +65,7 @@ Repeat runs agree because they all share one layout, and a real pull request shi
 - A canary adds less than the layout noise, so it's compared with the full run on the same layout.
 - Builds can be compared across runners. Re-measuring the previous build on the same machine, which
   the plan held in reserve at twice the cost, isn't needed. **This is the comparison method M0 asked for.**
+  A runner and a laptop aren't as close, so a result from one isn't compared with the other.
 
 Most cells barely notice: `grover/default` moves 0.001% across layouts. The sensitive ones are
 `trotter/lightning` (0.34%), `qpe/lightning` (0.30%) and `sampling/lightning` (up to 0.49%).
@@ -116,7 +117,7 @@ QPE stays small because `default.qubit` builds a dense matrix for its inverse QF
 | | Milestone | Done when | Status |
 |---|---|---|---|
 | M0 | The instrument | `pennywatch run` reproduces the table above from code in a pinned image. Three circuits on three stacks. The canary is detected every time. Runs on two different days agree within 0.05%. The same suite on GitHub Actions: spread between runners measured and written down, and the comparison method chosen from it | All but one. The second day's run is waiting for a second day: see below |
-| M1 | History | All six circuits on the last eight stable releases, with an API adapter. Every step of 0.5% or more re-measured and listed with its numbers | Measured: 8 releases, 144 of 144 canaries, 166 steps in [the list](HISTORY.md). The second measurement is running |
+| M1 | History | All six circuits on the last eight stable releases, with an API adapter. Every step of 0.5% or more re-measured and listed with its numbers | **Done.** 8 releases, 144 of 144 canaries, 166 steps in [the list](HISTORY.md). Measured again on a laptop, all 166 came back the same way round and 159 the same size; the list says why the other 7 didn't |
 | M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | Built, and proven once from TestPyPI to the `data` branch. The schedule starts once it's on `main`, and the backfill needs the repo public: see below |
 | M3 | Explanation | For at least three real changes from M1 or M2, it names the responsible pull request or a candidate list, checked by reading the diff or bisecting. Wrong answers counted and published | **Done.** 7 real changes in [explanations](explanations.md), with the wrong answers counted |
 | M4 | Public page | The repo is public under MIT, with a static page showing each metric's history and what changed, credits, and the limits below. The Action's cost is under GitHub's free allowance | Page, licence and workflow are ready. Needs the repo public |
@@ -127,8 +128,6 @@ QPE stays small because `default.qubit` builds a dense matrix for its inverse QF
 - **M0.** On another day, run `uv run pennywatch run --stack 0.15.0 --suite full --out
   results/m0/laptop-full-catalyst-0.15.0-day2.json`, then `uv run pennywatch compare` it against
   `results/m0/laptop-full-catalyst-0.15.0-day1.json`, which fails if anything differs by more than 0.05%.
-- **M1.** Commit `results/stable-repeat/` when the second measurement finishes, regenerate
-  [the list](HISTORY.md), and look at any step it doesn't confirm.
 - **M2.** Merge to `main` to start the schedule. Measuring all 63 dev builds takes about 55 hours of runner time, far
   past what a private repo gets, so the backfill waits for the repo to go public. Then fourteen nights unattended.
 - **M4.** Make the repo public, which also makes Actions free, then turn on Pages with GitHub Actions as the source.
