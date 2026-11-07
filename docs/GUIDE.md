@@ -7,7 +7,8 @@ stack, which takes a few minutes and about 2 GiB.
 ## Measuring
 
 ```sh
-uv run pennywatch run --suite smoke --repeats 1 --no-busy-check   # check the plumbing, in minutes
+uv run pennywatch run --suite full --cells qft/lightning --repeats 1 --no-busy-check   # one real circuit
+uv run pennywatch run --suite smoke --repeats 1 --no-busy-check   # all the plumbing; its numbers mean nothing
 uv run pennywatch run                                             # three circuits, one stack
 uv run pennywatch run --suite full --stack 0.14.1                 # all six, on any release
 uv run pennywatch run --stack 0.16.0.dev134                       # a dev build from TestPyPI

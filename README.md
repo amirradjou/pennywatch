@@ -31,11 +31,11 @@ You need Docker and [uv](https://docs.astral.sh/uv/).
 
 ```sh
 git clone https://github.com/amirradjou/pennywatch && cd pennywatch
-uv run pennywatch run --suite smoke --cells qft/lightning --repeats 1 --no-busy-check
+uv run pennywatch run --suite full --cells qft/lightning --repeats 1 --no-busy-check
 ```
 
-The first run builds the image and installs a stack, which takes a few minutes and about 2 GiB. It
-prints a table of what it measured. Then:
+That measures one real circuit. The first run builds the image and installs a stack, which takes a few
+minutes and about 2 GiB, and it ends with a table of what it found. Then:
 
 ```sh
 uv run pennywatch run --suite full --cells qft/lightning --stack 0.14.1      # any release, or dev build

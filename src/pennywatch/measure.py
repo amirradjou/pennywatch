@@ -443,6 +443,7 @@ def run_suite(
     busy_check: bool,
     keep_raw: Path | None = None,
     memory_wires: int | None = None,
+    judge_canaries: bool = True,
 ) -> dict:
     image = container.ensure_image()
     if not stack.lock_path.exists():
@@ -475,11 +476,12 @@ def run_suite(
         )
 
     problems = problems_with(outcomes, versions)
-    problems += [
-        f"{summary['name']}: the canary was not detected"
-        for summary in summaries
-        if "canary" in summary and not summary["canary"]["detected"]
-    ]
+    if judge_canaries:
+        problems += [
+            f"{summary['name']}: the canary was not detected"
+            for summary in summaries
+            if "canary" in summary and not summary["canary"]["detected"]
+        ]
     return {
         "schema": SCHEMA,
         "started_at": started.isoformat(timespec="seconds"),

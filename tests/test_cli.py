@@ -59,6 +59,25 @@ def test_a_cell_outside_the_suite_is_an_error():
         cli.chosen_cells("m0", "qpe/qjit,qft/qjit")
 
 
+def _suite_run_captured(monkeypatch):
+    seen = {}
+
+    def capture(*args, **kwargs):
+        seen.update(kwargs)
+        raise stacks.StackUnavailable("stop here")
+
+    monkeypatch.setattr(measure, "run_suite", capture)
+    return seen
+
+
+def test_the_smoke_suite_does_not_judge_canaries_and_a_real_suite_does(tmp_path, monkeypatch):
+    seen = _suite_run_captured(monkeypatch)
+    cli.main(["run", "--suite", "smoke", "--out", str(tmp_path / "a.json")])
+    assert seen["judge_canaries"] is False
+    cli.main(["run", "--suite", "full", "--out", str(tmp_path / "b.json")])
+    assert seen["judge_canaries"] is True
+
+
 def test_a_build_that_cannot_be_measured_is_saved_as_rejected_with_the_reason(
     tmp_path, monkeypatch, capsys
 ):

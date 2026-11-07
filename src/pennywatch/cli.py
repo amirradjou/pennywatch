@@ -139,6 +139,8 @@ def run_command(args: argparse.Namespace) -> int:
             busy_check=not args.no_busy_check,
             keep_raw=args.keep_raw,
             memory_wires=None if args.cells else MEMORY_WIRES.get(args.suite),
+            # Too small for 1% extra gates to clear the noise, and its numbers mean nothing anyway.
+            judge_canaries=args.suite != "smoke",
         )
     except stacks.StackUnavailable as error:
         result = measure.unavailable_result(stack, str(error))
