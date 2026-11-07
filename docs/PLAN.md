@@ -116,7 +116,7 @@ QPE stays small because `default.qubit` builds a dense matrix for its inverse QF
 
 | | Milestone | Done when | Status |
 |---|---|---|---|
-| M0 | The instrument | `pennywatch run` reproduces the table above from code in a pinned image. Three circuits on three stacks. The canary is detected every time. Runs on two different days agree within 0.05%. The same suite on GitHub Actions: spread between runners measured and written down, and the comparison method chosen from it | All but one. The second day's run is waiting for a second day: see below |
+| M0 | The instrument | `pennywatch run` reproduces the table above from code in a pinned image. Three circuits on three stacks. The canary is detected every time. Runs on two different days agree within 0.05%. The same suite on GitHub Actions: spread between runners measured and written down, and the comparison method chosen from it | **Done.** The full suite on the laptop on 2026-11-06 and 2026-11-07 agrees to 0.025% at worst. Peak memory moved up to 0.35%, under its 0.5% threshold |
 | M1 | History | All six circuits on the last eight stable releases, with an API adapter. Every step of 0.5% or more re-measured and listed with its numbers | **Done.** 8 releases, 144 of 144 canaries, 166 steps in [the list](HISTORY.md). Measured again on a laptop, all 166 came back the same way round and 159 the same size; the list says why the other 7 didn't |
 | M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | Built, and proven once from TestPyPI to the `data` branch. The schedule starts once it's on `main`, and the backfill needs the repo public: see below |
 | M3 | Explanation | For at least three real changes from M1 or M2, it names the responsible pull request or a candidate list, checked by reading the diff or bisecting. Wrong answers counted and published | **Done.** 7 real changes in [explanations](explanations.md), with the wrong answers counted |
@@ -125,9 +125,6 @@ QPE stays small because `default.qubit` builds a dense matrix for its inverse QF
 
 ### What's left
 
-- **M0.** On another day, run `uv run pennywatch run --stack 0.15.0 --suite full --out
-  results/m0/laptop-full-catalyst-0.15.0-day2.json`, then `uv run pennywatch compare` it against
-  `results/m0/laptop-full-catalyst-0.15.0-day1.json`, which fails if anything differs by more than 0.05%.
 - **M2.** Merge to `main` to start the schedule. Measuring all 63 dev builds takes about 55 hours of runner time, far
   past what a private repo gets, so the backfill waits for the repo to go public. Then fourteen nights unattended.
 - **M4.** Make the repo public, which also makes Actions free, then turn on Pages with GitHub Actions as the source.
