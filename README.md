@@ -40,7 +40,7 @@ minutes and about 2 GiB, and it ends with a table of what it found. Then:
 ```sh
 uv run pennywatch run --suite full --cells qft/lightning --stack 0.14.1      # any release, or dev build
 uv run pennywatch steps results/stable/*.json                                # what changed between releases
-uv run pennywatch explain 0.14.1 0.15.0 --cell qft/default                   # which pull requests did it
+uv run pennywatch explain 0.12.0 0.13.0 --cell qft/default                   # what caused one of them
 ```
 
 ## How it works

@@ -44,8 +44,8 @@ for like. `--second-set` marks each step as confirmed or not against separate re
 ## Explaining a change
 
 ```sh
-uv run pennywatch explain 0.14.1 0.15.0 --cell qft/default
-uv run pennywatch explain 0.14.1 0.15.0 --cell qft/default --bisect
+uv run pennywatch explain 0.12.0 0.13.0 --cell qft/default
+uv run pennywatch explain 0.15.0 0.16.0.dev135 --cell qpe/default --bisect
 ```
 
 This re-measures the cell on both builds, then lists what merged between them:
