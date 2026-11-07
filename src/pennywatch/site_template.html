@@ -360,7 +360,7 @@ function drawSteps() {
     tr.append(el("td", { class: "num" }, shown(row.before, unit)), el("td", { class: "num" }, shown(row.after, unit)));
     const change = row.change_pct === null ? "" : pct(row.change_pct);
     tr.append(el("td", { class: "num " + (row.change_pct > 0 ? "up" : "down") }, (row.change_pct > 0 ? "▲ " : "▼ ") + change));
-    tr.append(el("td", {}, row.confirmed === null ? "not yet" : row.confirmed ? "yes" : "no"));
+    tr.append(el("td", {}, confirmation(row)));
     const why = el("td", { class: "wrap" });
     if (row.explanation) {
       if (row.explanation.url && /^https:\/\/github\.com\//.test(row.explanation.url)) {
@@ -373,6 +373,12 @@ function drawSteps() {
     body.append(tr);
   }
   table.append(body);
+}
+
+function confirmation(row) {
+  if (row.confirmed === null) return "not yet";
+  if (row.confirmed) return "yes";
+  return typeof row.second_change_pct === "number" ? `no: ${pct(row.second_change_pct)} when re-measured` : "no";
 }
 
 function drawTiles() {

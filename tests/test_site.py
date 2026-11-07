@@ -94,6 +94,16 @@ def test_steps_carry_their_numbers_and_explanation():
     assert row["explanation"]["text"] == "#1"
 
 
+def test_a_step_carries_what_the_second_measurement_saw():
+    steps = history.confirm_steps(
+        history.find_steps([result("0.9.0", 100), result("0.10.0", 110)]),
+        [result("0.9.0", 100), result("0.10.0", 120)],
+    )
+    row = next(r for r in site.step_rows(steps) if r["cell"] == "qft/qjit")
+    assert row["confirmed"] is False
+    assert row["second_change_pct"] == pytest.approx(20.0)
+
+
 def test_imports_are_one_chart_with_a_line_per_backend():
     data = site.page_data([result("0.9.0", 100)], [], [])
     panel = data["stable"]["panels"]["imports"][0]

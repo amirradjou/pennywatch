@@ -113,6 +113,7 @@ class Step:
     change_pct: float | None
     packages_changed: tuple[str, ...]
     confirmed: bool | None = None  # None: not re-measured
+    second_change_pct: float | None = None  # the same change in the second measurement
 
     @property
     def is_counted(self) -> bool:
@@ -155,22 +156,32 @@ def find_steps(results: list[dict]) -> list[Step]:
     return steps
 
 
-def _confirmed(step: Step, second: dict[str, dict]) -> bool | None:
-    """Whether a second set of results shows a step too, the same way round and about the same size.
+def _second_pair(step: Step, second: dict[str, dict]) -> tuple[float, float, dict, dict] | None:
+    """The step's two figures in a second set of results, and the results they came from.
     None if it lacks either build."""
     if step.before_stack not in second or step.after_stack not in second:
         return None
-    key = (step.cell, step.metric)
     first, last = second[step.before_stack], second[step.after_stack]
+    key = (step.cell, step.metric)
     before = metrics_of(first).get(key)
     after = metrics_of(last).get(key)
     if before is None or after is None:
         return None
+    return before, after, first, last
+
+
+def _confirmed(step: Step, pair: tuple[float, float, dict, dict] | None) -> bool | None:
+    """Whether a second set of results shows a step too, the same way round and about the same size.
+    None if it lacks either build."""
+    if pair is None:
+        return None
+    before, after, first, last = pair
     if not step.is_counted:
         return (before, after) == (step.before, step.after)
     change = change_pct(before, after)
     if change is None or step.change_pct is None:
         return False
+    key = (step.cell, step.metric)
     if not is_step(step.metric, before, after, runs_of(first).get(key), runs_of(last).get(key)):
         return False
     return abs(change - step.change_pct) <= max(
@@ -180,7 +191,15 @@ def _confirmed(step: Step, second: dict[str, dict]) -> bool | None:
 
 def confirm_steps(steps: list[Step], second_set: list[dict]) -> list[Step]:
     second = {result["stack"]["id"]: result for result in second_set}
-    return [Step(**(asdict(step) | {"confirmed": _confirmed(step, second)})) for step in steps]
+    confirmed = []
+    for step in steps:
+        pair = _second_pair(step, second)
+        found = {
+            "confirmed": _confirmed(step, pair),
+            "second_change_pct": None if pair is None else change_pct(pair[0], pair[1]),
+        }
+        confirmed.append(Step(**(asdict(step) | found)))
+    return confirmed
 
 
 def load_results(paths: list[Path]) -> list[dict]:
@@ -193,10 +212,16 @@ def _number(value: float) -> str:
     return f"{value:,.0f}"
 
 
-def _change(step: Step) -> str:
-    if step.change_pct is None:
+def _change(change: float | None) -> str:
+    if change is None:
         return "from zero"
-    return f"{step.change_pct:+.2f}%"
+    return f"{change:+.2f}%"
+
+
+def _second(step: Step) -> str:
+    if step.confirmed is None:
+        return ""
+    return _change(step.second_change_pct)
 
 
 def _status(step: Step) -> str:
@@ -207,15 +232,15 @@ def render_steps(steps: list[Step]) -> str:
     if not steps:
         return "No steps.\n"
     lines = [
-        "| Between | Cell | Metric | Before | After | Change | Confirmed |",
-        "|---|---|---|---:|---:|---:|---|",
+        "| Between | Cell | Metric | Before | After | Change | Re-measured | Confirmed |",
+        "|---|---|---|---:|---:|---:|---:|---|",
     ]
     for step in steps:
         between = f"{clean_name(step.before_stack)} → {clean_name(step.after_stack)}"
         lines.append(
             f"| {between} | {clean_name(step.cell)} | {clean_name(step.metric)} "
-            f"| {_number(step.before)} | {_number(step.after)} | {_change(step)} "
-            f"| {_status(step)} |"
+            f"| {_number(step.before)} | {_number(step.after)} | {_change(step.change_pct)} "
+            f"| {_second(step)} | {_status(step)} |"
         )
     return "\n".join(lines) + "\n"
 

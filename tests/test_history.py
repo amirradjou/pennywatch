@@ -147,6 +147,15 @@ def test_a_second_measurement_showing_something_else_does_not_confirm():
     assert history.confirm_steps(find_steps(first), second)[0].confirmed is False
 
 
+def test_a_step_keeps_the_size_the_second_measurement_saw():
+    first = [result("0.8.1", cell(1000)), result("0.9.0", cell(1100))]
+    second = [result("0.8.1", cell(1000)), result("0.9.0", cell(1200))]
+    step = history.confirm_steps(find_steps(first), second)[0]
+    assert step.confirmed is False
+    assert step.second_change_pct == 20.0
+    assert "| +10.00% | +20.00% | NO |" in history.render_steps([step])
+
+
 def test_a_step_with_no_second_measurement_says_so():
     first = [result("0.8.1", cell(1000)), result("0.9.0", cell(1100))]
     assert history.confirm_steps(find_steps(first), first[:1])[0].confirmed is None

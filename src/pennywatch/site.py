@@ -165,6 +165,7 @@ def step_rows(steps: list[history.Step], explanations: dict | None = None) -> li
                 "after": step.after,
                 "change_pct": step.change_pct,
                 "confirmed": step.confirmed,
+                "second_change_pct": step.second_change_pct,
                 "explanation": explanations.get(key),
             }
         )
