@@ -1,0 +1,771 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.8.1..catalyst-0.9.0/grover/lightning/instructions",
+ "name": "0.8.1--0.9.0--grover-lightning--instructions",
+ "before": "0.8.1",
+ "after": "0.9.0",
+ "cell": "grover/lightning",
+ "metric": "instructions",
+ "first": {
+  "before": 1291270395,
+  "after": 1199927306,
+  "change_pct": -7.073893225903316
+ },
+ "second": {
+  "before": 1291791125,
+  "after": 1200583448,
+  "change_pct": -7.060559190635406,
+  "host": "AMD EPYC 9V45 96-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "grover/lightning",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.8.1",
+   "runs": [
+    1291791258,
+    1291736507,
+    1292287345
+   ],
+   "net": 1291791258
+  },
+  "after": {
+   "stack": "catalyst-0.9.0",
+   "runs": [
+    1200583316,
+    1200508424,
+    1201452763
+   ],
+   "net": 1200583316
+  },
+  "packages": [
+   "autoray 0.6.12 ? 0.7.0",
+   "charset-normalizer 3.3.2 ? 3.4.0",
+   "idna 3.8 ? 3.10",
+   "ml-dtypes 0.4.0 ? 0.5.0",
+   "networkx 3.3 ? 3.4.2",
+   "numpy 1.26.4 ? 2.0.2",
+   "opt-einsum 3.3.0 ? 3.4.0",
+   "pennylane 0.38.0 ? 0.39.0",
+   "pennylane-catalyst 0.8.1 ? 0.9.0",
+   "pennylane-lightning 0.38.0 ? 0.39.0",
+   "scipy 1.12.0 ? 1.13.0",
+   "termcolor 2.4.0 ? 2.5.0"
+  ],
+  "python_functions": [
+   [
+    "<frozen abc>:__instancecheck__",
+    16428,
+    10507
+   ],
+   [
+    "~:<built-in method _abc._abc_instancecheck>",
+    16428,
+    10507
+   ],
+   [
+    "~:<built-in method builtins.isinstance>",
+    17761,
+    12459
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    5505,
+    844
+   ],
+   [
+    "pennylane/operation.py:name",
+    1406,
+    37
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    7259,
+    5917
+   ],
+   [
+    "pennylane/math/utils.py:_get_interface_of_single_tensor",
+    54,
+    1038
+   ],
+   [
+    "~:<method 'split' of 'str' objects>",
+    56,
+    1040
+   ],
+   [
+    "~:<built-in method builtins.hasattr>",
+    1719,
+    784
+   ],
+   [
+    "autoray/autoray.py:infer_backend",
+    108,
+    960
+   ],
+   [
+    "pennylane/operation.py:wires",
+    2167,
+    1410
+   ],
+   [
+    "pennylane/tape/qscript.py:<genexpr>",
+    1357,
+    601
+   ],
+   [
+    "pennylane_lightning/core/_serialize.py:sv_type",
+    750,
+    0
+   ],
+   [
+    "~:<method 'extend' of 'list' objects>",
+    1122,
+    374
+   ],
+   [
+    "pennylane/transforms/convert_to_numpy_parameters.py:<genexpr>",
+    746,
+    0
+   ]
+  ],
+  "c_functions": [
+   [
+    "Pennylane::LightningQubit::Measures::Measurements<Pennylane::LightningQubit::StateVectorLQubitManaged<double> >::expval(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > ",
+    75498588,
+    0
+   ],
+   [
+    "???",
+    143075151,
+    196404182
+   ],
+   [
+    "Pennylane::LightningQubit::StateVectorLQubitManaged<double>::StateVectorLQubitManaged(Pennylane::LightningQubit::StateVectorLQubitManaged<double> const&)",
+    33031566,
+    0
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    40781926,
+    31567376
+   ],
+   [
+    "void Pennylane::LightningQubit::Gates::GateImplementationsLM::applyNCGlobalPhase<double, double>(std::complex<double>*, unsigned long, std::vector<unsigned long, std::allocator<unsigned long> > const&",
+    59769684,
+    51905448
+   ],
+   [
+    "__tls_get_addr",
+    14658292,
+    11968649
+   ],
+   [
+    "_PyType_Lookup",
+    5888416,
+    4530489
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    3786310,
+    2996307
+   ],
+   [
+    "_int_malloc",
+    1666543,
+    925352
+   ],
+   [
+    "PyObject_GC_Del",
+    2261419,
+    1528600
+   ],
+   [
+    "Pennylane::LightningQubit::StateVectorLQubit<double, Pennylane::LightningQubit::StateVectorLQubitManaged<double> >::resetStateVector()",
+    655376,
+    0
+   ],
+   [
+    "_PyObject_GC_New",
+    2398086,
+    1798524
+   ],
+   [
+    "PyObject_GetAttr",
+    1972186,
+    1499118
+   ],
+   [
+    "free",
+    1016029,
+    557769
+   ],
+   [
+    "PyObject_RichCompare",
+    2192303,
+    1757803
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 3032,
+     "subject": "Remove 'Operator.expand' (#6227)",
+     "pull_request": 6227,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6227"
+    },
+    {
+     "score": 3032,
+     "subject": "'devices.qubit.measure' uses 'csr_dot_products' only when it is usable. (#6278)",
+     "pull_request": 6278,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6278"
+    },
+    {
+     "score": 3032,
+     "subject": "Fix failure in legacy opmath (#6310)",
+     "pull_request": 6310,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6310"
+    },
+    {
+     "score": 3032,
+     "subject": "Legacy operator arithmetic deprecation (#6287)",
+     "pull_request": 6287,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6287"
+    },
+    {
+     "score": 3032,
+     "subject": "Add generator checks and differentiability checks to assert_valid (#6282)",
+     "pull_request": 6282,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6282"
+    },
+    {
+     "score": 2970,
+     "subject": "Adding string representation for some operators (#6493)",
+     "pull_request": 6493,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6493"
+    },
+    {
+     "score": 2970,
+     "subject": "Revert \"Adding string representation for some operators\" (#6501)",
+     "pull_request": 6501,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6501"
+    },
+    {
+     "score": 2922,
+     "subject": "Correct some typos across the codebase (#6280)",
+     "pull_request": 6280,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6280"
+    },
+    {
+     "score": 867,
+     "subject": "[BugFix] - PennyLane raises an informative error if running circuit(s) with dynamic tracers as wires (#6405)",
+     "pull_request": 6405,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6405"
+    },
+    {
+     "score": 829,
+     "subject": "Final RC sync for v0.38 (#6205)",
+     "pull_request": 6205,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6205"
+    },
+    {
+     "score": 829,
+     "subject": "'qml.wire.Wires' accepts 'JAX' arrays (#6312)",
+     "pull_request": 6312,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6312"
+    },
+    {
+     "score": 808,
+     "subject": "Final documentation fixes for 0.39 feature freeze (#6469)",
+     "pull_request": 6469,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6469"
+    },
+    {
+     "score": 770,
+     "subject": "remove default.qubit.autograd (#6210)",
+     "pull_request": 6210,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6210"
+    },
+    {
+     "score": 770,
+     "subject": "Add update kwarg to QuantumScript.copy (#6285)",
+     "pull_request": 6285,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6285"
+    },
+    {
+     "score": 770,
+     "subject": "Avoid duplicate diagonalizing_gates (#6288)",
+     "pull_request": 6288,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6288"
+    },
+    {
+     "score": 770,
+     "subject": "Fix handling of trainable_params in qs.copy (#6363)",
+     "pull_request": 6363,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6363"
+    },
+    {
+     "score": 638,
+     "subject": "Add 'H' as an alias for Hadamard operator (#6450)",
+     "pull_request": 6450,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6450"
+    },
+    {
+     "score": 216,
+     "subject": "Handle recursion errors in CompositeOp methods (#6375)",
+     "pull_request": 6375,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6375"
+    },
+    {
+     "score": 72,
+     "subject": "[Program Capture] Capture & execute 'qml.grad' in plxpr (#6120)",
+     "pull_request": 6120,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6120"
+    },
+    {
+     "score": 72,
+     "subject": "Fix bug where unexpected queuing occurs in qml.ctrl among other functions (#6474)",
+     "pull_request": 6474,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6474"
+    },
+    {
+     "score": 39,
+     "subject": "Various removals for v0.39 (#6203)",
+     "pull_request": 6203,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6203"
+    },
+    {
+     "score": 39,
+     "subject": "Deprecate'QNode.gradient_fn' (#6244)",
+     "pull_request": 6244,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6244"
+    },
+    {
+     "score": 39,
+     "subject": "Clean up how 'interface' is handled in 'QNode' and 'qml.execute' (#6225)",
+     "pull_request": 6225,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6225"
+    },
+    {
+     "score": 39,
+     "subject": "Remove 'AllWires' validation and associated tests (#6373)",
+     "pull_request": 6373,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6373"
+    },
+    {
+     "score": 39,
+     "subject": "Extract 'qfunc_output' and 'tape.measurement' validation to private helper function (#6370)",
+     "pull_request": 6370,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6370"
+    },
+    {
+     "score": 38,
+     "subject": "Fix snapshot wire order when simulation indices different than device wires (#6461)",
+     "pull_request": 6461,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6461"
+    },
+    {
+     "score": 2,
+     "subject": "Adding documentation on device docs (#6325)",
+     "pull_request": 6325,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6325"
+    },
+    {
+     "score": 0,
+     "subject": "Bump dev version to 0.39 (#6142)",
+     "pull_request": 6142,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6142"
+    },
+    {
+     "score": 0,
+     "subject": "Update reviewer for RC sync workflow (#6152)",
+     "pull_request": 6152,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6152"
+    },
+    {
+     "score": 0,
+     "subject": "Daily rc sync to master (#6150)",
+     "pull_request": 6150,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/6150"
+    }
+   ],
+   "pennylane-lightning": [
+    {
+     "score": 1576,
+     "subject": "Chunk Hamiltonian, PauliSentence, LinearCombination [sc-65680] (#873)",
+     "pull_request": 873,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/873"
+    },
+    {
+     "score": 1530,
+     "subject": "Enable 'enable_new_opmath' for 'lightning.tensor' (#919)",
+     "pull_request": 919,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/919"
+    },
+    {
+     "score": 907,
+     "subject": "Unify Lightning Kokkos device and Lightning Qubit device under a Lightning Base device (#876)",
+     "pull_request": 876,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/876"
+    },
+    {
+     "score": 907,
+     "subject": "Migration of 'lightning.gpu' device to the new device API (#853)",
+     "pull_request": 853,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/853"
+    },
+    {
+     "score": 834,
+     "subject": "Uniform Python format to adhere PL style; Always decompose qml.QFT in Lightning (#924)",
+     "pull_request": 924,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/924"
+    },
+    {
+     "score": 727,
+     "subject": "Update ecosystem build tooling  (#901)",
+     "pull_request": 901,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/901"
+    },
+    {
+     "score": 727,
+     "subject": "Remove magic numbers in Lightning stopping_conditions (#926)",
+     "pull_request": 926,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/926"
+    },
+    {
+     "score": 54,
+     "subject": "Update probs in Lightning.GPU (#941)",
+     "pull_request": 941,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/941"
+    },
+    {
+     "score": 0,
+     "subject": "Cron jobs for 0.38.0 release (#872)",
+     "pull_request": 872,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/872"
+    },
+    {
+     "score": 0,
+     "subject": "Point to the right Lightning root folder independently from the invocation folder (#874)",
+     "pull_request": 874,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/874"
+    },
+    {
+     "score": 0,
+     "subject": "Optimize  gate cache recording for 'lightning.tensor' (#879)",
+     "pull_request": 879,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/879"
+    },
+    {
+     "score": 0,
+     "subject": "Version Bump (#884)",
+     "pull_request": 884,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/884"
+    },
+    {
+     "score": 0,
+     "subject": " Migration of LightningKokkos to the new device API (#810)",
+     "pull_request": 810,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/810"
+    },
+    {
+     "score": 0,
+     "subject": "Update/actions (#887)",
+     "pull_request": 887,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/887"
+    },
+    {
+     "score": 0,
+     "subject": "Correctly querying wire IDs for 'SetState' and 'SetBasisState' in L-Kokkos (#878)",
+     "pull_request": 878,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/878"
+    },
+    {
+     "score": 0,
+     "subject": "Fix the artifact name in LGPU and remove old installation commands in stable installation of LQ & LK (#890)",
+     "pull_request": 890,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/890"
+    },
+    {
+     "score": 0,
+     "subject": "Add controlled gate support to 'lightning.tensor' (#880)",
+     "pull_request": 880,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/880"
+    },
+    {
+     "score": 0,
+     "subject": "Update Version (#898)",
+     "pull_request": 898,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/898"
+    },
+    {
+     "score": 0,
+     "subject": "Update Py3.9 to 3.10 minimum (#891)",
+     "pull_request": 891,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/891"
+    },
+    {
+     "score": 0,
+     "subject": "Replace toml with tomllib & tomli (#857)",
+     "pull_request": 857,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/857"
+    },
+    {
+     "score": 0,
+     "subject": "Migrate wheels artifacts to v4 (#893)",
+     "pull_request": 893,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/893"
+    },
+    {
+     "score": 0,
+     "subject": "Solve test measurements issue with CI (#895)",
+     "pull_request": 895,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/895"
+    },
+    {
+     "score": 0,
+     "subject": "Add Projector Obs to LGPU (#894)",
+     "pull_request": 894,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/894"
+    },
+    {
+     "score": 0,
+     "subject": "Remove PowerPC wheels for LQ (#902)",
+     "pull_request": 902,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/902"
+    },
+    {
+     "score": 0,
+     "subject": "Build LTensor wheels on Linux x86_64 and aarch64 (#862)",
+     "pull_request": 862,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/862"
+    },
+    {
+     "score": 0,
+     "subject": "Add native PauliRot implementation in LightningKokkos [sc-71642] (#855)",
+     "pull_request": 855,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/855"
+    },
+    {
+     "score": 0,
+     "subject": "Prevent labels from triggering CI (#899)",
+     "pull_request": 899,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/899"
+    },
+    {
+     "score": 0,
+     "subject": "Import QubitDevice from devices module (#897)",
+     "pull_request": 897,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/897"
+    },
+    {
+     "score": 0,
+     "subject": "Add shot measurement support to 'lightning.tensor' (#852)",
+     "pull_request": 852,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/852"
+    },
+    {
+     "score": 0,
+     "subject": "Skip binaries in the docs build script (#904)",
+     "pull_request": 904,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/904"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Bump Catalyst dev version (#1053)",
+     "pull_request": 1053,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1053"
+    },
+    {
+     "score": 0,
+     "subject": "Fix how we install lightning kokkos from source (#1064)",
+     "pull_request": 1064,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1064"
+    },
+    {
+     "score": 0,
+     "subject": "Split release notes in different  files (main) (#1069)",
+     "pull_request": 1069,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1069"
+    },
+    {
+     "score": 0,
+     "subject": "Fix 'compile_executable' tests and builld python3.10 from source in linux-arm64 script (#1048)",
+     "pull_request": 1048,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1048"
+    },
+    {
+     "score": 0,
+     "subject": "Add install ccache step for MacOS (#1074)",
+     "pull_request": 1074,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1074"
+    },
+    {
+     "score": 0,
+     "subject": "Rc sync action (#1059)",
+     "pull_request": 1059,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1059"
+    },
+    {
+     "score": 0,
+     "subject": "Remove MemcpyOptPass from O2 for Enzyme (#1063)",
+     "pull_request": 1063,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1063"
+    },
+    {
+     "score": 0,
+     "subject": "Update changelog reminder (#1080)",
+     "pull_request": 1080,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1080"
+    },
+    {
+     "score": 0,
+     "subject": "Update RC sync action (#1081)",
+     "pull_request": 1081,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1081"
+    },
+    {
+     "score": 0,
+     "subject": "Daily rc sync to main (#1087)",
+     "pull_request": 1087,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1087"
+    },
+    {
+     "score": 0,
+     "subject": "Daily rc sync to main (#1091)",
+     "pull_request": 1091,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1091"
+    },
+    {
+     "score": 0,
+     "subject": "Daily rc sync to main (#1095)",
+     "pull_request": 1095,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1095"
+    },
+    {
+     "score": 0,
+     "subject": "[Tests] Avoid warning from PL. (#1039)",
+     "pull_request": 1039,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1039"
+    },
+    {
+     "score": 0,
+     "subject": "Fixing 'gather batching rule not implemented' when multiple qjits call them (#1096)",
+     "pull_request": 1096,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1096"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] default.qubit.jax -> default.qubit (#1101)",
+     "pull_request": 1101,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1101"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Remove control_wires from MultiControlledX (#1102)",
+     "pull_request": 1102,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1102"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Do not test legacy Hamiltonian. (#1103)",
+     "pull_request": 1103,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1103"
+    },
+    {
+     "score": 0,
+     "subject": "Implement to support shot-vector to Catalyst (#1051)",
+     "pull_request": 1051,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1051"
+    },
+    {
+     "score": 0,
+     "subject": "Move minimum Python version from 3.9 to 3.10 (#1104)",
+     "pull_request": 1104,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1104"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Delete expand tests (#1108)",
+     "pull_request": 1108,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1108"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] tensor observable acts on overlapping wires (#1107)",
+     "pull_request": 1107,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1107"
+    },
+    {
+     "score": 0,
+     "subject": "[Frontend] Remove static_size from AbstractQreg (#1113)",
+     "pull_request": 1113,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1113"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Add unit tests for 'AccelerateContext' (#1112)",
+     "pull_request": 1112,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1112"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Remove test for operator.expand (#1114)",
+     "pull_request": 1114,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1114"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Remove warning from complex to float cast (#1115)",
+     "pull_request": 1115,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1115"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Explicitly pass 'ExecutionConfig' to qjit device in 'test_qjit_device' (#1117)",
+     "pull_request": 1117,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1117"
+    },
+    {
+     "score": 0,
+     "subject": "Add full support for JAX linear algebra functions invoked from within a 'qjit' block (#1097)",
+     "pull_request": 1097,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1097"
+    },
+    {
+     "score": 0,
+     "subject": "ZNE local folding (#1006)",
+     "pull_request": 1006,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1006"
+    },
+    {
+     "score": 0,
+     "subject": "[tests] Change 'sum_expand' to 'split_non_commuting' (#1100)",
+     "pull_request": 1100,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1100"
+    },
+    {
+     "score": 0,
+     "subject": "Fix broken link in slack notification (#1111)",
+     "pull_request": 1111,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/1111"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 183,
+   "pennylane-lightning": 77,
+   "pennylane-catalyst": 118
+  },
+  "bisect": {
+   "verdict": "PennyLane alone gives 41% of the step, so the cause is elsewhere: another package or the third-party ones.",
+   "pennylane_alone": 1254697068
+  }
+ },
+ "problems": [],
+ "run": "42423533768",
+ "recorded_at": "2026-11-07T23:09:31+00:00"
+}
