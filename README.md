@@ -18,6 +18,7 @@ cost changes, it finds the pull request behind it.
 | `qpe/lightning`, on dev builds | +622% | Operators moving to `Operator2`, mostly `PhaseShift` ([#9951](https://github.com/PennyLaneAI/pennylane/pull/9951)) | Bisecting, commit by commit |
 | `trotter/lightning`, on dev builds | +102% | `qp.prod` moving to `Prod2` ([#10113](https://github.com/PennyLaneAI/pennylane/pull/10113)), and three smaller ones | Bisecting, commit by commit |
 | `default.qubit` cells, at 0.43 | -11% | numpy 2.4, and not PennyLane at all | Changing only numpy on the older stack |
+| Lightning's peak memory, at 0.41 | -44% | Expectation values computed in place, not on a copy of the state ([#1079](https://github.com/PennyLaneAI/pennylane-lightning/pull/1079)) | Swapping only Lightning, both ways round |
 | `qpe/lightning`, at 0.40 | -94% | Lightning keeping controlled powers whole, not expanding them ([#988](https://github.com/PennyLaneAI/pennylane-lightning/pull/988)) | Reading the code, since it can't be bisected |
 
 The dev builds are mid-migration and these aren't released yet, so that part of the history may well change.

@@ -14,5 +14,13 @@
  "catalyst-0.15.0..catalyst-0.16.0.dev135/qpe/default/instructions": {
   "text": "QFT's matrix lost its cache when it moved to Operator2 (#9932). Adding it back halves the cell",
   "url": "https://github.com/PennyLaneAI/pennylane/pull/9932"
+ },
+ "catalyst-0.10.0..catalyst-0.11.0/memory/lightning/peak_kb": {
+  "text": "Expectation values computed in place, not on a copy of the state (#1079). Swapping Lightning alone moves it",
+  "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1079"
+ },
+ "catalyst-0.10.0..catalyst-0.11.0/memory/qjit/peak_kb": {
+  "text": "Expectation values computed in place, not on a copy of the state (#1079). Swapping Lightning alone moves it",
+  "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1079"
  }
 }

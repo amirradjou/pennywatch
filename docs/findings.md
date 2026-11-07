@@ -75,11 +75,35 @@ From 0.45.1 to 0.46.0.dev142, in instructions: `qpe/lightning` +622%, `qpe/defau
 [explanations](explanations.md). `Operator2.__init__` calls `Signature.bind`, and the profile shows the new calls in
 `inspect.py`. The migration is still in progress and hasn't reached a stable release, so this is a snapshot.
 
-## Lightning's peak memory fell by 44% at PennyLane 0.41
+## Lightning's peak memory fell by 44% at PennyLane 0.41: expectation values stopped copying the state
 
 At 25 wires on `lightning.qubit`, from 1,232 MiB at Catalyst 0.10.0 to 690 MiB at 0.11.0, and from 1,759 to 1,217 MiB
 under `qjit`, with a spread across layouts of at most 0.08%. It's held since, rising slowly to 772 and 1,337 MiB at
-0.15.0. Not explained yet.
+0.15.0.
+
+The difference is 512 MiB, one state vector at 25 qubits (2^25 amplitudes of 16 bytes). Swapping one package at a time,
+on the laptop, three runs each:
+
+| Stack | `lightning.qubit` | under `qjit` |
+|---|---:|---:|
+| Catalyst 0.10.0 as published | 1,228 MiB | |
+| Catalyst 0.11.0 as published | 687 MiB | 1,215 MiB |
+| 0.10.0 with only PennyLane 0.41.1 | 1,200 MiB | |
+| 0.10.0 with only numpy 2.2.5 | 1,229 MiB | |
+| 0.10.0 with PennyLane and Lightning 0.41.1 | 688 MiB | |
+| 0.11.0 with only Lightning 0.40.0 | 1,200 MiB | 1,726 MiB |
+
+So it's Lightning, both ways round. (Lightning 0.41 alone won't run with PennyLane 0.40.) Stepping through a run
+on 0.40 puts the peak in measuring: after the gates the process holds 716 MiB, while the 25 `expval(PauliZ)` take it to
+1,229 MiB and back. In 0.40, Lightning's C++ `expval` for a named observable copied the whole state, applied the
+observable to the copy and took an inner product.
+[pennylane-lightning#1079](https://github.com/PennyLaneAI/pennylane-lightning/pull/1079), "in-place implementation of
+expval for LightningQubit", replaced that with kernels that read the state where it is. The other commits to the
+measurement code between the two tags are documentation and sparse matrices, which this circuit doesn't use. Under `qjit` the same C++ code runs from Lightning's library for Catalyst,
+and swapping Lightning moves it by the same 512 MiB.
+
+The rest of 0.41's change is smaller: the device no longer allocates its state until a circuit runs, and the imports
+take about 30 MiB less.
 
 ## `default.qubit` got 11% cheaper from numpy 2.4, not from PennyLane
 

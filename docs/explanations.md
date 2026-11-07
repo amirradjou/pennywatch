@@ -117,6 +117,16 @@ _operations`, a fixed list, so `C(Adjoint(PhaseShift)**N)` gets decomposed into 
 with `capabilities.supports_operation`, which understands nested controlled and power forms, and on 0.40
 those operators stay whole. **Probably right, and the only answer here not confirmed by a count.**
 
+### 8. Lightning's peak memory: -44% at PennyLane 0.41
+
+1,232 → 690 MiB at 25 wires on `lightning.qubit`, and 1,759 → 1,217 MiB under `qjit`, from Catalyst 0.10.0 to 0.11.0.
+
+**Explained by hand: the tool doesn't explain memory**, so this isn't on the scoreboard. Swapping one package at a time
+showed it's Lightning, both ways round, and stepping through a run put the peak in measuring. In 0.40 an expectation
+value copied the whole state; [#1079](https://github.com/PennyLaneAI/pennylane-lightning/pull/1079) computes it in
+place. **Checked** by putting Lightning 0.40.0 back on the newer stack, which brings back the 512 MiB on both backends.
+See [findings](findings.md).
+
 ## What these add up to
 
 Changes 1 to 4 are one story. PennyLane is moving its operators from `Operator` to `Operator2`, still in progress
