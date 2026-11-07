@@ -52,7 +52,8 @@ jobs:
         if: always()
         with:
           name: results-${{ matrix.runner }}
-          path: results/
+          # Only this runner's result, valid or rejected, not the results already in the repo.
+          path: results/runner-${{ matrix.runner }}*.json
           if-no-files-found: warn
 
   compare:
