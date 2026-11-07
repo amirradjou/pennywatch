@@ -1,0 +1,18 @@
+{
+ "catalyst-0.12.0..catalyst-0.13.0/imports/default/imports": {
+  "text": "One line: from scipy.stats import multinomial (#7988). Removing it gives back 87% of this",
+  "url": "https://github.com/PennyLaneAI/pennylane/pull/7988"
+ },
+ "catalyst-0.12.0..catalyst-0.13.0/qft/default/instructions": {
+  "text": "numpy 2.4, not PennyLane: confirmed by changing only numpy",
+  "url": "https://github.com/amirradjou/pennywatch/blob/main/docs/findings.md"
+ },
+ "catalyst-0.9.0..catalyst-0.10.0/qpe/lightning/instructions": {
+  "text": "Lightning keeping controlled powers whole (#988). Read in the code, not bisected",
+  "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/988"
+ },
+ "catalyst-0.15.0..catalyst-0.16.0.dev135/qpe/default/instructions": {
+  "text": "QFT's matrix lost its cache when it moved to Operator2 (#9932). Adding it back halves the cell",
+  "url": "https://github.com/PennyLaneAI/pennylane/pull/9932"
+ }
+}

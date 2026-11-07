@@ -1,0 +1,129 @@
+name: Nightly
+
+# Measures each new Catalyst dev build and publishes the results to the `data` branch. New builds
+# land on TestPyPI between 04:00 and 06:30 UTC. `limit` above 1 also works through older builds,
+# newest first, which is how the backfill runs. Each build takes up to an hour, against the 2,000
+# free minutes a private repo gets each month, and public repos don't count them.
+on:
+  schedule:
+    - cron: "23 8 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Builds to measure in this run
+        default: "1"
+  # A workflow can't be dispatched until it's on the default branch, so pushing here also starts it.
+  push:
+    branches: ["measure/nightly"]
+
+# Measuring runs nightly code from TestPyPI: a read-only token and no secrets, and the code itself
+# runs in a container with no network. Only `publish` may write, and it runs nothing from TestPyPI
+# and treats what the measuring job uploaded as hostile. Actions are pinned by SHA for the same
+# reason.
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      versions: ${{ steps.pending.outputs.versions }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: data
+          path: data
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Find builds without results
+        id: pending
+        env:
+          LIMIT: ${{ inputs.limit || '1' }}
+        run: |
+          versions=$(uv run --quiet pennywatch pending --data data --limit "$LIMIT")
+          echo "$versions"
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+
+  measure:
+    needs: plan
+    if: needs.plan.outputs.versions != '[]'
+    name: measure (${{ matrix.version }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        version: ${{ fromJson(needs.plan.outputs.versions) }}
+    env:
+      VERSION: ${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Measure
+        run: >-
+          uv run pennywatch run --stack "$VERSION" --suite full --repeats 3 --no-busy-check
+          --out "measured/catalyst-$VERSION.json"
+      - name: Keep the lock file with the result
+        if: always()
+        run: cp "stacks/catalyst-$VERSION.pylock.toml" measured/ || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: measured-${{ matrix.version }}
+          path: measured/
+          if-no-files-found: warn
+
+  publish:
+    needs: [plan, measure]
+    if: always() && needs.plan.outputs.versions != '[]'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: data
+          path: data
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: downloaded
+          pattern: measured-*
+      - name: Check and store
+        env:
+          PLANNED: ${{ needs.plan.outputs.versions }}
+        run: >-
+          uv run pennywatch accept downloaded --into data --planned "$PLANNED"
+          | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Say what changed
+        run: |
+          shopt -s nullglob
+          results=(data/nightly/catalyst-*.json)
+          if (( ${#results[@]} >= 2 )); then
+            uv run pennywatch steps --latest "${results[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Push
+        working-directory: data
+        run: |
+          git add nightly stacks
+          if git diff --cached --quiet; then
+            echo "Nothing new to publish." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "data: results from run $GITHUB_RUN_ID"
+          git push origin HEAD:data

@@ -22,6 +22,9 @@ __pycache__/
 coverage/
 htmlcov/
 
+# browser test output
+.playwright-mcp/
+
 # editors / OS
 .idea/
 .vscode/*
@@ -33,3 +36,6 @@ htmlcov/
 # Claude Code project files: local only, never committed
 .claude/
 CLAUDE.md
+
+# A rejected run is kept for debugging and never published
+*.rejected.json

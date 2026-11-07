@@ -1,0 +1,775 @@
+{
+ "cell": "qft/lightning",
+ "metric": "instructions",
+ "before": {
+  "stack": "catalyst-0.15.0",
+  "runs": [
+   1553150344,
+   1553246764,
+   1552848166
+  ],
+  "net": 1553150344
+ },
+ "after": {
+  "stack": "catalyst-0.16.0.dev135",
+  "runs": [
+   2272817227,
+   2274337002,
+   2273851992
+  ],
+  "net": 2273851992
+ },
+ "packages": [
+  "autoray 0.8.4 → 0.8.10",
+  "cachetools 7.1.4 → 7.3.0",
+  "certifi 2026.6.17 → 2026.10.23",
+  "charset-normalizer 3.4.7 → 3.5.2",
+  "idna 3.18 → 3.20",
+  "immutabledict 4.2.2 → 4.3.1",
+  "ml-dtypes 0.5.4 → 0.6.0",
+  "networkx 3.6.1 → 3.7",
+  "numpy 2.5.0 → 2.5.4",
+  "packaging 26.2 → 26.3",
+  "pennylane 0.45.1 → 0.46.0.dev142",
+  "pennylane-catalyst 0.15.0 → 0.16.0.dev135",
+  "pennylane-lightning 0.45.0 → 0.46.0.dev34",
+  "rustworkx 0.18.0 → 0.18.1",
+  "scipy 1.18.0 → 1.18.1",
+  "scipy-openblas32 0.3.33.112.0 → 0.3.31.188.0",
+  "typing-extensions 4.15.0 → 4.16.0",
+  "urllib3 2.7.0 → 2.8.0",
+  "xdsl 0.59.0 → 0.63.0",
+  "xdsl-jax 0.5.0 → 0.5.2"
+ ],
+ "python_functions": [
+  [
+   "~:<built-in method builtins.isinstance>",
+   27859,
+   95129
+  ],
+  [
+   "~:<built-in method builtins.len>",
+   22219,
+   51178
+  ],
+  [
+   "/usr/local/lib/python3.12/inspect.py:kind",
+   0,
+   19248
+  ],
+  [
+   "/usr/local/lib/python3.12/inspect.py:name",
+   0,
+   15232
+  ],
+  [
+   "pennylane/wires.py:__new__",
+   0,
+   14770
+  ],
+  [
+   "~:<built-in method builtins.next>",
+   1468,
+   14464
+  ],
+  [
+   "autoray/autoray.py:infer_backend",
+   3948,
+   16510
+  ],
+  [
+   "~:<method 'split' of 'str' objects>",
+   5816,
+   18372
+  ],
+  [
+   "~:<built-in method __new__ of type object at 0x>",
+   648,
+   10844
+  ],
+  [
+   "pennylane/math/interface_utils.py:_get_interface_of_single_tensor",
+   5810,
+   15915
+  ],
+  [
+   "pennylane/math/interface_utils.py:get_interface",
+   4569,
+   14674
+  ],
+  [
+   "pennylane/operation.py:hyperparameters",
+   9796,
+   0
+  ],
+  [
+   "pennylane/core/operator/operator2.py:<genexpr>",
+   0,
+   9458
+  ],
+  [
+   "~:<method 'append' of 'list' objects>",
+   977,
+   9883
+  ],
+  [
+   "~:<built-in method builtins.id>",
+   231,
+   9015
+  ]
+ ],
+ "c_functions": [
+  [
+   "???",
+   210194455,
+   1733367493
+  ],
+  [
+   "void Pennylane::LightningQubit::Gates::GateImplementationsLM::applyControlledPhaseShift<double, double>(std::complex<double>*, unsigned long, std::vector<unsigned long, std::allocator<unsigned long> > const&, bool, double)",
+   922523904,
+   0
+  ],
+  [
+   "_PyEval_EvalFrameDefault",
+   90777919,
+   256000270
+  ],
+  [
+   "std::_Function_handler<void (std::complex<double>*, unsigned long, std::vector<unsigned long, std::allocator<unsigned long> > const&, bool, std::vector<double, std::allocator<double> > const&), Pennylane::LightningQubit::gateOpToFunctor<double, double, Pennylane::LightningQubit::Gates::GateImplement",
+   93335616,
+   51460
+  ],
+  [
+   "std::_Function_handler<void (std::complex<double> const*, unsigned long, unsigned long, double&), Pennylane::LightningQubit::Measures::Measurements<Pennylane::LightningQubit::StateVectorLQubitManaged<double> >::expval(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > co",
+   51904836,
+   0
+  ],
+  [
+   "double Pennylane::LightningQubit::Measures::applyExpVal1<double, std::function<void (std::complex<double> const*, unsigned long, unsigned long, double&)> >(std::complex<double> const*, unsigned long, std::vector<unsigned long, std::allocator<unsigned long> > const&, std::function<void (std::complex<",
+   47187270,
+   0
+  ],
+  [
+   "__tls_get_addr",
+   26036186,
+   67918521
+  ],
+  [
+   "void Pennylane::LightningQubit::Gates::GateImplementationsAVXCommon<Pennylane::LightningQubit::Gates::GateImplementationsAVX2>::applySWAP<double>(std::complex<double>*, unsigned long, std::vector<unsigned long, std::allocator<unsigned long> > const&, bool)",
+   28838072,
+   0
+  ],
+  [
+   "_PyType_Lookup",
+   9998880,
+   31829315
+  ],
+  [
+   "_PyObject_GenericGetAttrWithDict",
+   5779737,
+   19611364
+  ],
+  [
+   "PyObject_GC_Del",
+   4001764,
+   10110945
+  ],
+  [
+   "_PyObject_GC_New",
+   4046562,
+   10108278
+  ],
+  [
+   "_PyObject_MakeTpCall",
+   2012559,
+   7390351
+  ],
+  [
+   "PyObject_GetAttr",
+   2887049,
+   8173229
+  ],
+  [
+   "PyObject_RichCompare",
+   2806890,
+   7388715
+  ]
+ ],
+ "candidates": {
+  "pennylane": [
+   {
+    "score": 106324,
+    "subject": "chore: rename `qp.math.is_abstract` to `is_tracer` (#10374)",
+    "pull_request": 10374,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10374"
+   },
+   {
+    "score": 101827,
+    "subject": "`Operator2` supports partially abstract instantiation (#9788)",
+    "pull_request": 9788,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9788"
+   },
+   {
+    "score": 98557,
+    "subject": "Simplify `Operator2.__str__` and `Wires.__str__` (#9860)",
+    "pull_request": 9860,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9860"
+   },
+   {
+    "score": 92025,
+    "subject": "Improved interface parity between AbstractWires and Wires (#10056)",
+    "pull_request": 10056,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10056"
+   },
+   {
+    "score": 88337,
+    "subject": "Cleanup now that jax is available by default (#10198)",
+    "pull_request": 10198,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10198"
+   },
+   {
+    "score": 80197,
+    "subject": "Port `QSVT` and `BlockEncode` to `Operator2` (#10223)",
+    "pull_request": 10223,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10223"
+   },
+   {
+    "score": 79390,
+    "subject": "Allow reconstructing operator2 with abstract wire values (#10165)",
+    "pull_request": 10165,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10165"
+   },
+   {
+    "score": 77627,
+    "subject": "The dynamic wire allocation primitive returns a custom abstract qubit type (#9400)",
+    "pull_request": 9400,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9400"
+   },
+   {
+    "score": 74123,
+    "subject": "Port `RX` and `CRX` to `Operator2` (#9984)",
+    "pull_request": 9984,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9984"
+   },
+   {
+    "score": 74123,
+    "subject": "BREAKING CHANGE: move `pop_op_eqns` to `capture` module (#10345)",
+    "pull_request": 10345,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10345"
+   },
+   {
+    "score": 73875,
+    "subject": "Drop TensorFlow (#10229)",
+    "pull_request": 10229,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10229"
+   },
+   {
+    "score": 72196,
+    "subject": "move queuing into core module (#9719)",
+    "pull_request": 9719,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9719"
+   },
+   {
+    "score": 69612,
+    "subject": "Port `X`/`CNOT`/`Toffoli`/`MultiControlledX` to `Operator2` (#9844)",
+    "pull_request": 9844,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9844"
+   },
+   {
+    "score": 68805,
+    "subject": "Decomposition rules work with wires as traced arrays (#10167)",
+    "pull_request": 10167,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10167"
+   },
+   {
+    "score": 63296,
+    "subject": "Migrate `AbstractArray` to `qp.typing` (#9385)",
+    "pull_request": 9385,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9385"
+   },
+   {
+    "score": 63296,
+    "subject": "Added user facing aliases for AbstractWires and AbstractArray (#9701)",
+    "pull_request": 9701,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9701"
+   },
+   {
+    "score": 62209,
+    "subject": "chore: more `apply` from `queueing` to `core` module (#10114)",
+    "pull_request": 10114,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10114"
+   },
+   {
+    "score": 58005,
+    "subject": "Enable capture for assert_valid and decomposition rule tests (#10019)",
+    "pull_request": 10019,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10019"
+   },
+   {
+    "score": 56457,
+    "subject": "`Operator2` subclasses can override `__abstract_init__` (#9744)",
+    "pull_request": 9744,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9744"
+   },
+   {
+    "score": 56375,
+    "subject": "perf: improve `pop_op_eqns` performance and update `remove_from_program` signature (#10298)",
+    "pull_request": 10298,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10298"
+   },
+   {
+    "score": 51079,
+    "subject": "Jax import cleanup (#10200)",
+    "pull_request": 10200,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/10200"
+   },
+   {
+    "score": 50661,
+    "subject": "Fix error with `Wires` being unflattened with JAX arrays (#9852)",
+    "pull_request": 9852,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9852"
+   },
+   {
+    "score": 49808,
+    "subject": "create core module and more `Operator` into it (#9508)",
+    "pull_request": 9508,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9508"
+   },
+   {
+    "score": 47701,
+    "subject": "Add `Controlled2` and `ControlledOp2` (#9647)",
+    "pull_request": 9647,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9647"
+   },
+   {
+    "score": 46873,
+    "subject": "Misc Operator2 compatibility updates (#9877)",
+    "pull_request": 9877,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9877"
+   },
+   {
+    "score": 46477,
+    "subject": "__abstract_init__ for custom controlled ops (#9778)",
+    "pull_request": 9778,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9778"
+   },
+   {
+    "score": 46053,
+    "subject": "feat: skip `Operator2` child `__init__` and canonicalize inputs when abstract types are detected (#9646)",
+    "pull_request": 9646,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9646"
+   },
+   {
+    "score": 43274,
+    "subject": "BREAKING CHANGE: remove `id` as kwarg for various objects (#9467)",
+    "pull_request": 9467,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9467"
+   },
+   {
+    "score": 43073,
+    "subject": "Deprecate Operator.hash and MeasurementProcess.hash (#9488)",
+    "pull_request": 9488,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9488"
+   },
+   {
+    "score": 41364,
+    "subject": "`Operator2.arg_specs` can be used to validate arguments (#9675)",
+    "pull_request": 9675,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9675"
+   }
+  ],
+  "pennylane-lightning": [
+   {
+    "score": 1441,
+    "subject": "fix: restore latest/latest compatibility with `pennylane` (#1416)",
+    "pull_request": 1416,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1416"
+   },
+   {
+    "score": 720,
+    "subject": "Changing runners (#1417)",
+    "pull_request": 1417,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1417"
+   },
+   {
+    "score": 0,
+    "subject": "Docker test for v0.45.0 RC branch (#1373)",
+    "pull_request": 1373,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1373"
+   },
+   {
+    "score": 0,
+    "subject": "Bump version to v0.46.0-dev (#1374)",
+    "pull_request": 1374,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1374"
+   },
+   {
+    "score": 0,
+    "subject": "Read version from file in rc branch check (#1376)",
+    "pull_request": 1376,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1376"
+   },
+   {
+    "score": 0,
+    "subject": "Add additional id-token write (#1377)",
+    "pull_request": 1377,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1377"
+   },
+   {
+    "score": 0,
+    "subject": "Upload to testpypi from 1 source (#1379)",
+    "pull_request": 1379,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1379"
+   },
+   {
+    "score": 0,
+    "subject": "Fix typo in RC nightly builds (#1381)",
+    "pull_request": 1381,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1381"
+   },
+   {
+    "score": 0,
+    "subject": "Merge RC v0.45.0_rc to v0.46.0-dev (#1384)",
+    "pull_request": 1384,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1384"
+   },
+   {
+    "score": 0,
+    "subject": "Reduce wheel size (#1386)",
+    "pull_request": 1386,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1386"
+   },
+   {
+    "score": 0,
+    "subject": "Remove outdated CI patches that are no longer relevant for v0.45.0 (#1388)",
+    "pull_request": 1388,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1388"
+   },
+   {
+    "score": 0,
+    "subject": "Update RC script from v0.45 release process (#1385)",
+    "pull_request": 1385,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1385"
+   },
+   {
+    "score": 0,
+    "subject": "Add missing PauliMeasure capability to lightning.qubit (#1389)",
+    "pull_request": 1389,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1389"
+   },
+   {
+    "score": 0,
+    "subject": "Fixing PPR Execution with Identity Pauli Word (#1390)",
+    "pull_request": 1390,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1390"
+   },
+   {
+    "score": 0,
+    "subject": "Lightning Kokkos support >=32 qubits on GPUs (#1382)",
+    "pull_request": 1382,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1382"
+   },
+   {
+    "score": 0,
+    "subject": "Variable MPI buffer size and cap communication chunk size (#1391)",
+    "pull_request": 1391,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1391"
+   },
+   {
+    "score": 0,
+    "subject": "Improve benchmark trigger mechanism (#1392)",
+    "pull_request": 1392,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1392"
+   },
+   {
+    "score": 0,
+    "subject": "Upgrading sphinx to verison 9.0 (#1393)",
+    "pull_request": 1393,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1393"
+   },
+   {
+    "score": 0,
+    "subject": "Fix arm-gpu::aarch64 lightning_tensor CI failures (cutensor-cu12 incompatibility) (#1394)",
+    "pull_request": 1394,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1394"
+   },
+   {
+    "score": 0,
+    "subject": "fix(mpi): add MPIRuntime manager (#1397)",
+    "pull_request": 1397,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1397"
+   },
+   {
+    "score": 0,
+    "subject": "Bump min Python from 3.11 to 3.12 (#1395)",
+    "pull_request": 1395,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1395"
+   },
+   {
+    "score": 0,
+    "subject": "[fix] Use `base_operation.parameters` for controlled Operators (#1405)",
+    "pull_request": 1405,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1405"
+   },
+   {
+    "score": 0,
+    "subject": "Remove tests for `DisplacementEmbedding` (#1406)",
+    "pull_request": 1406,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1406"
+   },
+   {
+    "score": 0,
+    "subject": "Update lightning_qubit.toml with dynamic qubit allocation capability (#1407)",
+    "pull_request": 1407,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1407"
+   },
+   {
+    "score": 0,
+    "subject": "Fixed controlled-gate execution in Lightning devices when `control_values` is passed as dynamic arg (#1408)",
+    "pull_request": 1408,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1408"
+   },
+   {
+    "score": 0,
+    "subject": "Correct kernel tuning documentation LQ_ENABLE_KERNEL_OMP flag (#1409)",
+    "pull_request": 1409,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1409"
+   },
+   {
+    "score": 0,
+    "subject": "Fix `PCPhase` use `compilable_args.dim` (#1420)",
+    "pull_request": 1420,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1420"
+   },
+   {
+    "score": 0,
+    "subject": "Adding codeql yml (#1419)",
+    "pull_request": 1419,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1419"
+   },
+   {
+    "score": 0,
+    "subject": "Remove docs & src references to gbenchmarks (#1412)",
+    "pull_request": 1412,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1412"
+   },
+   {
+    "score": 0,
+    "subject": "Update Lightning performance kernel tuning doc page (#1413)",
+    "pull_request": 1413,
+    "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1413"
+   }
+  ],
+  "pennylane-catalyst": [
+   {
+    "score": 0,
+    "subject": "Prepare for the next development cycle (v16) (#2791)",
+    "pull_request": 2791,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2791"
+   },
+   {
+    "score": 0,
+    "subject": "Read version from file in rc branch check (#2797)",
+    "pull_request": 2797,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2797"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#2796)",
+    "pull_request": 2796,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2796"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#2810)",
+    "pull_request": 2810,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2810"
+   },
+   {
+    "score": 0,
+    "subject": "Add a `qecp-to-qauntum` skeleton pass (#2822)",
+    "pull_request": 2822,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2822"
+   },
+   {
+    "score": 0,
+    "subject": "Add lowering for qecl gates to the qecp dialect (#2776)",
+    "pull_request": 2776,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2776"
+   },
+   {
+    "score": 0,
+    "subject": "Remove stray print statement in measurements_from_samples (#2825)",
+    "pull_request": 2825,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2825"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#2827)",
+    "pull_request": 2827,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2827"
+   },
+   {
+    "score": 0,
+    "subject": "Fix build failures with clang + GCC ≤ 13 libstdc++ due to broken range views (#2801)",
+    "pull_request": 2801,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2801"
+   },
+   {
+    "score": 0,
+    "subject": "Fix keep_intermediate workspace for target=\"mlir\" + mlir_opt (#2807)",
+    "pull_request": 2807,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2807"
+   },
+   {
+    "score": 0,
+    "subject": "Daily rc sync to main (#2831)",
+    "pull_request": 2831,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2831"
+   },
+   {
+    "score": 0,
+    "subject": "MLIR to LLVM lowering for `qecp.assemble_tanner` (#2780)",
+    "pull_request": 2780,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2780"
+   },
+   {
+    "score": 0,
+    "subject": "Decompose lowering can handle qreg argument to the rule function being at any position (#2836)",
+    "pull_request": 2836,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2836"
+   },
+   {
+    "score": 0,
+    "subject": "Bump xdsl-jax to 0.5.2 (#2840)",
+    "pull_request": 2840,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2840"
+   },
+   {
+    "score": 0,
+    "subject": "Add qecp.decode_esm_css to llvm lowering pass (#2772)",
+    "pull_request": 2772,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2772"
+   },
+   {
+    "score": 0,
+    "subject": "Fix/prod id removed from pl (#2844)",
+    "pull_request": 2844,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2844"
+   },
+   {
+    "score": 0,
+    "subject": "Test cleanup (#2842)",
+    "pull_request": 2842,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2842"
+   },
+   {
+    "score": 0,
+    "subject": "Remove rt_decoder from build targets (#2847)",
+    "pull_request": 2847,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2847"
+   },
+   {
+    "score": 0,
+    "subject": "Ensure constructors of xDSL ops with `idx_attr` produce correct attribute type (#2846)",
+    "pull_request": 2846,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2846"
+   },
+   {
+    "score": 0,
+    "subject": "fix decoder arm wheels (#2851)",
+    "pull_request": 2851,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2851"
+   },
+   {
+    "score": 0,
+    "subject": "FIX `convert-qecl-to-qecp` qjit lowering (#2837)",
+    "pull_request": 2837,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2837"
+   },
+   {
+    "score": 0,
+    "subject": "Add type conversion patterns for the `convert-qecp-to-quantum` pass (#2809)",
+    "pull_request": 2809,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2809"
+   },
+   {
+    "score": 0,
+    "subject": "Delete plxpr transform integration (#2853)",
+    "pull_request": 2853,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2853"
+   },
+   {
+    "score": 0,
+    "subject": "Decompose lowering pass can handle a null decomp rule (#2855)",
+    "pull_request": 2855,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2855"
+   },
+   {
+    "score": 0,
+    "subject": "Update tests that were affected by Pennylane deprecation/removal v0.46 (#2848)",
+    "pull_request": 2848,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2848"
+   },
+   {
+    "score": 0,
+    "subject": " Add patterns for qecp to quantum gate/measurement op conversion (#2824)",
+    "pull_request": 2824,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2824"
+   },
+   {
+    "score": 0,
+    "subject": "Add patterns to lower qecp subroutines to quantum (#2835)",
+    "pull_request": 2835,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2835"
+   },
+   {
+    "score": 0,
+    "subject": "bump PL dev12 and fix test failures (#2857)",
+    "pull_request": 2857,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2857"
+   },
+   {
+    "score": 0,
+    "subject": "Improve lowering of the `qecl.measure` op in the `convert-qecl-to-qecp` pass (#2813)",
+    "pull_request": 2813,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2813"
+   },
+   {
+    "score": 0,
+    "subject": "Move reference semantics MBQC ops to MBQC dialect (#2829)",
+    "pull_request": 2829,
+    "url": "https://github.com/PennyLaneAI/catalyst/pull/2829"
+   }
+  ]
+ },
+ "bisect": {
+  "culprits": [
+   {
+    "commit": "ca0bf19d1e98319c5cd994b87c04d5601df79177",
+    "before": 1621522635,
+    "after": 2081057057,
+    "pull_request": 9951,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9951",
+    "subject": "Migrate `PhaseShift` and `ControlledPhaseShift` to use `Operator2` as its base class (#9951)"
+   },
+   {
+    "commit": "868e2f06ad7b4a208446e204affe11a71ca687eb",
+    "before": 1566056532,
+    "after": 1600384046,
+    "pull_request": 9932,
+    "url": "https://github.com/PennyLaneAI/pennylane/pull/9932",
+    "subject": "Port `QFT` to `Operator2` (#9932)"
+   }
+  ],
+  "unresolved": [],
+  "measured": 17,
+  "pennylane_alone": 2136985427,
+  "pennylane_share": 0.8100926154674202
+ },
+ "candidate_counts": {
+  "pennylane": 591,
+  "pennylane-lightning": 36,
+  "pennylane-catalyst": 411
+ }
+}

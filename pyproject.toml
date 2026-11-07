@@ -8,12 +8,16 @@ authors = [
 requires-python = ">=3.12"
 dependencies = []
 
+[project.scripts]
+pennywatch = "pennywatch.cli:main"
+
 [build-system]
 requires = ["uv_build>=0.12.15,<0.13.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "numpy>=2.5.4",
     "pytest>=9.2.0",
     "ruff>=0.17.4",
 ]
@@ -24,5 +28,12 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+# Counting has to stop before the other imports run.
+"src/pennywatch/harness/workload.py" = ["E402"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["tests"]
+addopts = "-m 'not docker'"
+markers = ["docker: needs Docker and the pinned image, and takes minutes"]

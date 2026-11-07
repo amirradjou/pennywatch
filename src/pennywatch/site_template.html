@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pennywatch</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="An independent performance history of PennyLane, Lightning and Catalyst: the same circuits on every build, and what changed.">
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb; --surface-2: #f3f2ef; --grid: #e4e3df;
+  --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #6d6c68; --link: #1c5cab;
+  --s-default: #2a78d6; --s-lightning: #eb6834; --s-qjit: #1baf7a;
+  --good: #0ca30c; --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface: #1a1a19; --surface-2: #252523; --grid: #383835;
+    --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #a3a297; --link: #86b6ef;
+    --s-default: #3987e5; --s-lightning: #d95926; --s-qjit: #199e70;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19; --surface-2: #252523; --grid: #383835;
+  --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #a3a297; --link: #86b6ef;
+  --s-default: #3987e5; --s-lightning: #d95926; --s-qjit: #199e70;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--ink);
+  font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 48px 0 8px; }
+p { margin: 0 0 12px; max-width: 70ch; }
+a { color: var(--link); }
+.lede { font-size: 1.125rem; color: var(--ink-2); }
+.num, td.num, th.num { font-variant-numeric: tabular-nums; text-align: right; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0 0; }
+.tile { background: var(--surface-2); border-radius: 8px; padding: 12px 16px; min-width: 0; }
+.tile strong { display: block; font-size: clamp(1.125rem, 5vw, 1.75rem); line-height: 1.2; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tile span { color: var(--ink-2); font-size: 0.875rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin: 12px 0 16px; }
+.controls label { color: var(--ink-2); font-size: 0.875rem; display: inline-flex; gap: 8px; align-items: center; }
+select { font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.875rem; color: var(--ink-2); margin: 0 0 12px; padding: 0; list-style: none; }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.key { width: 16px; height: 2px; border-radius: 1px; display: inline-block; }
+.charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 24px 24px; }
+figure { margin: 0; min-width: 0; position: relative; }
+figcaption { font-weight: 600; margin-bottom: 4px; }
+svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+svg text { fill: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--grid); border-radius: 6px; padding: 8px 10px; font-size: 0.8125rem; box-shadow: 0 2px 10px rgb(0 0 0 / 0.16); max-width: 300px; }
+.tip b { font-variant-numeric: tabular-nums; }
+.tip .row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tip .head { color: var(--ink-2); margin-bottom: 4px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+th, td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; white-space: nowrap; }
+td.wrap { white-space: normal; min-width: 240px; }
+th { color: var(--ink-2); font-weight: 600; }
+.up { color: var(--critical); }
+.down { color: var(--good); }
+details { margin-top: 16px; }
+summary { cursor: pointer; color: var(--ink-2); }
+.empty { color: var(--ink-2); }
+ul.plain { margin: 0; padding-left: 20px; max-width: 70ch; }
+ul.plain li { margin-bottom: 6px; }
+footer { margin-top: 48px; color: var(--ink-2); font-size: 0.875rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>pennywatch</h1>
+<p class="lede">An independent performance history of <a href="https://github.com/PennyLaneAI/pennylane">PennyLane</a>, <a href="https://github.com/PennyLaneAI/pennylane-lightning">Lightning</a> and <a href="https://github.com/PennyLaneAI/catalyst">Catalyst</a>. The same circuits run on every build, and any change in what they cost gets traced to the pull requests behind it.</p>
+<div class="tiles" id="tiles"></div>
+
+<h2>History</h2>
+<div class="controls">
+  <label>Metric
+    <select id="metric">
+      <option value="instructions">Instructions</option>
+      <option value="compile">Compile cost</option>
+      <option value="imports">Imports</option>
+      <option value="memory">Peak memory</option>
+      <option value="gates">Gates</option>
+      <option value="depth">Depth</option>
+    </select>
+  </label>
+  <label>Builds
+    <select id="track">
+      <option value="all">All</option>
+      <option value="stable">Stable releases</option>
+      <option value="nightly">Dev builds</option>
+    </select>
+  </label>
+  <label>Scale
+    <select id="scale">
+      <option value="change">Change since the first build</option>
+      <option value="value">Value</option>
+    </select>
+  </label>
+</div>
+<ul class="legend" id="legend"></ul>
+<div class="charts" id="charts"></div>
+<details>
+  <summary>The same numbers as a table</summary>
+  <div class="table-wrap"><table id="values"></table></div>
+</details>
+
+<h2>What changed</h2>
+<p>Each row is a change from one build to the next: 0.5% or more in a counted metric with the runs of the two builds apart, or any change in a gate count. <q>Confirmed</q> means a second, separate measurement showed the same change.</p>
+<div class="controls">
+  <label>Between
+    <select id="step-between"></select>
+  </label>
+  <label>Metric
+    <select id="step-metric"></select>
+  </label>
+</div>
+<div class="table-wrap"><table id="steps"></table></div>
+<p class="empty" id="no-steps" hidden>No changes in this view.</p>
+
+<h2>How it works</h2>
+<ul class="plain">
+  <li><strong>Instructions, not time.</strong> Each circuit runs under Valgrind's Cachegrind, single-threaded, in a pinned container, counting only the circuit and not the imports. On a busy machine, wall-clock time got 3.5 times slower while the count moved by 0.004%.</li>
+  <li><strong>Several memory layouts.</strong> The same code on the same machine can cost half a percent more when something shifts its addresses by a few bytes. The Python calls stay the same, so the extra work is inside the interpreter. So each cell runs under several layouts, the figure is their median, and a change only counts if the runs of the two builds are apart.</li>
+  <li><strong>Every run proves itself.</strong> Each cell also runs a canary with 1% extra gates, which has to show up, and each circuit's answer has to be right. A build that fails either gets thrown out, not published.</li>
+  <li><strong>The set is what's measured.</strong> One Catalyst build pins exact PennyLane and Lightning builds, so one version names a whole stack.</li>
+</ul>
+
+<h2>Limits</h2>
+<ul class="plain">
+  <li>Instructions aren't time. Cache misses, branch prediction and memory bandwidth don't show up, so this complements real timing and doesn't replace it.</li>
+  <li>Single-threaded and CPU only. OpenMP scaling and GPU devices are out of scope, and AVX-512 kernels aren't measured, because Valgrind can't run them.</li>
+  <li>Small circuits, around 18 qubits. Effects that only appear at scale can't be seen here.</li>
+  <li>Old dev builds may leave TestPyPI, so past results may not stay reproducible.</li>
+</ul>
+<div id="gaps"></div>
+
+<footer>
+  <p>PennyLane, Lightning and Catalyst are made by <a href="https://xanadu.ai">Xanadu</a> and their contributors, and they already benchmark themselves. pennywatch is not affiliated with or endorsed by Xanadu. Counting by <a href="https://valgrind.org">Valgrind</a>.</p>
+  <p><a href="https://github.com/amirradjou/pennywatch">Source, results and method</a>, under the MIT licence.</p>
+</footer>
+</main>
+<div class="tip" id="tip" hidden></div>
+<script id="data" type="application/json">/*DATA*/null</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const SVG = "http://www.w3.org/2000/svg";
+const $ = (id) => document.getElementById(id);
+
+function el(tag, attrs = {}, text) {
+  const node = document.createElement(tag);
+  for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, value);
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function svg(tag, attrs = {}, text) {
+  const node = document.createElementNS(SVG, tag);
+  for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, value);
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 });
+const whole = new Intl.NumberFormat("en", { maximumFractionDigits: 1 });
+const pct = (value, digits = 2) => (value > 0 ? "+" : "") + value.toFixed(digits) + "%";
+const shown = (value, unit) => (unit === "instructions" ? compact.format(value) : whole.format(value)) +
+  (unit === "MiB" ? " MiB" : "");
+
+const COLOR = { default: "var(--s-default)", lightning: "var(--s-lightning)", qjit: "var(--s-qjit)" };
+const WIDTH = 340, HEIGHT = 190;
+const MARGIN = { top: 10, right: 12, bottom: 24, left: 52 };
+
+function niceTicks(low, high, count = 4) {
+  if (low === high) { low -= Math.abs(low) * 0.01 || 1; high += Math.abs(high) * 0.01 || 1; }
+  const rough = (high - low) / count;
+  const power = 10 ** Math.floor(Math.log10(rough));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * power).find((s) => s >= rough) || 10 * power;
+  const ticks = [];
+  for (let t = Math.floor(low / step) * step; t <= high + step * 0.999; t += step) ticks.push(Number(t.toFixed(10)));
+  return ticks;
+}
+
+function firstValue(values) { return values.find((value) => value !== null && value !== undefined); }
+
+function chart(panel, builds, scale) {
+  const figure = el("figure");
+  figure.append(el("figcaption", {}, panel.title));
+  const transform = (series) => {
+    if (scale === "value") return series.values;
+    const base = firstValue(series.values);
+    return series.values.map((v) => (v === null ? null : base ? (v - base) / base * 100 : 0));
+  };
+  const lines = panel.series.map((series) => ({ ...series, plotted: transform(series) }));
+  const every = lines.flatMap((line) => line.plotted).filter((v) => v !== null);
+  if (scale === "change") every.push(0);
+  const ticks = niceTicks(Math.min(...every), Math.max(...every));
+  const low = ticks[0], high = ticks[ticks.length - 1];
+  const plotWidth = WIDTH - MARGIN.left - MARGIN.right, plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
+  const x = (i) => MARGIN.left + (builds.length < 2 ? plotWidth / 2 : i / (builds.length - 1) * plotWidth);
+  const y = (v) => MARGIN.top + (1 - (v - low) / (high - low)) * plotHeight;
+  const label = panel.title + ": " + lines.map((line) => {
+    const last = line.values[line.values.length - 1];
+    return line.name + " " + (last === null ? "no value" : shown(last, panel.unit));
+  }).join("; ");
+  const root = svg("svg", { viewBox: `0 0 ${WIDTH} ${HEIGHT}`, role: "img", "aria-label": label, tabindex: "0" });
+  for (const tick of ticks) {
+    root.append(svg("line", { x1: MARGIN.left, x2: WIDTH - MARGIN.right, y1: y(tick), y2: y(tick), stroke: "var(--grid)", "stroke-width": 1 }));
+    const text = scale === "change" ? pct(tick, Math.abs(high - low) < 2 ? 2 : 0) : shown(tick, panel.unit);
+    root.append(svg("text", { x: MARGIN.left - 6, y: y(tick) + 4, "text-anchor": "end" }, text));
+  }
+  const labelled = builds.length <= 2 ? builds.map((_, i) => i) : [0, builds.length - 1];
+  for (const i of labelled) {
+    const anchor = i === 0 && builds.length > 1 ? "start" : i === builds.length - 1 && builds.length > 1 ? "end" : "middle";
+    root.append(svg("text", { x: x(i), y: HEIGHT - 6, "text-anchor": anchor }, builds[i].catalyst));
+  }
+  for (const line of lines) {
+    let path = "", open = false;
+    line.plotted.forEach((v, i) => {
+      if (v === null) { open = false; return; }
+      path += (open ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1);
+      open = true;
+    });
+    root.append(svg("path", { d: path, fill: "none", stroke: COLOR[line.key], "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    line.plotted.forEach((v, i) => {
+      const lone = v !== null && (line.plotted[i - 1] ?? null) === null && (line.plotted[i + 1] ?? null) === null;
+      if (lone || (v !== null && i === line.plotted.length - 1)) {
+        root.append(svg("circle", { cx: x(i), cy: y(v), r: 4, fill: COLOR[line.key], stroke: "var(--surface)", "stroke-width": 2 }));
+      }
+    });
+  }
+  const hair = svg("line", { y1: MARGIN.top, y2: HEIGHT - MARGIN.bottom, stroke: "var(--ink-3)", "stroke-width": 1, visibility: "hidden" });
+  root.append(hair);
+  const tip = $("tip");
+  const show = (i, clientX, clientY) => {
+    hair.setAttribute("x1", x(i)); hair.setAttribute("x2", x(i)); hair.setAttribute("visibility", "visible");
+    tip.replaceChildren();
+    const build = builds[i];
+    tip.append(el("div", { class: "head" }, `Catalyst ${build.catalyst} · PennyLane ${build.pennylane} · Lightning ${build.lightning}`));
+    for (const line of lines) {
+      const value = line.values[i];
+      const row = el("div", { class: "row" });
+      const key = el("span", { class: "key" }); key.style.background = COLOR[line.key];
+      row.append(key, el("b", {}, value === null ? "no value" : shown(value, panel.unit)));
+      if (value !== null && scale === "change") row.append(document.createTextNode(" " + pct(line.plotted[i])));
+      row.append(document.createTextNode(" " + line.name));
+      tip.append(row);
+    }
+    tip.hidden = false;
+    const box = tip.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(clientX + 14, innerWidth - box.width - 8)) + "px";
+    tip.style.top = Math.max(8, Math.min(clientY + 14, innerHeight - box.height - 8)) + "px";
+  };
+  const hide = () => { hair.setAttribute("visibility", "hidden"); tip.hidden = true; };
+  const nearest = (clientX) => {
+    const box = root.getBoundingClientRect();
+    const position = (clientX - box.left) / box.width * WIDTH;
+    const fraction = builds.length < 2 ? 0 : (position - MARGIN.left) / plotWidth * (builds.length - 1);
+    return Math.max(0, Math.min(builds.length - 1, Math.round(fraction)));
+  };
+  root.addEventListener("pointermove", (event) => show(nearest(event.clientX), event.clientX, event.clientY));
+  root.addEventListener("pointerleave", hide);
+  let focused = builds.length - 1;
+  root.addEventListener("focus", () => {
+    const box = root.getBoundingClientRect();
+    show(focused, box.left + box.width / 2, box.bottom);
+  });
+  root.addEventListener("blur", hide);
+  root.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    focused = Math.max(0, Math.min(builds.length - 1, focused + (event.key === "ArrowLeft" ? -1 : 1)));
+    const box = root.getBoundingClientRect();
+    show(focused, box.left + box.width / 2, box.bottom);
+  });
+  figure.append(root);
+  return figure;
+}
+
+function drawLegend(panels) {
+  const seen = new Map();
+  for (const panel of panels) for (const series of panel.series) seen.set(series.key, series.name);
+  const legend = $("legend");
+  legend.replaceChildren();
+  if (seen.size < 2) return;
+  for (const [key, name] of seen) {
+    const item = el("li");
+    const mark = el("span", { class: "key" }); mark.style.background = COLOR[key];
+    item.append(mark, document.createTextNode(name));
+    legend.append(item);
+  }
+}
+
+function drawValues(panels, builds) {
+  const table = $("values");
+  table.replaceChildren();
+  const head = el("tr");
+  head.append(el("th", {}, "Chart"), el("th", {}, "Series"));
+  for (const build of builds) head.append(el("th", { class: "num" }, build.catalyst));
+  const thead = el("thead"); thead.append(head); table.append(thead);
+  const body = el("tbody");
+  for (const panel of panels) for (const series of panel.series) {
+    const row = el("tr");
+    row.append(el("td", {}, panel.title), el("td", {}, series.name));
+    for (const value of series.values) row.append(el("td", { class: "num" }, value === null ? "" : whole.format(value)));
+    body.append(row);
+  }
+  table.append(body);
+}
+
+function drawHistory() {
+  const track = DATA[$("track").value];
+  const metric = $("metric").value;
+  const panels = track.panels[metric] || [];
+  const charts = $("charts");
+  charts.replaceChildren();
+  drawLegend(panels);
+  drawValues(panels, track.builds);
+  if (!panels.length) {
+    charts.append(el("p", { class: "empty" }, "Nothing measured here yet."));
+    return;
+  }
+  for (const panel of panels) charts.append(chart(panel, track.builds, $("scale").value));
+}
+
+const METRIC_NAMES = { instructions: "Instructions", compile: "Compile cost", imports: "Imports", peak_kb: "Peak memory" };
+const metricName = (metric) => METRIC_NAMES[metric] || metric.replace(".", " at ").replace("gates", "Gates").replace("depth", "Depth");
+
+const transition = (row) => `${row.before_stack} → ${row.after_stack}`;
+
+function drawSteps() {
+  const wanted = $("step-metric").value;
+  const between = $("step-between").value;
+  const size = (row) => (row.change_pct === null ? Infinity : Math.abs(row.change_pct));
+  const rows = DATA.steps
+    .filter((row) => (wanted === "all" || row.metric === wanted) && (between === "all" || transition(row) === between))
+    .sort((a, b) => size(b) - size(a));
+  const table = $("steps");
+  table.replaceChildren();
+  $("no-steps").hidden = rows.length > 0;
+  table.hidden = !rows.length;
+  if (!rows.length) return;
+  const head = el("tr");
+  for (const [name, numeric] of [["Between", 0], ["Cell", 0], ["Metric", 0], ["Before", 1], ["After", 1], ["Change", 1], ["Confirmed", 0], ["Why", 0]]) {
+    head.append(el("th", numeric ? { class: "num" } : {}, name));
+  }
+  const thead = el("thead"); thead.append(head); table.append(thead);
+  const body = el("tbody");
+  for (const row of rows) {
+    const tr = el("tr");
+    tr.append(el("td", {}, transition(row)), el("td", {}, row.cell), el("td", {}, metricName(row.metric)));
+    const unit = row.metric === "instructions" || row.metric === "compile" || row.metric === "imports" ? "instructions" : "";
+    tr.append(el("td", { class: "num" }, shown(row.before, unit)), el("td", { class: "num" }, shown(row.after, unit)));
+    const change = row.change_pct === null ? "" : pct(row.change_pct);
+    tr.append(el("td", { class: "num " + (row.change_pct > 0 ? "up" : "down") }, (row.change_pct > 0 ? "▲ " : "▼ ") + change));
+    tr.append(el("td", {}, confirmation(row)));
+    const why = el("td", { class: "wrap" });
+    if (row.explanation) {
+      if (row.explanation.url && /^https:\/\/github\.com\//.test(row.explanation.url)) {
+        why.append(el("a", { href: row.explanation.url }, row.explanation.text));
+      } else {
+        why.textContent = row.explanation.text;
+      }
+    }
+    tr.append(why);
+    body.append(tr);
+  }
+  table.append(body);
+}
+
+function confirmation(row) {
+  if (row.confirmed === null) return "not yet";
+  if (row.confirmed) return "yes";
+  return typeof row.second_change_pct === "number" ? `no: ${pct(row.second_change_pct)} when re-measured` : "no";
+}
+
+function drawTiles() {
+  const stable = DATA.stable.builds.length, nightly = DATA.nightly.builds.length;
+  const confirmed = DATA.steps.filter((row) => row.confirmed).length;
+  const newest = DATA.nightly.builds[nightly - 1] || DATA.stable.builds[stable - 1];
+  const tiles = [
+    [stable, "stable releases measured"],
+    [nightly, "dev builds measured"],
+    [confirmed, "changes confirmed"],
+    [newest ? newest.catalyst : "none", newest ? `newest build, measured ${newest.measured}` : "newest build"],
+  ];
+  for (const [value, name] of tiles) {
+    const tile = el("div", { class: "tile" });
+    tile.append(el("strong", {}, String(value)), el("span", {}, name));
+    $("tiles").append(tile);
+  }
+}
+
+function drawGaps() {
+  if (!DATA.gaps.length) return;
+  const holder = $("gaps");
+  holder.append(el("h2", {}, "Builds with no result"));
+  const list = el("ul", { class: "plain" });
+  for (const gap of DATA.gaps) {
+    list.append(el("li", {}, `${gap.build}: ${gap.why.join("; ") || "no reason recorded"}`));
+  }
+  holder.append(list);
+}
+
+const stepMetric = $("step-metric");
+stepMetric.append(el("option", { value: "all" }, "All"));
+for (const metric of [...new Set(DATA.steps.map((row) => row.metric))].sort()) {
+  stepMetric.append(el("option", { value: metric }, metricName(metric)));
+}
+const stepBetween = $("step-between");
+stepBetween.append(el("option", { value: "all" }, "Every build"));
+const transitions = [...new Set(DATA.steps.map(transition))];
+for (const name of [...transitions].reverse()) stepBetween.append(el("option", { value: name }, name));
+if (transitions.length) stepBetween.value = transitions[transitions.length - 1];
+stepMetric.value = DATA.steps.some((row) => row.metric === "instructions") ? "instructions" : "all";
+for (const id of ["metric", "track", "scale"]) $(id).addEventListener("change", drawHistory);
+stepMetric.addEventListener("change", drawSteps);
+stepBetween.addEventListener("change", drawSteps);
+drawTiles();
+drawSteps();
+drawHistory();
+drawGaps();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+name: Measure
+
+# Runs the suite on several runners at once, to see whether counts agree between them. The answer
+# decides how builds get compared. A private repo has 2,000 minutes a month, and each runner here
+# takes up to an hour, so this runs by hand and not on every push.
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: Catalyst version
+        default: "0.15.0"
+      repeats:
+        description: Runs per cell, each under a different memory layout
+        default: "3"
+      suite:
+        description: Which suite
+        default: full
+  # A workflow can't be dispatched until it's on the default branch, so pushing here also starts it.
+  # Not measure/**, which would also catch the branches that start History and Nightly.
+  push:
+    branches: ["measure/spread-**"]
+
+# This runs nightly code from TestPyPI: a read-only token, no secrets, and the code itself runs in a
+# container with no network. Actions are pinned by SHA for the same reason.
+permissions:
+  contents: read
+
+env:
+  STACK: ${{ inputs.stack || '0.15.0' }}
+  REPEATS: ${{ inputs.repeats || '3' }}
+  SUITE: ${{ inputs.suite || 'full' }}
+
+jobs:
+  measure:
+    name: measure (${{ matrix.runner }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [a, b, c, d]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Measure
+        run: >-
+          uv run pennywatch run --stack "$STACK" --suite "$SUITE" --repeats "$REPEATS" --no-busy-check
+          --out "results/runner-${{ matrix.runner }}.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: results-${{ matrix.runner }}
+          # Only this runner's result, valid or rejected, not the results already in the repo.
+          path: results/runner-${{ matrix.runner }}*.json
+          if-no-files-found: warn
+
+  compare:
+    needs: measure
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: downloaded
+          pattern: results-*
+      - name: Compare runners
+        # Reports the spread instead of failing on it: this workflow is here to measure it.
+        run: |
+          shopt -s nullglob
+          results=(downloaded/*/runner-*.json)
+          if (( ${#results[@]} < 2 )); then
+            echo "Fewer than two valid results." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          uv run pennywatch compare --limit 100 "${results[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
