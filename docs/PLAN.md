@@ -87,6 +87,13 @@ Most cells barely notice: `grover/default` moves 0.001% across layouts. The sens
      step. It can't run across a release where a dependency changed its API, and then it says so.
    - Lightning needs a C++ build per step, and Catalyst is too heavy to build per commit, so those stop at
      the candidates and say so.
+
+   After each night this runs by itself on up to three new steps, newest first, then the largest older
+   ones. A fresh runner measures both builds again, which confirms the step or not, and explains it with a
+   bisect that stops after 30 measurements. The job that records the outcome runs nothing from TestPyPI
+   and works out whether the step held from the numbers, not from what the runner said. When one held, it
+   opens an issue in this repo that names the pull requests in code spans and links none of them, so
+   nothing appears on their pages.
 5. **Publish.** Results are JSON files in the repo, rendered as a static page. There is no server.
 
 **Security.** Running nightly dev builds means running code from TestPyPI, where names aren't as well

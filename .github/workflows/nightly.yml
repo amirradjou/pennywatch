@@ -126,4 +126,6 @@ jobs:
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit -m "data: results from run $GITHUB_RUN_ID"
+          # A follow-up may have recorded meanwhile; it writes other files, so a rebase is clean.
+          git pull --rebase --quiet origin data
           git push origin HEAD:data
