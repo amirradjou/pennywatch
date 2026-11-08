@@ -20,7 +20,7 @@ from statistics import median
 from pennywatch import analysis, builds, cachegrind, container, stacks, untrusted
 from pennywatch.cachegrind import Counts
 from pennywatch.harness import expected
-from pennywatch.suite import BACKENDS, Cell
+from pennywatch.suite import BACKENDS, MAIN_BACKENDS, Cell
 
 SCHEMA = 2
 JOB_TIMEOUT_S = 3600
@@ -43,6 +43,8 @@ VALGRIND = [
     "--log-file=/out/valgrind.%p.log",
 ]
 PYTHON = ["/stack/bin/python", "-P", "-s", "-m", "pennywatch.harness.workload"]
+# kokkos has its own entry point, so the workload the other backends run is unchanged.
+KOKKOS_PYTHON = [*PYTHON[:-1], "pennywatch.harness.kokkos"]
 UNCOUNTED_MODES = ("native", "profile")
 
 
@@ -158,12 +160,14 @@ class Runner:
         cpus: list[int],
         overlay: Path | None = None,
         keep_functions: bool = False,
+        kokkos: Path | None = None,
     ):
         self.image = image
         self.stack_dir = stack_dir
         self.workspace = workspace
         self.cpus = cpus
         self.overlay = overlay
+        self.kokkos = kokkos
         self.keep_functions = keep_functions
         self.source = workspace / "src"
         package = self.source / "pennywatch"
@@ -177,7 +181,8 @@ class Runner:
     def execute(self, job: Job, cpu: int) -> Outcome:
         output = self.workspace / "runs" / job.label
         output.mkdir(parents=True)
-        command = [*PYTHON, *workload_args(job)]
+        on_kokkos = job.backend == "kokkos"
+        command = [*(KOKKOS_PYTHON if on_kokkos else PYTHON), *workload_args(job)]
         if job.mode not in UNCOUNTED_MODES:
             command = [*VALGRIND, *command]
         if job.busy:
@@ -188,7 +193,13 @@ class Runner:
             "run",
             f"--name={name}",
             *container.sandbox_args(
-                cpu, self.stack_dir, self.source, output, layout=job.repeat, overlay=self.overlay
+                cpu,
+                self.stack_dir,
+                self.source,
+                output,
+                layout=job.repeat,
+                overlay=self.overlay,
+                kokkos=self.kokkos if on_kokkos else None,
             ),
             # Catalyst 0.14's specs writes a file to the working directory, and crashes if it can't.
             # Only for what isn't counted: the counted runs all keep one directory.
@@ -304,13 +315,15 @@ def plan_baselines(cells: list[Cell]) -> list[Job]:
     return [Job("imports", backend, wires) for backend, wires in sorted(widest.items())]
 
 
-def plan_memory(wires: int | None, repeats: int) -> list[Job]:
+def plan_memory(
+    wires: int | None, repeats: int, backends: tuple[str, ...] = MAIN_BACKENDS
+) -> list[Job]:
     """Peak memory with the state vector dominating. Nothing gets counted, so these are quick."""
     if wires is None:
         return []
     return [
         Job("memory", backend, wires, circuit="memory", repeat=repeat)
-        for backend in BACKENDS
+        for backend in backends
         for repeat in range(repeats)
     ]
 
@@ -444,13 +457,22 @@ def run_suite(
     keep_raw: Path | None = None,
     memory_wires: int | None = None,
     judge_canaries: bool = True,
+    part: str | None = None,
+    drop_unrunnable: bool = False,
 ) -> dict:
+    """Measure cells on one stack. With `drop_unrunnable`, a cell whose first, native run can't
+    execute at all is left out and named, rather than failing the result: an older backend that
+    lacks an operation has nothing to measure. Every other fault still fails it."""
     image = container.ensure_image()
     if not stack.lock_path.exists():
         stacks.write_lock(stack, image)
     versions = stacks.locked_versions(stack.lock_path)
     lock_sha256 = stacks.lock_sha256(stack.lock_path)
     stack_dir = stacks.install(stack, image)
+    kokkos_dir, kokkos_version = None, None
+    if any(cell.backend == "kokkos" for cell in cells):
+        kokkos_dir, kokkos_version = stacks.install_kokkos(stack, image)
+    backends = tuple(b for b in BACKENDS if any(cell.backend == b for cell in cells))
 
     started = datetime.now(UTC)
     # Read now, because the harness is copied now: edits during a long run don't affect it.
@@ -458,8 +480,11 @@ def run_suite(
     workspace = Path(tempfile.mkdtemp(prefix="run-", dir=stacks.cache_dir()))
     workspace.chmod(0o755)
     try:
-        runner = Runner(image, stack_dir, workspace, cpus)
-        outcomes = _measure(runner, cells, repeats, busy_check, memory_wires)
+        runner = Runner(image, stack_dir, workspace, cpus, kokkos=kokkos_dir)
+        outcomes, unavailable = _measure(
+            runner, cells, repeats, busy_check, memory_wires, backends, drop_unrunnable
+        )
+        cells = [cell for cell in cells if cell.name not in unavailable]
         if keep_raw:
             untrusted.copy_plain_files(workspace / "runs", keep_raw)
     finally:
@@ -486,6 +511,7 @@ def run_suite(
         "schema": SCHEMA,
         "started_at": started.isoformat(timespec="seconds"),
         "finished_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        **({"part": part} if part else {}),
         "pennywatch": provenance,
         "image": {"tag": image, **container.tool_versions(image)},
         "host": host_facts(),
@@ -495,8 +521,10 @@ def run_suite(
             "pennylane": versions.get("pennylane"),
             "pennylane-lightning": versions.get("pennylane-lightning"),
             "pennylane-catalyst": versions.get("pennylane-catalyst"),
+            "pennylane-lightning-kokkos": kokkos_version,
             "packages": versions,
         },
+        **({"unavailable": unavailable} if unavailable else {}),
         "repeats": repeats,
         "cpus": len(cpus),
         "cells": summaries,
@@ -508,11 +536,12 @@ def run_suite(
     }
 
 
-def unavailable_result(stack: stacks.Stack, reason: str) -> dict:
+def unavailable_result(stack: stacks.Stack, reason: str, part: str | None = None) -> dict:
     """What's recorded for a build that can't be measured, so it isn't retried every night."""
     now = datetime.now(UTC).isoformat(timespec="seconds")
     return {
         "schema": SCHEMA,
+        **({"part": part} if part else {}),
         "started_at": now,
         "finished_at": now,
         "stack": {"id": stack.id, "pennylane-catalyst": stack.catalyst},
@@ -542,13 +571,32 @@ def _busy_jobs(cell: Cell) -> list[Job]:
 
 
 def _measure(
-    runner: Runner, cells: list[Cell], repeats: int, busy_check: bool, memory_wires: int | None
-):
+    runner: Runner,
+    cells: list[Cell],
+    repeats: int,
+    busy_check: bool,
+    memory_wires: int | None,
+    backends: tuple[str, ...] = MAIN_BACKENDS,
+    drop_unrunnable: bool = False,
+) -> tuple[dict, dict[str, str]]:
+    """Every job's outcome, and the cells left out because they can't run, with why."""
     # Gate counts come from the native runs, and the canary's size comes from the gate counts.
-    native_jobs = [native_job(cell) for cell in cells] + plan_memory(memory_wires, repeats)
+    native_jobs = [native_job(cell) for cell in cells]
+    native_jobs += plan_memory(memory_wires, repeats, backends)
     if busy_check:
         native_jobs.append(native_job(reference_cell(cells), busy=True))
     outcomes = runner.run_all(native_jobs)
+    unavailable = {}
+    if drop_unrunnable:
+        for cell in cells:
+            outcome = outcomes[native_job(cell)]
+            if outcome.error:
+                last_line = outcome.error.strip().splitlines()[-1]
+                unavailable[cell.name] = untrusted.clean_name(last_line)
+                del outcomes[native_job(cell)]
+        cells = [cell for cell in cells if cell.name not in unavailable]
+        if not cells:
+            raise stacks.StackUnavailable(f"no cell can run: {next(iter(unavailable.values()))}")
 
     jobs = plan_baselines(cells)
     for cell in cells:
@@ -566,7 +614,7 @@ def _measure(
             cell, [job for job in outcomes if _belongs_to(job, cell)], outcomes, repeats
         )
     ]
-    return outcomes | runner.run_all(retries) if retries else outcomes
+    return (outcomes | runner.run_all(retries) if retries else outcomes), unavailable
 
 
 def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | None:

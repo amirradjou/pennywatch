@@ -75,6 +75,26 @@ def test_imports_and_memory_are_measured_with_a_cell_of_their_backend():
     )
 
 
+def test_kokkos_steps_can_be_followed_up_and_are_measured_as_their_part(tmp_path, monkeypatch):
+    seen = []
+
+    class Stack:
+        def __init__(self, version):
+            self.version = version
+            self.id = f"catalyst-{version}"
+            self.lock_path = tmp_path / f"{self.id}.pylock.toml"
+
+    def run_suite(cells, stack, repeats, cpus, busy_check, memory_wires, part):
+        seen.append((cells[0].name, part))
+        return result(stack.version, [cell(1000, "qft/kokkos")]) | {"part": part}
+
+    monkeypatch.setattr(followup.stacks, "Stack", Stack)
+    monkeypatch.setattr(followup.measure, "run_suite", run_suite)
+    step = FollowUp.from_key(f"catalyst-{dev(1)}..catalyst-{dev(2)}/imports/kokkos/imports")
+    followup.run(step, tmp_path / "out")
+    assert seen == [("qft/kokkos", "kokkos"), ("qft/kokkos", "kokkos")]
+
+
 def test_memory_is_measured_again_but_not_explained():
     assert not FollowUp("0.15.0", "0.16.0", "memory/default", "peak_kb").explainable
     assert FollowUp("0.15.0", "0.16.0", "imports/qjit", "imports").explainable
@@ -177,8 +197,8 @@ def test_a_follow_up_measures_both_builds_with_the_first_locks_and_explains(tmp_
             self.id = f"catalyst-{version}"
             self.lock_path = tmp_path / "stacks" / f"{self.id}.pylock.toml"
 
-    def run_suite(cells, stack, repeats, cpus, busy_check, memory_wires):
-        calls["measured"].append((stack.version, cells[0].name, repeats, memory_wires))
+    def run_suite(cells, stack, repeats, cpus, busy_check, memory_wires, part):
+        calls["measured"].append((stack.version, cells[0].name, repeats, memory_wires, part))
         return result(stack.version, [cell(1000 if stack.version == dev(1) else 2000)])
 
     class Explanation:
@@ -196,8 +216,8 @@ def test_a_follow_up_measures_both_builds_with_the_first_locks_and_explains(tmp_
     step = FollowUp(dev(1), dev(2), "qpe/lightning", "instructions")
     followup.run(step, tmp_path / "out", locks=tmp_path / "locks", max_measured=12)
     assert calls["measured"] == [
-        (dev(1), "qpe/lightning", 3, None),
-        (dev(2), "qpe/lightning", 3, None),
+        (dev(1), "qpe/lightning", 3, None, None),
+        (dev(2), "qpe/lightning", 3, None, None),
     ]
     assert calls["explained"] == [(dev(1), dev(2), "qpe/lightning", True, 12)]
     assert (tmp_path / "stacks" / f"catalyst-{dev(1)}.pylock.toml").read_text() == "lock 1"
@@ -234,7 +254,7 @@ def test_memory_is_measured_with_the_memory_runs(tmp_path, monkeypatch):
             self.id = f"catalyst-{version}"
             self.lock_path = tmp_path / f"{self.id}.pylock.toml"
 
-    def run_suite(cells, stack, repeats, cpus, busy_check, memory_wires):
+    def run_suite(cells, stack, repeats, cpus, busy_check, memory_wires, part):
         seen.append(memory_wires)
         return result(stack.version, [cell(1000, "qft/lightning")], [memory(1000)])
 

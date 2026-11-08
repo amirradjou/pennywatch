@@ -11,7 +11,7 @@
   color-scheme: light;
   --surface: #fcfcfb; --surface-2: #f3f2ef; --grid: #e4e3df;
   --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #6d6c68; --link: #1c5cab;
-  --s-default: #2a78d6; --s-lightning: #eb6834; --s-qjit: #1baf7a;
+  --s-default: #2a78d6; --s-lightning: #eb6834; --s-qjit: #1baf7a; --s-kokkos: #eda100;
   --good: #0ca30c; --critical: #d03b3b;
 }
 @media (prefers-color-scheme: dark) {
@@ -19,14 +19,14 @@
     color-scheme: dark;
     --surface: #1a1a19; --surface-2: #252523; --grid: #383835;
     --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #a3a297; --link: #86b6ef;
-    --s-default: #3987e5; --s-lightning: #d95926; --s-qjit: #199e70;
+    --s-default: #3987e5; --s-lightning: #d95926; --s-qjit: #199e70; --s-kokkos: #c98500;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --surface: #1a1a19; --surface-2: #252523; --grid: #383835;
   --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #a3a297; --link: #86b6ef;
-  --s-default: #3987e5; --s-lightning: #d95926; --s-qjit: #199e70;
+  --s-default: #3987e5; --s-lightning: #d95926; --s-qjit: #199e70; --s-kokkos: #c98500;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--surface); color: var(--ink);
@@ -174,7 +174,7 @@ const pct = (value, digits = 2) => (value > 0 ? "+" : "") + value.toFixed(digits
 const shown = (value, unit) => (unit === "instructions" ? compact.format(value) : whole.format(value)) +
   (unit === "MiB" ? " MiB" : "");
 
-const COLOR = { default: "var(--s-default)", lightning: "var(--s-lightning)", qjit: "var(--s-qjit)" };
+const COLOR = { default: "var(--s-default)", lightning: "var(--s-lightning)", qjit: "var(--s-qjit)", kokkos: "var(--s-kokkos)" };
 const WIDTH = 340, HEIGHT = 190;
 const MARGIN = { top: 10, right: 12, bottom: 24, left: 52 };
 

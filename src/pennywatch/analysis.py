@@ -8,7 +8,8 @@ CANARY_MIN_NOISE_RATIO = 5.0
 # The widest range across three runs of any cell under one memory layout, per backend, measured in
 # M0. A canary is compared within one layout, so this is the noise it has to clear, and it has only
 # one run to compare with, so it can't measure its own.
-NOISE_FLOOR = {"default": 100_000, "lightning": 230_000, "qjit": 710_000}
+# kokkos was measured the same way on 2026-11-07: 381,836 at most, on trotter/kokkos at 0.15.0.
+NOISE_FLOOR = {"default": 100_000, "lightning": 230_000, "qjit": 710_000, "kokkos": 400_000}
 
 
 def spread_pct(values: list[int]) -> float | None:

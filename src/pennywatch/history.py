@@ -208,9 +208,38 @@ def confirm_steps(steps: list[Step], second_set: list[dict]) -> list[Step]:
 
 
 def load_results(paths: list[Path]) -> list[dict]:
-    """Saved results, leaving out rejected ones, which never get compared or published."""
+    """Saved results, leaving out rejected ones, which never get compared or published, with the
+    parts of each build read as one."""
     results = [json.loads(path.read_text()) for path in paths if ".rejected." not in path.name]
-    return [result for result in results if result.get("valid", True)]
+    return combine([result for result in results if result.get("valid", True)])
+
+
+def combine(results: list[dict]) -> list[dict]:
+    """One result per build. A build can be measured in parts, the main run and then
+    lightning.kokkos on its own, each with its own verdict, so a valid part counts whatever happened
+    to the other. The main part's details come first."""
+    grouped: dict[object, list[dict]] = {}
+    for number, result in enumerate(results):
+        # Without a stack there's nothing to combine it with.
+        grouped.setdefault((result.get("stack") or {}).get("id", number), []).append(result)
+    combined = []
+    for parts in grouped.values():
+        parts.sort(key=lambda part: part.get("part") is not None)
+        if len(parts) == 1:
+            combined.append(parts[0])
+            continue
+        merged = dict(parts[0])
+        merged["cells"], merged["memory"] = [], []
+        for part in parts:
+            names = {cell["name"] for cell in merged["cells"]}
+            merged["cells"] += [cell for cell in part["cells"] if cell["name"] not in names]
+            backends = {entry["backend"] for entry in merged["memory"]}
+            merged["memory"] += [
+                entry for entry in part.get("memory") or [] if entry["backend"] not in backends
+            ]
+        merged["parts"] = [part.get("part") or "main" for part in parts]
+        combined.append(merged)
+    return combined
 
 
 def _number(value: float) -> str:

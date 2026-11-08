@@ -201,3 +201,35 @@ def test_the_series_has_one_column_per_build_in_order():
     text = history.render_series([result("0.9.0", cell(2e9)), result("0.8.1", cell(1e9))])
     assert text.splitlines()[0] == "| instructions | 0.8.1 | 0.9.0 |"
     assert text.splitlines()[2] == "| qft/default | 1.000B | 2.000B |"
+
+
+def test_the_parts_of_a_build_read_as_one_result():
+    main = result("0.15.0", cell(1000), memory=[{"backend": "lightning", "max_rss_kb": {"net": 1}}])
+    kokkos = result(
+        "0.15.0",
+        cell(2000, name="qft/kokkos"),
+        memory=[{"backend": "kokkos", "max_rss_kb": {"net": 2}}],
+    ) | {"part": "kokkos"}
+    (combined,) = history.combine([kokkos, main])
+    assert [c["name"] for c in combined["cells"]] == ["qft/default", "qft/kokkos"]
+    assert [m["backend"] for m in combined["memory"]] == ["lightning", "kokkos"]
+    assert combined["parts"] == ["main", "kokkos"]
+    assert "part" not in combined
+
+
+def test_a_part_alone_still_counts():
+    kokkos = result("0.15.0", cell(2000, name="qft/kokkos")) | {"part": "kokkos"}
+    assert history.combine([kokkos]) == [kokkos]
+
+
+def test_steps_on_kokkos_come_from_its_parts():
+    first = [
+        result("0.8.1", cell(1000)),
+        result("0.8.1", cell(5000, name="qft/kokkos")) | {"part": "kokkos"},
+    ]
+    second = [
+        result("0.9.0", cell(1000)),
+        result("0.9.0", cell(6000, name="qft/kokkos")) | {"part": "kokkos"},
+    ]
+    steps = find_steps(history.combine(first + second))
+    assert [(s.cell, s.change_pct) for s in steps] == [("qft/kokkos", 20.0)]

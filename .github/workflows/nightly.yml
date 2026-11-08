@@ -56,7 +56,8 @@ jobs:
     if: needs.plan.outputs.versions != '[]'
     name: measure (${{ matrix.version }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    # Up to 65 minutes for the main run on the slower CPUs, then about 20 for lightning.kokkos.
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       max-parallel: 6
@@ -73,6 +74,13 @@ jobs:
         run: >-
           uv run pennywatch run --stack "$VERSION" --suite full --repeats 3 --no-busy-check
           --out "measured/catalyst-$VERSION.json"
+      # A part with a verdict of its own: if kokkos can't be measured, the main run still counts.
+      - name: Measure lightning.kokkos
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: >-
+          uv run pennywatch run --stack "$VERSION" --suite kokkos --repeats 3 --no-busy-check
+          --out "measured/catalyst-$VERSION.kokkos.json"
       - name: Keep the lock file with the result
         if: always()
         run: cp "stacks/catalyst-$VERSION.pylock.toml" measured/ || true

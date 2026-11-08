@@ -18,6 +18,7 @@ BACKEND_LABELS = {
     "default": "default.qubit",
     "lightning": "lightning.qubit",
     "qjit": "lightning.qubit under qjit",
+    "kokkos": "lightning.kokkos",
 }
 
 

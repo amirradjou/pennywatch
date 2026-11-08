@@ -174,3 +174,25 @@ def test_steps_can_be_limited_to_the_newest_two_builds(tmp_path, capsys):
     assert "+100.00%" in capsys.readouterr().out
     assert cli.main(["steps", "--latest", *paths]) == 0
     assert "No steps." in capsys.readouterr().out
+
+
+def test_a_rejected_part_isnt_shown_as_a_missing_build(tmp_path):
+    data = tmp_path / "data"
+    (data / "nightly" / "rejected").mkdir(parents=True)
+    _with_stack(data / "nightly", "0.16.0.dev1", 100)
+    rejected = data / "nightly" / "rejected" / "catalyst-0.16.0.dev1.kokkos.json"
+    rejected.write_text(
+        json.dumps(
+            {
+                "valid": False,
+                "part": "kokkos",
+                "problems": ["no cell can run"],
+                "stack": {"id": "catalyst-0.16.0.dev1", "pennylane-catalyst": "0.16.0.dev1"},
+                "cells": [],
+            }
+        )
+    )
+    none = str(tmp_path / "none")
+    arguments = ["site", "--stable", none, "--data", str(data), "--second-set", none]
+    assert cli.main([*arguments, "--explanations", none, "--out", str(tmp_path / "site")]) == 0
+    assert '"gaps":[]' in (tmp_path / "site" / "index.html").read_text()

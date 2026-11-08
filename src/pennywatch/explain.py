@@ -20,7 +20,7 @@ from statistics import median
 
 from pennywatch import cachegrind, container, history, measure, stacks, untrusted, upstream
 from pennywatch.measure import Job
-from pennywatch.suite import SUITES, Cell
+from pennywatch.suite import PARTS, SUITES, Cell
 
 LAYOUTS = 3
 TOP_FUNCTIONS = 15
@@ -51,7 +51,8 @@ class Side:
 
 
 def find_cell(name: str, suite: str = "full") -> Cell:
-    for cell in SUITES[suite]:
+    """A cell of the suite, or of a part measured alongside it, such as kokkos's."""
+    for cell in [*SUITES[suite], *(cell for part in PARTS for cell in SUITES[part])]:
         if cell.name == name:
             return cell
     raise SystemExit(f"no cell {name} in suite {suite}")
@@ -155,13 +156,14 @@ def measure_side(
     metric: str = "instructions",
     overlay: Path | None = None,
     profile: bool = True,
+    kokkos: Path | None = None,
 ) -> Side:
     """Run a cell across layouts, with the functions of the first layout and a Python profile."""
     workspace = _workspace()
     role = counted_role(metric)
     try:
         runner = measure.Runner(
-            image, stack_dir, workspace, cpus, overlay=overlay, keep_functions=True
+            image, stack_dir, workspace, cpus, overlay=overlay, keep_functions=True, kokkos=kokkos
         )
         jobs = [_job(cell, role, repeat=layout) for layout in range(LAYOUTS)]
         extra = [_job(cell, "profile")] if profile else []
@@ -431,6 +433,7 @@ def bisect_pennylane(
     metric: str,
     extras: tuple[str, ...] = (),
     max_measured: int | None = None,
+    kokkos: Path | None = None,
 ) -> dict:
     """Bisect PennyLane alone on top of the older stack, so nothing else can be the cause."""
 
@@ -438,7 +441,15 @@ def bisect_pennylane(
         try:
             overlay = fetch_overlay(commit, extras)
             side = measure_side(
-                image, stack_dir, commit[:12], cell, cpus, metric, overlay=overlay, profile=False
+                image,
+                stack_dir,
+                commit[:12],
+                cell,
+                cpus,
+                metric,
+                overlay=overlay,
+                profile=False,
+                kokkos=kokkos,
             )
         except (
             MeasurementFailed,
@@ -515,13 +526,17 @@ def explain(
 ) -> Explanation:
     cell = find_cell(cell_name, suite)
     image = container.ensure_image()
-    versions, sides, directories = {}, {}, {}
+    versions, sides, directories, kokkos = {}, {}, {}, {}
     for name, stack in (("before", before), ("after", after)):
         if not stack.lock_path.exists():
             stacks.write_lock(stack, image)
         versions[name] = stacks.locked_versions(stack.lock_path)
         directories[name] = stacks.install(stack, image)
-        sides[name] = measure_side(image, directories[name], stack.id, cell, list(cpus), metric)
+        if cell.backend == "kokkos":
+            kokkos[name] = stacks.install_kokkos(stack, image)[0]
+        sides[name] = measure_side(
+            image, directories[name], stack.id, cell, list(cpus), metric, kokkos=kokkos.get(name)
+        )
     if metric == "imports":
         # What the circuit does says nothing about a step in the imports.
         for name in ("before", "after"):
@@ -555,6 +570,7 @@ def explain(
             metric,
             extras,
             max_measured,
+            kokkos.get("before"),
         )
         by_commit = {change.commit: change for change in merged["pennylane"]}
         for culprit in bisected.get("culprits", []):

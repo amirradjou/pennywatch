@@ -18,7 +18,7 @@ from pennywatch import (
     site,
     stacks,
 )
-from pennywatch.suite import MEMORY_WIRES, SUITES, Cell
+from pennywatch.suite import MEMORY_WIRES, PARTS, SUITES, Cell
 
 DEFAULT_STACK = "0.15.0"
 AGREEMENT_LIMIT_PCT = 0.05
@@ -136,7 +136,8 @@ def result_path(result: dict, requested: Path | None) -> Path:
     """A rejected run keeps its numbers for debugging under a name nothing will publish."""
     if requested is None:
         stamp = result["started_at"].replace(":", "").replace("+0000", "Z")
-        requested = container.REPO_ROOT / "results" / f"{result['stack']['id']}-{stamp}.json"
+        part = f".{result['part']}" if result.get("part") else ""
+        requested = container.REPO_ROOT / "results" / f"{result['stack']['id']}-{stamp}{part}.json"
     if result["valid"]:
         return requested
     return requested.with_suffix(".rejected.json")
@@ -166,9 +167,13 @@ def run_command(args: argparse.Namespace) -> int:
             memory_wires=None if args.cells else MEMORY_WIRES.get(args.suite),
             # Too small for 1% extra gates to clear the noise, and its numbers mean nothing anyway.
             judge_canaries=args.suite != "smoke",
+            # A part, such as kokkos's, has a verdict of its own, and a circuit an older build of
+            # its backend can't run is named rather than failing the rest.
+            part=PARTS.get(args.suite),
+            drop_unrunnable=args.suite in PARTS,
         )
     except stacks.StackUnavailable as error:
-        result = measure.unavailable_result(stack, str(error))
+        result = measure.unavailable_result(stack, str(error), PARTS.get(args.suite))
     path = result_path(result, args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(result, indent=1) + "\n")
@@ -212,7 +217,12 @@ def site_command(args: argparse.Namespace) -> int:
     nightly_dir = args.data / "nightly" if args.data else None
     nightly = history.load_results(_json_files(nightly_dir))
     gaps_dir = nightly_dir / "rejected" if nightly_dir else None
-    gaps = [json.loads(path.read_text()) for path in _json_files(gaps_dir)]
+    # A build is missing when its main run is: a rejected part only lacks that part's backend.
+    gaps = [
+        gap
+        for gap in (json.loads(path.read_text()) for path in _json_files(gaps_dir))
+        if not gap.get("part")
+    ]
     # As one history: the step from the last release to the first dev build counts too.
     steps = history.confirm_steps(
         history.find_steps(stable + nightly),
