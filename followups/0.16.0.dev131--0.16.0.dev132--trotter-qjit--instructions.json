@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev131..catalyst-0.16.0.dev132/trotter/qjit/instructions",
+ "name": "0.16.0.dev131--0.16.0.dev132--trotter-qjit--instructions",
+ "before": "0.16.0.dev131",
+ "after": "0.16.0.dev132",
+ "cell": "trotter/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 10632692863,
+  "after": 10688013953,
+  "change_pct": 0.5202923728993262
+ },
+ "second": {
+  "before": 10616867550,
+  "after": 10642514620,
+  "change_pct": 0.24156908691961593,
+  "host": "AMD EPYC 7763 64-Core Processor"
+ },
+ "confirmed": false,
+ "explanation": null,
+ "problems": [],
+ "run": "42494232069",
+ "recorded_at": "2026-11-08T16:23:42+00:00"
+}
