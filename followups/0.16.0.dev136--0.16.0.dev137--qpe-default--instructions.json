@@ -1,0 +1,399 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev136..catalyst-0.16.0.dev137/qpe/default/instructions",
+ "name": "0.16.0.dev136--0.16.0.dev137--qpe-default--instructions",
+ "before": "0.16.0.dev136",
+ "after": "0.16.0.dev137",
+ "cell": "qpe/default",
+ "metric": "instructions",
+ "first": {
+  "before": 3154825669,
+  "after": 3084803024,
+  "change_pct": -2.219540866807877
+ },
+ "second": {
+  "before": 3152431612,
+  "after": 3085069500,
+  "change_pct": -2.136830240617445,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qpe/default",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev136",
+   "runs": [
+    3156285375,
+    3152489628,
+    3153202404
+   ],
+   "net": 3153202404
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev137",
+   "runs": [
+    3085625732,
+    3085091333,
+    3084566292
+   ],
+   "net": 3085091333
+  },
+  "packages": [
+   "pennylane 0.46.0.dev142 ? 0.46.0.dev147",
+   "pennylane-catalyst 0.16.0.dev136 ? 0.16.0.dev137"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    43975,
+    38093
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    10443,
+    7737
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    18568,
+    16454
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    11744,
+    9688
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:name",
+    9337,
+    7423
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    8773,
+    7452
+   ],
+   [
+    "<frozen abc>:__instancecheck__",
+    10775,
+    9730
+   ],
+   [
+    "~:<built-in method _abc._abc_instancecheck>",
+    10775,
+    9730
+   ],
+   [
+    "~:<method 'pop' of 'dict' objects>",
+    2046,
+    1056
+   ],
+   [
+    "~:<method 'split' of 'str' objects>",
+    6557,
+    5633
+   ],
+   [
+    "autoray/autoray.py:infer_backend",
+    6223,
+    5365
+   ],
+   [
+    "pennylane/pytrees/pytrees.py:flatten",
+    6454,
+    5596
+   ],
+   [
+    "pennylane/math/interface_utils.py:_get_interface_of_single_tensor",
+    5954,
+    5162
+   ],
+   [
+    "pennylane/math/interface_utils.py:get_interface",
+    5443,
+    4651
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:__init__",
+    3045,
+    2319
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    325085834,
+    292773351
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    156503116,
+    136991959
+   ],
+   [
+    "__tls_get_addr",
+    45041573,
+    40235937
+   ],
+   [
+    "_PyType_Lookup",
+    21174776,
+    19024865
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    11053001,
+    9837813
+   ],
+   [
+    "PyObject_RichCompare",
+    4610325,
+    3964136
+   ],
+   [
+    "PyObject_GC_Del",
+    5998102,
+    5353313
+   ],
+   [
+    "_PyObject_GC_New",
+    6242994,
+    5638464
+   ],
+   [
+    "PyObject_GetAttr",
+    5018414,
+    4438276
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    4426794,
+    3859744
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    3736656,
+    3335472
+   ],
+   [
+    "_PyObject_GenericSetAttrWithDict",
+    2961080,
+    2601608
+   ],
+   [
+    "PyObject_Vectorcall",
+    2942950,
+    2587726
+   ],
+   [
+    "PyDict_GetItemWithError",
+    2417914,
+    2092408
+   ],
+   [
+    "PyList_New",
+    2053504,
+    1803574
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 2640,
+     "subject": "Helper to rerieve operators by name (#10430)",
+     "pull_request": 10430,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10430"
+    },
+    {
+     "score": 2640,
+     "subject": "clean up use of enabled() (#10451)",
+     "pull_request": 10451,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10451"
+    },
+    {
+     "score": 539,
+     "subject": "Remove custom dispatch of 'qp.ctrl' (#10395)",
+     "pull_request": 10395,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10395"
+    },
+    {
+     "score": 143,
+     "subject": "fix(capture): support traced work wires in callable controls (#10418)",
+     "pull_request": 10418,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10418"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#10437)",
+     "pull_request": 10437,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10437"
+    },
+    {
+     "score": 0,
+     "subject": "Refine AQFT errors/warnings (#10415)",
+     "pull_request": 10415,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10415"
+    },
+    {
+     "score": 0,
+     "subject": "Update stable dependency files (#10439)",
+     "pull_request": 10439,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10439"
+    },
+    {
+     "score": 0,
+     "subject": "Fix rendering issues in qp.hint docs and level docs in qp.analyze (#10428)",
+     "pull_request": 10428,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10428"
+    },
+    {
+     "score": 0,
+     "subject": "C(IsingZZ) decomp (#10425)",
+     "pull_request": 10425,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10425"
+    },
+    {
+     "score": 0,
+     "subject": "Add resource hints to 'cond' in 'TrotterVibronic' (#10401)",
+     "pull_request": 10401,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10401"
+    },
+    {
+     "score": 0,
+     "subject": "Apply the real BasisRotation determinant correction as PauliZ (#10442)",
+     "pull_request": 10442,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10442"
+    },
+    {
+     "score": 0,
+     "subject": "Fix infinite recursion in the decomposition graph for cycles through work-wire dependent ops (#10423)",
+     "pull_request": 10423,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10423"
+    },
+    {
+     "score": 0,
+     "subject": "Add three resource-improving decompositions (#10409)",
+     "pull_request": 10409,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10409"
+    },
+    {
+     "score": 0,
+     "subject": "Avoid casting to tracers prematurely in 'TrotterVibronic' preprocessing (#10445)",
+     "pull_request": 10445,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10445"
+    },
+    {
+     "score": 0,
+     "subject": "Displaying decomposition rules - Quantum chemistry and time evolution (#10421)",
+     "pull_request": 10421,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10421"
+    },
+    {
+     "score": 0,
+     "subject": "Prepare pennylane for turning on device decompositions (#10447)",
+     "pull_request": 10447,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10447"
+    },
+    {
+     "score": 0,
+     "subject": "Add a decomposition to Clifford+T of 'PhaseGradientStatePreparation' (#10446)",
+     "pull_request": 10446,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10446"
+    },
+    {
+     "score": 0,
+     "subject": "Prepare test suite for capture=True default (#10448)",
+     "pull_request": 10448,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10448"
+    },
+    {
+     "score": 0,
+     "subject": "Displaying decomposition rules - State preparation, embeddings and algorithms (#10420)",
+     "pull_request": 10420,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10420"
+    },
+    {
+     "score": 0,
+     "subject": "Port 'ControlledSequence' to 'Operator2' (#10449)",
+     "pull_request": 10449,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10449"
+    },
+    {
+     "score": 0,
+     "subject": "Port 'FermionicSWAP' to 'Operator2' (#10458)",
+     "pull_request": 10458,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10458"
+    },
+    {
+     "score": 0,
+     "subject": "Display adjoint, controlled and pow rules to multi-qubit, qchem and matrix op decompositions (#10436)",
+     "pull_request": 10436,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10436"
+    },
+    {
+     "score": 0,
+     "subject": "Migrate 'qp.Adder' to 'Operator2' (#10240)",
+     "pull_request": 10240,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10240"
+    },
+    {
+     "score": 0,
+     "subject": "Use MidMeasure as the canonical operation name (#10457)",
+     "pull_request": 10457,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10457"
+    },
+    {
+     "score": 0,
+     "subject": "Port 'PhaseAdder' to 'Operator2' (#10459)",
+     "pull_request": 10459,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10459"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "fix(LLL): align controlled-gate tests with latest PennyLane (#3451)",
+     "pull_request": 3451,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3451"
+    },
+    {
+     "score": 0,
+     "subject": "Make the MidMeasure DAG label test version-independent (#3448)",
+     "pull_request": 3448,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3448"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/work wires modifier (#3412)",
+     "pull_request": 3412,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3412"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 25,
+   "pennylane-catalyst": 3
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "df2daac474f168a35b436bd7097d498df4767076",
+     "before": 3153116021,
+     "after": 3085291420,
+     "pull_request": 10395,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10395",
+     "subject": "Remove custom dispatch of 'qp.ctrl' (#10395)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 5,
+   "stopped": false,
+   "pennylane_alone": 3085201439,
+   "pennylane_share": 0.9983834346107991
+  }
+ },
+ "problems": [],
+ "run": "42465499292",
+ "recorded_at": "2026-11-08T09:26:41+00:00"
+}
