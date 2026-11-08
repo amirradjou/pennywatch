@@ -1,10 +1,16 @@
 name: History
 
-# Measures the last eight stable releases, one job each. It costs about 8 hours of the 2,000 free
-# minutes a private repo gets each month, so it runs by hand. The results get checked and committed
-# to results/stable, or to results/stable-repeat for the second measurement that confirms a step.
+# Measures the last eight stable releases, one job each, by hand. The results get checked and
+# committed to results/stable, or to results/stable-repeat for the second measurement that confirms a
+# step. `suite: kokkos` measures lightning.kokkos on its own, as the part of each release it is.
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: The main run, or a part
+        type: choice
+        options: [full, kokkos]
+        default: full
   # A workflow can't be dispatched until it's on the default branch, so pushing here also starts it.
   push:
     branches: ["measure/history"]
@@ -24,18 +30,21 @@ jobs:
         stack: ["0.8.1", "0.9.0", "0.10.0", "0.11.0", "0.12.0", "0.13.0", "0.14.1", "0.15.0"]
     env:
       STACK: ${{ matrix.stack }}
+      SUITE: ${{ inputs.suite || 'full' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
       - name: Measure
-        run: >-
-          uv run pennywatch run --stack "$STACK" --suite full --repeats 3 --no-busy-check
-          --out "measured/catalyst-$STACK.json"
+        run: |
+          part=""
+          if [ "$SUITE" != full ]; then part=".$SUITE"; fi
+          uv run pennywatch run --stack "$STACK" --suite "$SUITE" --repeats 3 --no-busy-check \
+            --out "measured/catalyst-$STACK$part.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: measured-${{ matrix.stack }}
+          name: measured-${{ inputs.suite || 'full' }}-${{ matrix.stack }}
           path: measured/
           if-no-files-found: warn

@@ -105,16 +105,25 @@ def user_flag() -> str:
 
 
 def sandbox_args(
-    cpu: int, stack: Path, source: Path, output: Path, layout: int = 0, overlay: Path | None = None
+    cpu: int,
+    stack: Path,
+    source: Path,
+    output: Path,
+    layout: int = 0,
+    overlay: Path | None = None,
+    kokkos: Path | None = None,
 ) -> list[str]:
     """No network, no secrets, read-only everywhere except scratch, because this runs nightly code
     from TestPyPI. One CPU per process: with --cpuset the process also sees only one, so thread
     pools and CPU-count checks come out the same on every machine."""
     variables = MEASURE_ENV | {LAYOUT_VARIABLE: layout_padding(layout)}
-    if overlay is not None:
-        variables["PYTHONPATH"] = f"/overlay:{MEASURE_ENV['PYTHONPATH']}"
+    # Only a kokkos run gets its package on the path, so nothing changes for the other backends.
+    paths = [*(["/overlay"] if overlay else []), *(["/kokkos"] if kokkos else [])]
+    if paths:
+        variables["PYTHONPATH"] = ":".join([*paths, MEASURE_ENV["PYTHONPATH"]])
     environment = [flag for item in variables.items() for flag in ("-e", "=".join(item))]
     mounts = [f"--volume={overlay}:/overlay:ro"] if overlay is not None else []
+    mounts += [f"--volume={kokkos}:/kokkos:ro"] if kokkos is not None else []
     return [
         "--rm",
         "--cpus=1",

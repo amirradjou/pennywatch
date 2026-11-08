@@ -2,7 +2,11 @@
 
 from dataclasses import dataclass
 
-BACKENDS = ("default", "lightning", "qjit")
+# The backends of the main run. Their numbers stand or fall together: one failure rejects them all.
+MAIN_BACKENDS = ("default", "lightning", "qjit")
+# lightning.kokkos, on OpenMP with one thread, is measured in a run of its own with its own verdict,
+# so a kokkos that can't run doesn't take the other three down with it.
+BACKENDS = (*MAIN_BACKENDS, "kokkos")
 
 # The newest patch of each of the last eight stable series. Catalyst names a whole stack.
 STABLE_STACKS = ("0.8.1", "0.9.0", "0.10.0", "0.11.0", "0.12.0", "0.13.0", "0.14.1", "0.15.0")
@@ -23,7 +27,7 @@ class Cell:
 
 
 def _on_every_backend(circuit: str, wires: int, rounds: int) -> list[Cell]:
-    return [Cell(circuit, backend, wires, rounds) for backend in BACKENDS]
+    return [Cell(circuit, backend, wires, rounds) for backend in MAIN_BACKENDS]
 
 
 # Sized to about 700 device gates where that fits, so the canary's 1% is several gates. Trotter is
@@ -59,6 +63,15 @@ SUITES = {
     ],
 }
 
+# The same circuits at the same sizes as lightning.qubit's, so the two can be read side by side.
+SUITES["kokkos"] = [
+    Cell(cell.circuit, "kokkos", cell.wires, cell.rounds)
+    for cell in SUITES["full"]
+    if cell.backend == "lightning"
+]
+# Suites measured as a separate part of a build, and the suffix of their result files.
+PARTS = {"kokkos": "kokkos"}
+
 # 2^25 amplitudes are 512 MiB, about twice what the imports hold, so the state vector dominates.
 # Measured natively: Valgrind couldn't hold this for long, and it isn't counting anything here.
-MEMORY_WIRES = {"full": 25}
+MEMORY_WIRES = {"full": 25, "kokkos": 25}

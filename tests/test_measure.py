@@ -363,3 +363,72 @@ def test_the_canary_is_judged_against_the_full_run_on_its_own_layout():
     assert summary["instructions"]["net"] == 1_100_000_000
     assert summary["canary"]["delta"] == 10_000_000
     assert summary["canary"]["detected"]
+
+
+KOKKOS = Cell("qft", "kokkos", 18, 1)
+
+
+def test_kokkos_runs_through_its_own_entry_point_and_nothing_else_does(monkeypatch, tmp_path):
+    seen = {}
+
+    def fake(argv, timeout):
+        seen[next(a for a in argv if a.startswith("--name="))] = argv
+        return 1, ""
+
+    monkeypatch.setattr(measure, "run_keeping_tail", fake)
+    runner = measure.Runner("image", tmp_path, tmp_path, [0], kokkos=tmp_path / "k")
+    runner.execute(full_job(KOKKOS), 0)
+    runner.execute(full_job(), 0)
+    kokkos, lightning = seen.values()
+    assert "pennywatch.harness.kokkos" in kokkos
+    assert "PYTHONPATH=/kokkos:/src" in kokkos
+    assert "pennywatch.harness.workload" in lightning
+    assert "PYTHONPATH=/src" in lightning
+
+
+def test_memory_is_planned_only_for_the_backends_asked_for():
+    assert {job.backend for job in measure.plan_memory(25, 3)} == {"default", "lightning", "qjit"}
+    assert {job.backend for job in measure.plan_memory(25, 3, ("kokkos",))} == {"kokkos"}
+
+
+class _Runner:
+    """Answers every job; the native run of the cells named in `broken` exits with an error."""
+
+    def __init__(self, broken=()):
+        self.broken = set(broken)
+
+    def run_all(self, jobs):
+        outcomes = {}
+        for job in jobs:
+            name = f"{job.circuit}/{job.backend}"
+            if job.mode == "native" and name in self.broken:
+                outcomes[job] = Outcome(job, error="exit 1: Traceback\nDecompositionUndefinedError")
+            else:
+                sentinel = {"gates": {"device": {"gates": 700}}, "versions": {}}
+                outcomes[job] = Outcome(job, counts=Counts(python=1000), sentinel=sentinel)
+        return outcomes
+
+
+def test_a_cell_an_older_backend_cant_run_is_named_and_left_out():
+    grover = Cell("grover", "kokkos", 18, 12)
+    outcomes, unavailable = measure._measure(
+        _Runner(broken={"grover/kokkos"}), [KOKKOS, grover], 1, False, None, ("kokkos",), True
+    )
+    assert unavailable == {"grover/kokkos": "DecompositionUndefinedError"}
+    assert not any(job.circuit == "grover" for job in outcomes)
+
+
+def test_without_leave_to_drop_a_crashed_cell_stays_and_fails_the_run():
+    grover = Cell("grover", "kokkos", 18, 12)
+    outcomes, unavailable = measure._measure(
+        _Runner(broken={"grover/kokkos"}), [KOKKOS, grover], 1, False, None, ("kokkos",), False
+    )
+    assert unavailable == {}
+    assert outcomes[measure.native_job(grover)].error
+
+
+def test_a_part_where_no_cell_can_run_cant_be_measured():
+    with pytest.raises(measure.stacks.StackUnavailable, match="no cell can run"):
+        measure._measure(
+            _Runner(broken={"qft/kokkos"}), [KOKKOS], 1, False, None, ("kokkos",), True
+        )

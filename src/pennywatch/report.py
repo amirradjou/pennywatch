@@ -214,6 +214,8 @@ def render(result: dict) -> str:
         f"PennyLane {stack['pennylane']}, Lightning {stack['pennylane-lightning']}, "
         f"Catalyst {stack['pennylane-catalyst']}"
     )
+    if stack.get("pennylane-lightning-kokkos"):
+        versions += f", Lightning Kokkos {stack['pennylane-lightning-kokkos']}"
     verdict = "valid" if result["valid"] else "REJECTED"
     header = (
         f"**{verdict}.** {result['started_at']}, {versions}. "
@@ -222,4 +224,8 @@ def render(result: dict) -> str:
     problems = ""
     if result["problems"]:
         problems = "\nProblems:\n" + "".join(f"- {problem}\n" for problem in result["problems"])
+    if result.get("unavailable"):
+        problems += "\nCan't run on this build, so not measured:\n" + "".join(
+            f"- {name}: {reason}\n" for name, reason in result["unavailable"].items()
+        )
     return f"{header}{problems}\n{question_table(result)}\n{cell_table(result)}"

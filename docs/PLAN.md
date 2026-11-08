@@ -97,7 +97,8 @@ Most cells barely notice: `grover/default` moves 0.001% across layouts. The sens
 5. **Publish.** Results are JSON files in the repo, rendered as a static page. There is no server.
 
 **Security.** Running nightly dev builds means running code from TestPyPI, where names aren't as well
-guarded as on PyPI. So only the three named packages may come from it, everything else comes from PyPI,
+guarded as on PyPI. So only the three named packages may come from it, and `pennylane-lightning-kokkos`
+as a fourth, named and pinned exactly and installed without its dependencies. Everything else comes from PyPI,
 and the measuring job has a read-only token and no secrets. Measured code runs with no network in a
 read-only container. A separate job publishes, runs nothing from TestPyPI, and treats everything the
 measuring job uploaded as hostile.
@@ -105,7 +106,12 @@ measuring job uploaded as hostile.
 ### Circuits
 
 Chosen so each one exercises something different, on `default.qubit`, `lightning.qubit` and
-`lightning.qubit` under `qjit`:
+`lightning.qubit` under `qjit`. `lightning.kokkos`, on OpenMP with one thread, runs the same circuits at
+`lightning.qubit`'s sizes as a part of each build with a verdict of its own, so a kokkos that can't be
+measured doesn't take the other three down. It runs through its own entry point and its own directory on
+the path, so the code and environment of the other backends haven't changed. Lightning 0.38's kokkos
+can't run Grover's operator at 18 wires and takes no seed for sampling: a circuit an older kokkos can't
+run is recorded as unavailable for that build.
 
 | Circuit | Exercises | Wires | Answer checked against |
 |---|---|---:|---|

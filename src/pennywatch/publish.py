@@ -14,7 +14,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from pennywatch import history, stacks, untrusted
-from pennywatch.suite import BACKENDS
+from pennywatch.suite import BACKENDS, PARTS
 
 MAX_RESULT_BYTES = 2 * 1024 * 1024
 MAX_LOCK_BYTES = 2 * 1024 * 1024
@@ -120,7 +120,27 @@ def parse_result(data: bytes) -> dict:
     for cell in result["cells"]:
         _check_cell(cell)
     _check_memory(result.get("memory") or [])
+    _check_part(result)
     return result
+
+
+def _check_part(result: dict) -> None:
+    """A part holds its own backend's numbers and nothing else, so it can't stand in for another."""
+    part = result.get("part")
+    if part is not None and part not in PARTS.values():
+        raise Rejected("an unknown part")
+    backends = {cell["name"].split("/")[1] for cell in result["cells"]}
+    backends |= {entry["backend"] for entry in result.get("memory") or []}
+    if part is None and backends & set(PARTS.values()):
+        raise Rejected("a part's backend outside its part")
+    if part is not None and backends - {part}:
+        raise Rejected("a part with another backend in it")
+
+
+def result_name(result: dict) -> str:
+    """The file a result is stored as: catalyst-<version>, then the part, if it is one."""
+    part = result.get("part")
+    return f"catalyst-{result['stack']['pennylane-catalyst']}" + (f".{part}" if part else "")
 
 
 def parse_lock(data: bytes) -> dict:
@@ -153,11 +173,21 @@ def done_builds(data_dir: Path) -> set[str]:
     """Builds that have been dealt with, including those rejected: measuring them again wouldn't
     change the verdict, and costs minutes."""
     prefix = "catalyst-"
-    return {
+    names = {
         path.stem.removeprefix(prefix)
         for directory in (data_dir / "nightly", data_dir / "nightly" / "rejected")
         for path in directory.glob(f"{prefix}*.json")
     }
+    # A part, such as kokkos's, doesn't make a build done: only its main run does.
+    return {name for name in names if _is_version(name)}
+
+
+def _is_version(name: str) -> bool:
+    try:
+        history.version_key(name)
+    except ValueError:
+        return False
+    return True
 
 
 def accept(artifacts: Path, data_dir: Path, planned: set[str] | None = None) -> list[str]:
@@ -184,6 +214,7 @@ def _accept(artifacts: Path, data_dir: Path, planned: set[str] | None) -> list[s
             outcomes.append(f"{version}: refused, not one of the builds planned for this run")
             continue
         name = f"catalyst-{version}"
+        stored = result_name(result)
         lock_problem = None
         lock_data = None
         locks = list(artifacts.rglob(f"{name}.pylock.toml"))
@@ -199,9 +230,10 @@ def _accept(artifacts: Path, data_dir: Path, planned: set[str] | None) -> list[s
             result = result | {"valid": False, "problems": [f"lock file: {lock_problem}"]}
         directory = data_dir / "nightly" if result["valid"] else data_dir / "nightly" / "rejected"
         directory.mkdir(parents=True, exist_ok=True)
-        (directory / f"{name}.json").write_text(json.dumps(result, indent=1) + "\n")
+        (directory / f"{stored}.json").write_text(json.dumps(result, indent=1) + "\n")
         if lock_data is not None and not lock_problem:
             (data_dir / "stacks").mkdir(parents=True, exist_ok=True)
             (data_dir / "stacks" / f"{name}.pylock.toml").write_bytes(lock_data)
-        outcomes.append(f"{version}: {'accepted' if result['valid'] else 'recorded as rejected'}")
+        label = f"{version} ({result['part']})" if result.get("part") else version
+        outcomes.append(f"{label}: {'accepted' if result['valid'] else 'recorded as rejected'}")
     return outcomes

@@ -231,3 +231,47 @@ def test_done_builds_include_the_rejected_ones(tmp_path):
 
 def test_done_builds_of_nothing_is_nothing(tmp_path):
     assert publish.done_builds(tmp_path) == set()
+
+
+def kokkos_result(**changes):
+    result = good_result(part="kokkos")
+    result["cells"] = [
+        {"name": "qft/kokkos", "instructions": {"net": 100}, "gates": {"device": {"gates": 7}}}
+    ]
+    return result | changes
+
+
+def test_a_kokkos_part_is_stored_beside_the_main_result(tmp_path):
+    data = tmp_path / "data"
+    accept(artifact(tmp_path / "a", good_result()), data)
+    outcomes = accept(artifact(tmp_path / "b", kokkos_result()), data)
+    assert outcomes == [f"- {VERSION} (kokkos): accepted"]
+    assert (data / "nightly" / f"catalyst-{VERSION}.json").exists()
+    assert json.loads((data / "nightly" / f"catalyst-{VERSION}.kokkos.json").read_text())["part"]
+
+
+def test_a_rejected_part_doesnt_make_its_build_done_or_missing(tmp_path):
+    data = tmp_path / "data"
+    accept(artifact(tmp_path, kokkos_result(valid=False, problems=["x"])), data)
+    assert (data / "nightly" / "rejected" / f"catalyst-{VERSION}.kokkos.json").exists()
+    assert publish.done_builds(data) == set()
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"part": "gpu"},
+        {"part": None},
+        {"memory": [{"backend": "lightning", "wires": 25, "max_rss_kb": {"net": 1}}]},
+    ],
+)
+def test_a_part_holds_only_its_own_backend(changes):
+    with pytest.raises(Rejected, match="part"):
+        parse_result(encode(kokkos_result(**changes)))
+
+
+def test_the_main_run_holds_no_part_s_backend():
+    main = good_result()
+    main["cells"] = kokkos_result()["cells"]
+    with pytest.raises(Rejected, match="part"):
+        parse_result(encode(main))

@@ -25,7 +25,7 @@ from pennywatch.publish import (
     _refuse_constant,
     parse_result,
 )
-from pennywatch.suite import BACKENDS, MEMORY_WIRES, SUITES
+from pennywatch.suite import BACKENDS, MEMORY_WIRES, PARTS, SUITES
 
 LIMIT = 3
 SCHEMA = 1
@@ -66,7 +66,7 @@ class FollowUp:
             history.version_key(version)
         if self.metric not in FOLLOWED_METRICS:
             raise ValueError(f"not a metric that gets followed up: {self.metric}")
-        known = {cell.name for cell in SUITES[SUITE]}
+        known = {cell.name for cell in _cells()}
         known |= {f"{kind}/{backend}" for kind in ("imports", "memory") for backend in BACKENDS}
         if self.cell not in known:
             raise ValueError(f"not a cell of the {SUITE} suite: {self.cell}")
@@ -115,6 +115,11 @@ class FollowUp:
         if match is None:
             raise ValueError(f"not a step: {key}")
         return cls(*match.groups())
+
+
+def _cells() -> list:
+    """Every cell a nightly build measures, in its main run or in a part."""
+    return [cell for suite in (SUITE, *PARTS) for cell in SUITES[suite]]
 
 
 def of_step(step: history.Step) -> FollowUp:
@@ -227,7 +232,7 @@ def run(
     """Measure both builds of a step again and, if it still shows, explain it. Runs on a fresh
     runner, with the same lock files as the first measurement."""
     out.mkdir(parents=True, exist_ok=True)
-    cell = next(cell for cell in SUITES[SUITE] if cell.name == followup.measured_cell)
+    cell = next(cell for cell in _cells() if cell.name == followup.measured_cell)
     results = {}
     for version in (followup.before, followup.after):
         stack = stacks.Stack(version)
@@ -242,6 +247,7 @@ def run(
                 cpus=list(cpus),
                 busy_check=False,
                 memory_wires=MEMORY_WIRES[SUITE] if followup.metric == "peak_kb" else None,
+                part=PARTS.get(cell.backend),
             )
         except stacks.StackUnavailable as error:
             result = measure.unavailable_result(stack, str(error))

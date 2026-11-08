@@ -33,3 +33,22 @@ def test_a_job_gives_up_after_the_limit_and_says_why():
     clock = iter([0.0, 1.0, container.MEMORY_WAIT_LIMIT_S + 1.0])
     with pytest.raises(RuntimeError, match=r"only 1.5 GiB"):
         container.wait_for_memory(read=lambda: 1.5, sleep=lambda _: None, now=lambda: next(clock))
+
+
+def test_the_other_backends_get_exactly_the_environment_they_had(tmp_path):
+    plain = container.sandbox_args(0, tmp_path, tmp_path, tmp_path, layout=1)
+    assert "PYTHONPATH=/src" in plain
+    assert not any("/kokkos" in arg for arg in plain)
+
+
+def test_only_a_kokkos_run_gets_kokkos_on_its_path(tmp_path):
+    args = container.sandbox_args(0, tmp_path, tmp_path, tmp_path, kokkos=tmp_path / "k")
+    assert "PYTHONPATH=/kokkos:/src" in args
+    assert f"--volume={tmp_path / 'k'}:/kokkos:ro" in args
+
+
+def test_an_overlay_comes_before_kokkos(tmp_path):
+    args = container.sandbox_args(
+        0, tmp_path, tmp_path, tmp_path, overlay=tmp_path, kokkos=tmp_path
+    )
+    assert "PYTHONPATH=/overlay:/kokkos:/src" in args

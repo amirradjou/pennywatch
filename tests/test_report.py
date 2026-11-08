@@ -90,6 +90,15 @@ def test_a_rejected_run_lists_its_problems():
     assert "REJECTED" in text and "canary missed" in text
 
 
+def test_a_part_names_its_version_and_what_it_couldnt_run():
+    result = base_result([measured_cell("qft/kokkos")])
+    result["stack"] = result["stack"] | {"pennylane-lightning-kokkos": "0.38.0"}
+    result["unavailable"] = {"grover/kokkos": "DecompositionUndefinedError"}
+    text = report.render(result)
+    assert "Lightning Kokkos 0.38.0" in text
+    assert "- grover/kokkos: DecompositionUndefinedError" in text
+
+
 def compiled_cell(compiler):
     cell = measured_cell("qft/qjit")
     cell["compile"] = {"net": 3_000_000_000, "spread_pct": 0.01, "compiler_process": compiler}

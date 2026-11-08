@@ -13,12 +13,13 @@ uv run pennywatch run                                             # three circui
 uv run pennywatch run --suite full --stack 0.14.1                 # all six, on any release
 uv run pennywatch run --stack 0.16.0.dev134                       # a dev build from TestPyPI
 uv run pennywatch run --cells qft/qjit,trotter/default            # part of a suite
+uv run pennywatch run --suite kokkos --stack 0.15.0               # lightning.kokkos, as its own part
 ```
 
 | Option | Default | Meaning |
 |---|---|---|
 | `--stack` | `0.15.0` | A Catalyst version. It names the whole stack, because it pins or goes with one PennyLane and one Lightning |
-| `--suite` | `m0` | `smoke` (its numbers mean nothing), `m0` (three circuits), `full` (six, plus peak memory) |
+| `--suite` | `m0` | `smoke` (its numbers mean nothing), `m0` (three circuits), `full` (six, plus peak memory), `kokkos` (the six on `lightning.kokkos`, plus its peak memory, saved as a part: name its file `catalyst-<version>.kokkos.json`) |
 | `--repeats` | `3` | Runs per cell, each under a different memory layout. The figure is their median |
 | `--cpus` | `0,1` | CPUs to use, one process on each at a time |
 | `--no-busy-check` | off | Skip the run against four spinning processes |
@@ -82,8 +83,8 @@ This re-measures the cell on both builds, then lists what merged between them:
 |---|---|---|
 | CI | every pull request | Lint and tests |
 | Measure | by hand, or a push to `measure/spread-*` | The suite on several runners at once, to see how far they agree |
-| History | by hand, or a push to `measure/history` | The last eight stable releases |
-| Nightly | 08:23 UTC, or a push to `measure/nightly` | The newest unmeasured dev build, published to the `data` branch |
+| History | by hand, or a push to `measure/history` | The last eight stable releases; by hand with `suite: kokkos`, their `lightning.kokkos` parts |
+| Nightly | 08:23 UTC, or a push to `measure/nightly` | The newest unmeasured dev build, then its `lightning.kokkos` part, published to the `data` branch |
 | Follow-up | after Nightly, or by hand with a `step` | Up to three new steps measured again on fresh runners and explained, recorded in `followups/` on the `data` branch, and an issue here for those that held |
 | Pages | after Nightly and Follow-up, or a push to `main` that changes results or the page | The public page |
 

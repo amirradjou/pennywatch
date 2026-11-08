@@ -43,6 +43,9 @@ COMPILE_BYTECODE = [
     "/stack/lib/python3.12/site-packages",
 ]
 
+KOKKOS = "pennylane-lightning-kokkos"
+KOKKOS_BYTECODE = ["/usr/local/bin/python", "-I", "-S", "-m", "compileall", "-q", "/kokkos"]
+
 # Catalyst 0.15 goes with PennyLane 0.45. Its metadata can't be used for this: the requirement is
 # only a lower bound, and Catalyst 0.10's says `pennylane>=0.4`, meaning 0.40.
 PENNYLANE_MINOR_OFFSET = 30
@@ -251,8 +254,58 @@ def install(stack: Stack, image: str) -> Path:
     return target
 
 
-def install_extras(image: str, target: Path, packages: tuple[str, ...]) -> None:
-    """Unpack packages from PyPI into a directory. Wheels only, so nothing from them runs."""
+def install_kokkos(stack: Stack, image: str) -> tuple[Path, str]:
+    """lightning.kokkos for a stack, in a directory of its own, so the other backends' environment
+    stays exactly as it was. Its version is always Lightning's, since the two are released together.
+
+    A dev build's comes from TestPyPI, which makes it the fourth package allowed from there: named
+    exactly, pinned exactly, and without its dependencies, which the stack already has. Bytecode is
+    compiled here, offline, as for the stack, so no measured run pays for compiling it."""
+    version = locked_versions(stack.lock_path).get("pennylane-lightning")
+    if version is None:
+        raise StackUnavailable("the stack has no Lightning, so no kokkos to match it")
+    target = cache_dir() / "kokkos" / f"{stack.id}-{version}"
+    if target.is_dir():
+        return target, version
+    target.parent.mkdir(parents=True, exist_ok=True)
+    partial = Path(tempfile.mkdtemp(prefix=f"{target.name}.", dir=target.parent))
+    partial.chmod(0o755)
+    try:
+        install_extras(
+            image,
+            partial,
+            (f"{KOKKOS}=={version}",),
+            index_url=f"https://{_host(stack)}/simple/" if stack.is_dev else None,
+        )
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--cpus=2",
+                "--network=none",
+                *container.HARDENING,
+                container.user_flag(),
+                "-e",
+                "HOME=/tmp",
+                f"--volume={partial}:/kokkos",
+                image,
+                *KOKKOS_BYTECODE,
+            ],
+            check=True,
+        )
+    except subprocess.CalledProcessError as error:
+        shutil.rmtree(partial, ignore_errors=True)
+        raise StackUnavailable(f"{KOKKOS} {version} can't be installed") from error
+    partial.rename(target)
+    return target, version
+
+
+def install_extras(
+    image: str, target: Path, packages: tuple[str, ...], index_url: str | None = None
+) -> None:
+    """Unpack packages from PyPI, or one other index, into a directory. Wheels only, so nothing
+    from them runs."""
     _in_image(
         image,
         [
@@ -261,6 +314,7 @@ def install_extras(image: str, target: Path, packages: tuple[str, ...]) -> None:
             "install",
             "--quiet",
             "--no-deps",
+            *(["--index-url", index_url] if index_url else []),
             "--only-binary",
             ":all:",
             "--python-version",
