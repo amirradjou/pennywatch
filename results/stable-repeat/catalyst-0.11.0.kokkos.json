@@ -1,0 +1,555 @@
+{
+ "schema": 2,
+ "started_at": "2026-11-08T04:22:18+00:00",
+ "finished_at": "2026-11-08T04:31:23+00:00",
+ "part": "kokkos",
+ "pennywatch": {
+  "commit": "69440015dc566f5a769cfc06cfc07cc6ee17c8aa",
+  "dirty": false,
+  "harness_sha256": "91a8ffa95635abbfdd96e162c9c960734cb9bc5634acf6d18113d778f08f2382"
+ },
+ "image": {
+  "tag": "pennywatch-image:91b0bb206da3",
+  "valgrind": "valgrind-3.24.0",
+  "gcc": "14.2.0",
+  "python": "Python 3.12.16",
+  "libc": "ldd (Debian GLIBC 2.41-12+deb13u4) 2.41"
+ },
+ "host": {
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "logical_cpus": 4,
+  "kernel": "7.0.0-1017-azure",
+  "github_actions": true
+ },
+ "stack": {
+  "id": "catalyst-0.11.0",
+  "lock_sha256": "8e265d7bcea2e828f34385d93b1dc0ee1fcd65bdf34bc267dee07670881e5b1f",
+  "pennylane": "0.41.1",
+  "pennylane-lightning": "0.41.1",
+  "pennylane-catalyst": "0.11.0",
+  "pennylane-lightning-kokkos": "0.41.1",
+  "packages": {
+   "appdirs": "1.4.4",
+   "astunparse": "1.6.3",
+   "autograd": "1.8.0",
+   "autoray": "0.7.1",
+   "cachetools": "5.5.2",
+   "certifi": "2025.4.26",
+   "charset-normalizer": "3.4.2",
+   "diastatic-malt": "2.15.2",
+   "gast": "0.6.0",
+   "idna": "3.10",
+   "jax": "0.4.28",
+   "jaxlib": "0.4.28",
+   "ml-dtypes": "0.5.1",
+   "networkx": "3.4.2",
+   "numpy": "2.2.5",
+   "opt-einsum": "3.4.0",
+   "packaging": "25.0",
+   "pennylane": "0.41.1",
+   "pennylane-catalyst": "0.11.0",
+   "pennylane-lightning": "0.41.1",
+   "requests": "2.32.3",
+   "rustworkx": "0.16.0",
+   "scipy": "1.15.2",
+   "scipy-openblas32": "0.3.29.0.0",
+   "six": "1.17.0",
+   "termcolor": "3.1.0",
+   "tomlkit": "0.13.2",
+   "typing-extensions": "4.13.2",
+   "urllib3": "2.4.0",
+   "wheel": "0.45.1"
+  }
+ },
+ "repeats": 3,
+ "cpus": 2,
+ "cells": [
+  {
+   "circuit": "qft",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 1,
+   "name": "qft/kokkos",
+   "gates": {
+    "top": {
+     "gates": 5,
+     "depth": 5
+    },
+    "device": {
+     "gates": 721,
+     "depth": 145
+    }
+   },
+   "wall_s": [
+    0.2264926499999973,
+    0.3046785330000006,
+    0.22353301400000447,
+    0.22325949599999717,
+    0.1990741870000008,
+    0.21960343300000318,
+    0.22280156400000095,
+    0.2231574439999946,
+    0.22066943000000094,
+    0.2206773119999994
+   ],
+   "compile_s": 9.509999969736782e-07,
+   "max_rss_kb": 185212,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 4715088184,
+    "runs": [
+     4715088184
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2107874738,
+    "runs": [
+     2107874738,
+     2107918462,
+     2107760465
+    ],
+    "spread_pct": 0.0074955592546220836,
+    "noise": 157997,
+    "processes": {
+     "python": 2107874738,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      2150306686,
+      2107874738
+     ]
+    ],
+    "delta": 42431948,
+    "delta_pct": 2.0130203771150277,
+    "noise": 400000,
+    "noise_ratio": 106.07987,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "grover",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 12,
+   "name": "grover/kokkos",
+   "gates": {
+    "top": {
+     "gates": 282,
+     "depth": 73
+    },
+    "device": {
+     "gates": 726,
+     "depth": 109
+    }
+   },
+   "wall_s": [
+    0.2607170379999957,
+    0.24119750499999526,
+    0.25969750000000147,
+    0.26211633199999795,
+    0.33377701799999926,
+    0.26139596899999873,
+    0.2599120790000029,
+    0.26102791099999934,
+    0.2468385939999962,
+    0.20535768199999893
+   ],
+   "compile_s": 1.7930000026922244e-06,
+   "max_rss_kb": 184976,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 4715088184,
+    "runs": [
+     4715088184
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2853477715,
+    "runs": [
+     2853477715,
+     2853438414,
+     2853496996
+    ],
+    "spread_pct": 0.002053003592495202,
+    "noise": 58582,
+    "processes": {
+     "python": 2853477715,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      2896078980,
+      2853477715
+     ]
+    ],
+    "delta": 42601265,
+    "delta_pct": 1.4929594430002409,
+    "noise": 400000,
+    "noise_ratio": 106.5031625,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "trotter",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 4,
+   "name": "trotter/kokkos",
+   "gates": {
+    "top": {
+     "gates": 1,
+     "depth": 144
+    },
+    "device": {
+     "gates": 280,
+     "depth": 144
+    }
+   },
+   "wall_s": [
+    1.0509716480000009,
+    0.955136355999997,
+    1.0226481990000025,
+    0.9953936240000019,
+    1.020447206,
+    1.0241800269999999,
+    0.9936229099999991,
+    0.9290143679999971,
+    1.0289557679999888,
+    0.9990301880000061
+   ],
+   "compile_s": 1.1710000009657051e-06,
+   "max_rss_kb": 186216,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 4715088184,
+    "runs": [
+     4715088184
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 5684590913,
+    "runs": [
+     5684590913,
+     5688171379,
+     5676934126
+    ],
+    "spread_pct": 0.19767918522160857,
+    "noise": 11237253,
+    "processes": {
+     "python": 5684590913,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      5702942504,
+      5684590913
+     ]
+    ],
+    "delta": 18351591,
+    "delta_pct": 0.32283046011335736,
+    "noise": 400000,
+    "noise_ratio": 45.8789775,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qpe",
+   "backend": "kokkos",
+   "wires": 12,
+   "rounds": 3,
+   "name": "qpe/kokkos",
+   "gates": {
+    "top": {
+     "gates": 8,
+     "depth": 8
+    },
+    "device": {
+     "gates": 652,
+     "depth": 238
+    }
+   },
+   "wall_s": [
+    0.06800172900000234,
+    0.14337506500000075,
+    0.06393618599999229,
+    0.06407176800000514,
+    0.06352858900000058,
+    0.06278447100000051,
+    0.06106839599999603,
+    0.05713602099999093,
+    0.05583261000001016,
+    0.05726669599999923
+   ],
+   "compile_s": 2.10299999992003e-06,
+   "max_rss_kb": 182748,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 4715088184,
+    "runs": [
+     4715088184
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 442194944,
+    "runs": [
+     442194944,
+     442326009,
+     442121294
+    ],
+    "spread_pct": 0.046295192375605275,
+    "noise": 204715,
+    "processes": {
+     "python": 442194944,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      445104039,
+      442194944
+     ]
+    ],
+    "delta": 2909095,
+    "delta_pct": 0.6578761334729327,
+    "noise": 400000,
+    "noise_ratio": 7.2727375,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "variational",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 4,
+   "name": "variational/kokkos",
+   "gates": {
+    "top": {
+     "gates": 212,
+     "depth": 31
+    },
+    "device": {
+     "gates": 212,
+     "depth": 31
+    }
+   },
+   "wall_s": [
+    0.3811792890000021,
+    0.46436455799999976,
+    0.38499788000000024,
+    0.37477074099999186,
+    0.3877442360000032,
+    0.3761199230000045,
+    0.377847138000007,
+    0.39211558099999877,
+    0.37582534599999917,
+    0.3783406199999888
+   ],
+   "compile_s": 2.1830000065392596e-06,
+   "max_rss_kb": 203208,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 4715088184,
+    "runs": [
+     4715088184
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 3664585334,
+    "runs": [
+     3664725188,
+     3664585334,
+     3664581939
+    ],
+    "spread_pct": 0.00390900980449102,
+    "noise": 143249,
+    "processes": {
+     "python": 3664725188,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      3683767469,
+      3664725188
+     ]
+    ],
+    "delta": 19042281,
+    "delta_pct": 0.5196100668708586,
+    "noise": 400000,
+    "noise_ratio": 47.6057025,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "sampling",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 20,
+   "name": "sampling/kokkos",
+   "gates": {
+    "top": {
+     "gates": 721,
+     "depth": 721
+    },
+    "device": {
+     "gates": 721,
+     "depth": 721
+    }
+   },
+   "wall_s": [
+    0.17971415600000284,
+    0.2395771120000063,
+    0.1645382939999962,
+    0.16660754699999814,
+    0.16574138100000368,
+    0.166492085999991,
+    0.17116737599999965,
+    0.16671194199999206,
+    0.16560118199998897,
+    0.1700008050000008
+   ],
+   "compile_s": 2.4329999916972156e-06,
+   "max_rss_kb": 194116,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 4715088184,
+    "runs": [
+     4715088184
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 1529266935,
+    "runs": [
+     1529218454,
+     1529854490,
+     1529266935
+    ],
+    "spread_pct": 0.04159090773776522,
+    "noise": 636036,
+    "processes": {
+     "python": 1529218454,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      1571354309,
+      1529218454
+     ]
+    ],
+    "delta": 42135855,
+    "delta_pct": 2.755384941228286,
+    "noise": 400000,
+    "noise_ratio": 105.3396375,
+    "detected": true
+   }
+  }
+ ],
+ "memory": [
+  {
+   "backend": "kokkos",
+   "wires": 25,
+   "max_rss_kb": {
+    "net": 706248,
+    "runs": [
+     706248,
+     706508,
+     706064
+    ],
+    "spread_pct": 0.06286743466884154,
+    "noise": 444
+   }
+  }
+ ],
+ "busy_check": null,
+ "availability": {
+  "packages": {
+   "pennylane": {
+    "builds": 618,
+    "first": {
+     "version": "0.38.0.dev4",
+     "date": "2024-07-29"
+    },
+    "last": {
+     "version": "0.46.0.dev148",
+     "date": "2026-11-07"
+    }
+   },
+   "pennylane-lightning": {
+    "builds": 91,
+    "first": {
+     "version": "0.44.0.dev3",
+     "date": "2025-10-15"
+    },
+    "last": {
+     "version": "0.46.0.dev36",
+     "date": "2026-11-05"
+    }
+   },
+   "pennylane-catalyst": {
+    "builds": 64,
+    "first": {
+     "version": "0.16.0.dev67",
+     "date": "2026-08-08"
+    },
+    "last": {
+     "version": "0.16.0.dev137",
+     "date": "2026-11-07"
+    }
+   }
+  },
+  "newest_catalyst_pins": {
+   "pennylane": "0.46.0.dev147",
+   "pennylane-lightning": "0.46.0.dev34",
+   "pennylane-lightning-kokkos": "0.46.0.dev34"
+  }
+ },
+ "valid": true,
+ "problems": []
+}
