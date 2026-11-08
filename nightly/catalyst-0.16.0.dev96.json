@@ -1,0 +1,1547 @@
+{
+ "schema": 2,
+ "started_at": "2026-11-08T04:16:10+00:00",
+ "finished_at": "2026-11-08T05:27:26+00:00",
+ "pennywatch": {
+  "commit": "9e27dbee952e415cd30346e6a90be91cccf05cd3",
+  "dirty": false,
+  "harness_sha256": "baf1547c514c4b3ae6a9d5e9a43a199eec56924622b480dc802666e29d729218"
+ },
+ "image": {
+  "tag": "pennywatch-image:91b0bb206da3",
+  "valgrind": "valgrind-3.24.0",
+  "gcc": "14.2.0",
+  "python": "Python 3.12.16",
+  "libc": "ldd (Debian GLIBC 2.41-12+deb13u4) 2.41"
+ },
+ "host": {
+  "cpu": "AMD EPYC 7763 64-Core Processor",
+  "logical_cpus": 4,
+  "kernel": "7.0.0-1017-azure",
+  "github_actions": true
+ },
+ "stack": {
+  "id": "catalyst-0.16.0.dev96",
+  "lock_sha256": "7583245e9a3a47bd138c37d6475c81cfb3dbc0c8a1af95c2bbd812d09b072dce",
+  "pennylane": "0.46.0.dev94",
+  "pennylane-lightning": "0.46.0.dev27",
+  "pennylane-catalyst": "0.16.0.dev96",
+  "packages": {
+   "appdirs": "1.4.4",
+   "autograd": "1.8.0",
+   "autoray": "0.8.10",
+   "cachetools": "7.1.8",
+   "certifi": "2026.7.22",
+   "charset-normalizer": "3.5.1",
+   "diastatic-malt": "2.15.3",
+   "gast": "0.7.0",
+   "idna": "3.19",
+   "immutabledict": "4.3.1",
+   "jax": "0.7.1",
+   "jaxlib": "0.7.1",
+   "ml-dtypes": "0.6.0",
+   "networkx": "3.6.1",
+   "numpy": "2.5.3",
+   "opt-einsum": "3.4.0",
+   "ordered-set": "4.1.0",
+   "packaging": "26.3",
+   "pennylane": "0.46.0.dev94",
+   "pennylane-catalyst": "0.16.0.dev96",
+   "pennylane-lightning": "0.46.0.dev27",
+   "requests": "2.34.2",
+   "rustworkx": "0.18.1",
+   "scipy": "1.18.1",
+   "scipy-openblas32": "0.3.31.188.0",
+   "termcolor": "3.3.0",
+   "typing-extensions": "4.16.0",
+   "urllib3": "2.7.0",
+   "xdsl": "0.63.0",
+   "xdsl-jax": "0.5.2"
+  }
+ },
+ "repeats": 3,
+ "cpus": 2,
+ "cells": [
+  {
+   "circuit": "qft",
+   "backend": "default",
+   "wires": 18,
+   "rounds": 1,
+   "name": "qft/default",
+   "gates": {
+    "top": {
+     "gates": 5,
+     "depth": 5
+    },
+    "device": {
+     "gates": 721,
+     "depth": 145
+    }
+   },
+   "wall_s": [
+    1.6056153230000518,
+    1.5712912090000373,
+    1.5707346540000344,
+    1.4873039659998994,
+    1.5791243070000291,
+    1.5503003899999612,
+    1.6594207179999785,
+    1.5569028979999757,
+    1.457290874000023,
+    1.5793408939999836
+   ],
+   "compile_s": 8.120000529743265e-07,
+   "max_rss_kb": 277492,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7898867637,
+    "runs": [
+     7898867637
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 8401322491,
+    "runs": [
+     8403652513,
+     8399668276,
+     8401322491
+    ],
+    "spread_pct": 0.047423926462389146,
+    "noise": 3984237,
+    "processes": {
+     "python": 8403652513,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      8466430555,
+      8403652513
+     ]
+    ],
+    "delta": 62778042,
+    "delta_pct": 0.7470328158248539,
+    "noise": 100000,
+    "noise_ratio": 627.78042,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qft",
+   "backend": "lightning",
+   "wires": 18,
+   "rounds": 1,
+   "name": "qft/lightning",
+   "gates": {
+    "top": {
+     "gates": 5,
+     "depth": 5
+    },
+    "device": {
+     "gates": 721,
+     "depth": 145
+    }
+   },
+   "wall_s": [
+    0.4808730980000746,
+    0.476827248999939,
+    0.47732067699996605,
+    0.4605039330000409,
+    0.4778212879999728,
+    0.4774224160000813,
+    0.5253441439999733,
+    0.481616229999986,
+    0.47618790899991836,
+    0.4686764509999648
+   ],
+   "compile_s": 8.819999948173063e-07,
+   "max_rss_kb": 269012,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7946435491,
+    "runs": [
+     7946435491
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2253639194,
+    "runs": [
+     2253872735,
+     2253639194,
+     2252796957
+    ],
+    "spread_pct": 0.04773514779402616,
+    "noise": 1075778,
+    "processes": {
+     "python": 2253872735,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      2268373491,
+      2253872735
+     ]
+    ],
+    "delta": 14500756,
+    "delta_pct": 0.6433706648481198,
+    "noise": 230000,
+    "noise_ratio": 63.046765217391304,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qft",
+   "backend": "qjit",
+   "wires": 18,
+   "rounds": 1,
+   "name": "qft/qjit",
+   "gates": {
+    "top": {
+     "gates": 5,
+     "depth": 5
+    },
+    "device": {
+     "gates": 721,
+     "depth": 145
+    },
+    "qjit": {
+     "gates": 721,
+     "depth": 145
+    }
+   },
+   "wall_s": [
+    0.1831034049999971,
+    0.1654953449999539,
+    0.16766023399998176,
+    0.16781664500001625,
+    0.16618955800004187,
+    0.1664693279999483,
+    0.16271865800001706,
+    0.15415983900004449,
+    0.16855330599992158,
+    0.17028217400002177
+   ],
+   "compile_s": 0.5592512649999435,
+   "max_rss_kb": 328852,
+   "max_rss_children_kb": 313100,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 10452716189,
+    "runs": [
+     10452716189
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2798600004,
+    "runs": [
+     2798532442,
+     2798952646,
+     2798600004
+    ],
+    "spread_pct": 0.0150147930893807,
+    "noise": 420204,
+    "processes": {
+     "python": 2307444763,
+     "compiler": 491087679,
+     "linker": 99997651,
+     "other": 0
+    }
+   },
+   "compile": {
+    "net": 1507494000,
+    "runs": [
+     1507494000,
+     1507751521,
+     1507277007
+    ],
+    "spread_pct": 0.031477007537011756,
+    "noise": 474514,
+    "compiler_process": [
+     491087679,
+     491087237,
+     491087682
+    ]
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      2838203227,
+      2798532442
+     ]
+    ],
+    "delta": 39670785,
+    "delta_pct": 1.4175567309717827,
+    "noise": 710000,
+    "noise_ratio": 55.874345070422535,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "grover",
+   "backend": "default",
+   "wires": 18,
+   "rounds": 12,
+   "name": "grover/default",
+   "gates": {
+    "top": {
+     "gates": 282,
+     "depth": 73
+    },
+    "device": {
+     "gates": 726,
+     "depth": 109
+    }
+   },
+   "wall_s": [
+    1.1417437280000513,
+    1.1223951879999277,
+    1.179543408000086,
+    1.2146322940000118,
+    1.072182704999932,
+    1.1311092070000086,
+    1.1198866930000122,
+    1.1302795159999732,
+    1.1463237570000047,
+    1.2526003320000427
+   ],
+   "compile_s": 1.0019999763244414e-06,
+   "max_rss_kb": 276768,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7898867637,
+    "runs": [
+     7898867637
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 6294944297,
+    "runs": [
+     6294944297,
+     6295042135,
+     6294917151
+    ],
+    "spread_pct": 0.0019854663377968885,
+    "noise": 124984,
+    "processes": {
+     "python": 6294944297,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      6357380425,
+      6294944297
+     ]
+    ],
+    "delta": 62436128,
+    "delta_pct": 0.9918455994877567,
+    "noise": 100000,
+    "noise_ratio": 624.36128,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "grover",
+   "backend": "lightning",
+   "wires": 18,
+   "rounds": 12,
+   "name": "grover/lightning",
+   "gates": {
+    "top": {
+     "gates": 282,
+     "depth": 73
+    },
+    "device": {
+     "gates": 726,
+     "depth": 109
+    }
+   },
+   "wall_s": [
+    0.2241888870000821,
+    0.2179913630000101,
+    0.21900000000005093,
+    0.20408819700003278,
+    0.2060837310000352,
+    0.22016477800002576,
+    0.21815041900003962,
+    0.2193372179999642,
+    0.21960969499991734,
+    0.1930570770000486
+   ],
+   "compile_s": 1.1519999816300697e-06,
+   "max_rss_kb": 268264,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7946435491,
+    "runs": [
+     7946435491
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 1403843574,
+    "runs": [
+     1403806606,
+     1403868735,
+     1403843574
+    ],
+    "spread_pct": 0.004425635530244626,
+    "noise": 62129,
+    "processes": {
+     "python": 1403806606,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      1418115246,
+      1403806606
+     ]
+    ],
+    "delta": 14308640,
+    "delta_pct": 1.0192743030873015,
+    "noise": 230000,
+    "noise_ratio": 62.21147826086956,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "grover",
+   "backend": "qjit",
+   "wires": 18,
+   "rounds": 12,
+   "name": "grover/qjit",
+   "gates": {
+    "top": {
+     "gates": 282,
+     "depth": 73
+    },
+    "device": {
+     "gates": 726,
+     "depth": 109
+    },
+    "qjit": {
+     "gates": 726,
+     "depth": 97
+    }
+   },
+   "wall_s": [
+    0.14568296699997063,
+    0.12759766800002126,
+    0.14459552300002088,
+    0.1418671249999761,
+    0.1432835820000946,
+    0.14153895399999783,
+    0.14073696299999483,
+    0.1437318260000211,
+    0.140322771000001,
+    0.12943816300003164
+   ],
+   "compile_s": 1.071489167999971,
+   "max_rss_kb": 329936,
+   "max_rss_children_kb": 314360,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 10452716189,
+    "runs": [
+     10452716189
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 4452355562,
+    "runs": [
+     4453660452,
+     4451204552,
+     4452355562
+    ],
+    "spread_pct": 0.05515956589272958,
+    "noise": 2455900,
+    "processes": {
+     "python": 3530755940,
+     "compiler": 922904512,
+     "linker": 101227473,
+     "other": 0
+    }
+   },
+   "compile": {
+    "net": 3424945186,
+    "runs": [
+     3424144119,
+     3426107431,
+     3424945186
+    ],
+    "spread_pct": 0.05732389551883474,
+    "noise": 1963312,
+    "compiler_process": [
+     922904512,
+     922927524,
+     922899735
+    ]
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      4493942810,
+      4453660452
+     ]
+    ],
+    "delta": 40282358,
+    "delta_pct": 0.9044775288585472,
+    "noise": 710000,
+    "noise_ratio": 56.735715492957745,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "trotter",
+   "backend": "default",
+   "wires": 18,
+   "rounds": 4,
+   "name": "trotter/default",
+   "gates": {
+    "top": {
+     "gates": 1,
+     "depth": 1
+    },
+    "device": {
+     "gates": 280,
+     "depth": 144
+    }
+   },
+   "wall_s": [
+    0.5103612170000815,
+    0.5041390059999458,
+    0.503728694000074,
+    0.49942045499994947,
+    0.49564935700004753,
+    0.5080466389999856,
+    0.5140674450000233,
+    0.5119123639999543,
+    0.5131284679999908,
+    0.513903019000054
+   ],
+   "compile_s": 9.010000212583691e-07,
+   "max_rss_kb": 275876,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7898867637,
+    "runs": [
+     7898867637
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2774546953,
+    "runs": [
+     2774811659,
+     2774546953,
+     2774329029
+    ],
+    "spread_pct": 0.017394911968534273,
+    "noise": 482630,
+    "processes": {
+     "python": 2774811659,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      2799677550,
+      2774811659
+     ]
+    ],
+    "delta": 24865891,
+    "delta_pct": 0.8961289649821239,
+    "noise": 100000,
+    "noise_ratio": 248.65891,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "trotter",
+   "backend": "lightning",
+   "wires": 18,
+   "rounds": 4,
+   "name": "trotter/lightning",
+   "gates": {
+    "top": {
+     "gates": 1,
+     "depth": 1
+    },
+    "device": {
+     "gates": 280,
+     "depth": 144
+    }
+   },
+   "wall_s": [
+    2.338026482000032,
+    2.06633582500001,
+    2.1239623310000297,
+    2.2310944349999318,
+    2.20705359100009,
+    2.2353263309998965,
+    2.1896653659999856,
+    2.2483633129999134,
+    1.9946029420000286,
+    2.128352165000024
+   ],
+   "compile_s": 1.1820000054285629e-06,
+   "max_rss_kb": 268460,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7946435491,
+    "runs": [
+     7946435491
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 6553641920,
+    "runs": [
+     6567267003,
+     6549501554,
+     6553641920
+    ],
+    "spread_pct": 0.27107750494857674,
+    "noise": 17765449,
+    "processes": {
+     "python": 6567267003,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      6573882425,
+      6567267003
+     ]
+    ],
+    "delta": 6615422,
+    "delta_pct": 0.1007332577916811,
+    "noise": 230000,
+    "noise_ratio": 28.762704347826087,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "trotter",
+   "backend": "qjit",
+   "wires": 18,
+   "rounds": 4,
+   "name": "trotter/qjit",
+   "gates": {
+    "top": {
+     "gates": 1,
+     "depth": 1
+    },
+    "device": {
+     "gates": 280,
+     "depth": 144
+    },
+    "qjit": {
+     "gates": 280,
+     "depth": 144
+    }
+   },
+   "wall_s": [
+    0.0827783529999806,
+    0.06580783800006884,
+    0.06640652299995509,
+    0.0682346259999349,
+    0.06837274299994078,
+    0.06889337099994464,
+    0.06871709300003204,
+    0.06916774199999054,
+    0.06913917800000036,
+    0.0690635180000072
+   ],
+   "compile_s": 2.8092034940000303,
+   "max_rss_kb": 332772,
+   "max_rss_children_kb": 313024,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 10452716189,
+    "runs": [
+     10452716189
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 8164773093,
+    "runs": [
+     8178455740,
+     8164773093,
+     8162497111
+    ],
+    "spread_pct": 0.1954571035621553,
+    "noise": 15958629,
+    "processes": {
+     "python": 7717881801,
+     "compiler": 460573939,
+     "linker": 100454397,
+     "other": 0
+    }
+   },
+   "compile": {
+    "net": 7639922734,
+    "runs": [
+     7653583978,
+     7639922734,
+     7638483841
+    ],
+    "spread_pct": 0.19764777113255033,
+    "noise": 15100137,
+    "compiler_process": [
+     460573939,
+     460573709,
+     460573012
+    ]
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      8195831716,
+      8178455740
+     ]
+    ],
+    "delta": 17375976,
+    "delta_pct": 0.2124603537929032,
+    "noise": 710000,
+    "noise_ratio": 24.473205633802817,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qpe",
+   "backend": "default",
+   "wires": 12,
+   "rounds": 3,
+   "name": "qpe/default",
+   "gates": {
+    "top": {
+     "gates": 8,
+     "depth": 8
+    },
+    "device": {
+     "gates": 162,
+     "depth": 91
+    }
+   },
+   "wall_s": [
+    0.6757364459999735,
+    0.6771527270000206,
+    0.6744387969999934,
+    0.6739942090000568,
+    0.5991414439999971,
+    0.653791597999998,
+    0.6582414590000099,
+    0.6502705840000544,
+    0.6556954609999366,
+    0.6538594040000589
+   ],
+   "compile_s": 8.619999789516442e-07,
+   "max_rss_kb": 425712,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7898867637,
+    "runs": [
+     7898867637
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2875860828,
+    "runs": [
+     2876803680,
+     2875482665,
+     2875860828
+    ],
+    "spread_pct": 0.04593459416180065,
+    "noise": 1321015,
+    "processes": {
+     "python": 2876803680,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      2879794091,
+      2876803680
+     ]
+    ],
+    "delta": 2990411,
+    "delta_pct": 0.10394908143332186,
+    "noise": 100000,
+    "noise_ratio": 29.90411,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qpe",
+   "backend": "lightning",
+   "wires": 12,
+   "rounds": 3,
+   "name": "qpe/lightning",
+   "gates": {
+    "top": {
+     "gates": 8,
+     "depth": 8
+    },
+    "device": {
+     "gates": 652,
+     "depth": 238
+    }
+   },
+   "wall_s": [
+    0.9138228839999556,
+    0.8767791600000692,
+    0.9137614479999456,
+    0.8976624150000134,
+    0.9279464339999777,
+    0.9416224490000786,
+    1.0044550110000046,
+    0.9205547750000278,
+    0.8063898760000257,
+    0.9270952090000719
+   ],
+   "compile_s": 1.0019999763244414e-06,
+   "max_rss_kb": 264996,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7946435491,
+    "runs": [
+     7946435491
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 3279591685,
+    "runs": [
+     3281588466,
+     3279591685,
+     3279102489
+    ],
+    "spread_pct": 0.07580141794389261,
+    "noise": 2485977,
+    "processes": {
+     "python": 3281588466,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      3285947885,
+      3281588466
+     ]
+    ],
+    "delta": 4359419,
+    "delta_pct": 0.13284478066543765,
+    "noise": 230000,
+    "noise_ratio": 18.953995652173912,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qpe",
+   "backend": "qjit",
+   "wires": 12,
+   "rounds": 0,
+   "name": "qpe/qjit",
+   "gates": {
+    "top": {
+     "gates": 2,
+     "depth": 2
+    },
+    "device": {
+     "gates": 94,
+     "depth": 34
+    },
+    "qjit": {
+     "gates": 94,
+     "depth": 34
+    }
+   },
+   "wall_s": [
+    0.013441217999911714,
+    0.003091594000011355,
+    0.002950682000005145,
+    0.002696860000014567,
+    0.003021092999915709,
+    0.003041781999968407,
+    0.003059243999928185,
+    0.0029079830000000584,
+    0.002982111000051191,
+    0.003078370000025643
+   ],
+   "compile_s": 0.9247181050000108,
+   "max_rss_kb": 322748,
+   "max_rss_children_kb": 315328,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 10452716189,
+    "runs": [
+     10452716189
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2591860632,
+    "runs": [
+     2591806216,
+     2591860632,
+     2591935943
+    ],
+    "spread_pct": 0.005005168811869974,
+    "noise": 129727,
+    "processes": {
+     "python": 1901564362,
+     "compiler": 690241854,
+     "linker": 100468346,
+     "other": 0
+    }
+   },
+   "compile": {
+    "net": 2556585648,
+    "runs": [
+     2556743034,
+     2556585648,
+     2556238741
+    ],
+    "spread_pct": 0.019725253499506462,
+    "noise": 504293,
+    "compiler_process": [
+     690241854,
+     690240702,
+     690240290
+    ]
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      2604974653,
+      2591806216
+     ]
+    ],
+    "delta": 13168437,
+    "delta_pct": 0.5080795361438396,
+    "noise": 710000,
+    "noise_ratio": 18.547094366197182,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "variational",
+   "backend": "default",
+   "wires": 18,
+   "rounds": 4,
+   "name": "variational/default",
+   "gates": {
+    "top": {
+     "gates": 212,
+     "depth": 31
+    },
+    "device": {
+     "gates": 212,
+     "depth": 31
+    }
+   },
+   "wall_s": [
+    1.7782655369999247,
+    1.9246027309999363,
+    2.024342254999965,
+    1.705583311000055,
+    1.7495205190000434,
+    1.7691509380000525,
+    1.960707200999991,
+    1.9396384160000935,
+    1.6838400890000003,
+    1.8456117969999468
+   ],
+   "compile_s": 1.4720000081069884e-06,
+   "max_rss_kb": 290768,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7898867637,
+    "runs": [
+     7898867637
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 7267301144,
+    "runs": [
+     7267683343,
+     7267180105,
+     7267301144
+    ],
+    "spread_pct": 0.006924688959882739,
+    "noise": 503238,
+    "processes": {
+     "python": 7267683343,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      7342688800,
+      7267683343
+     ]
+    ],
+    "delta": 75005457,
+    "delta_pct": 1.032040795671744,
+    "noise": 100000,
+    "noise_ratio": 750.05457,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "variational",
+   "backend": "lightning",
+   "wires": 18,
+   "rounds": 4,
+   "name": "variational/lightning",
+   "gates": {
+    "top": {
+     "gates": 212,
+     "depth": 31
+    },
+    "device": {
+     "gates": 212,
+     "depth": 31
+    }
+   },
+   "wall_s": [
+    0.3288961810000046,
+    0.31834991300002,
+    0.31872987999997804,
+    0.3108369499999526,
+    0.30340238300004785,
+    0.30943258600007084,
+    0.31486128999995344,
+    0.3173831430000291,
+    0.3944609899999705,
+    0.3144632690000435
+   ],
+   "compile_s": 1.2820000847568735e-06,
+   "max_rss_kb": 281924,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7946435491,
+    "runs": [
+     7946435491
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 1956669160,
+    "runs": [
+     1957050042,
+     1956552168,
+     1956669160
+    ],
+    "spread_pct": 0.02544497609396573,
+    "noise": 497874,
+    "processes": {
+     "python": 1957050042,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      1963574028,
+      1957050042
+     ]
+    ],
+    "delta": 6523986,
+    "delta_pct": 0.3333581594741868,
+    "noise": 230000,
+    "noise_ratio": 28.36515652173913,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "variational",
+   "backend": "qjit",
+   "wires": 18,
+   "rounds": 4,
+   "name": "variational/qjit",
+   "gates": {
+    "top": {
+     "gates": 212,
+     "depth": 31
+    },
+    "device": {
+     "gates": 212,
+     "depth": 31
+    },
+    "qjit": {
+     "gates": 212,
+     "depth": 31
+    }
+   },
+   "wall_s": [
+    0.24618964199999027,
+    0.23114472800000385,
+    0.23255499399999735,
+    0.2347299230000317,
+    0.23754434399995716,
+    0.2218747770000391,
+    0.22692205500004548,
+    0.23339170100007323,
+    0.22965501800001675,
+    0.23542108000003736
+   ],
+   "compile_s": 1.7437327390000519,
+   "max_rss_kb": 358164,
+   "max_rss_children_kb": 328044,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 10452716189,
+    "runs": [
+     10452716189
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 7715936818,
+    "runs": [
+     7716418582,
+     7715656062,
+     7715936818
+    ],
+    "spread_pct": 0.009882403368326803,
+    "noise": 762520,
+    "processes": {
+     "python": 3427294810,
+     "compiler": 4289123772,
+     "linker": 101426058,
+     "other": 0
+    }
+   },
+   "compile": {
+    "net": 6184935591,
+    "runs": [
+     6184935591,
+     6184501000,
+     6185563258
+    ],
+    "spread_pct": 0.017174924206902708,
+    "noise": 1062258,
+    "compiler_process": [
+     4289123772,
+     4289122358,
+     4289124128
+    ]
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      7795577529,
+      7716418582
+     ]
+    ],
+    "delta": 79158947,
+    "delta_pct": 1.025850867974596,
+    "noise": 710000,
+    "noise_ratio": 111.49147464788733,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "sampling",
+   "backend": "default",
+   "wires": 18,
+   "rounds": 20,
+   "name": "sampling/default",
+   "gates": {
+    "top": {
+     "gates": 721,
+     "depth": 721
+    },
+    "device": {
+     "gates": 721,
+     "depth": 721
+    }
+   },
+   "wall_s": [
+    0.7040160370000876,
+    0.73993589600002,
+    0.7262930520000737,
+    0.7296796260000065,
+    0.752743756999962,
+    0.7654537949999849,
+    0.844253545000015,
+    0.7579293720000351,
+    0.7652348330000223,
+    0.7399015280000185
+   ],
+   "compile_s": 9.919999683916103e-07,
+   "max_rss_kb": 280684,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7898867637,
+    "runs": [
+     7898867637
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 4292262157,
+    "runs": [
+     4292262157,
+     4292069221,
+     4292795886
+    ],
+    "spread_pct": 0.016929650925792693,
+    "noise": 726665,
+    "processes": {
+     "python": 4292262157,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      4354990521,
+      4292262157
+     ]
+    ],
+    "delta": 62728364,
+    "delta_pct": 1.4614290019005474,
+    "noise": 100000,
+    "noise_ratio": 627.28364,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "sampling",
+   "backend": "lightning",
+   "wires": 18,
+   "rounds": 20,
+   "name": "sampling/lightning",
+   "gates": {
+    "top": {
+     "gates": 721,
+     "depth": 721
+    },
+    "device": {
+     "gates": 721,
+     "depth": 721
+    }
+   },
+   "wall_s": [
+    0.36967534900009014,
+    0.3469738530000086,
+    0.34866657299994586,
+    0.344828338999946,
+    0.3160072719999789,
+    0.37066596399995433,
+    0.4005823989999726,
+    0.3724083749999636,
+    0.320455610999943,
+    0.36930474700000104
+   ],
+   "compile_s": 1.092000047719921e-06,
+   "max_rss_kb": 281032,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 7946435491,
+    "runs": [
+     7946435491
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 1438025263,
+    "runs": [
+     1438356496,
+     1438025263,
+     1437741584
+    ],
+    "spread_pct": 0.042760862122628786,
+    "noise": 614912,
+    "processes": {
+     "python": 1438356496,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      1452731297,
+      1438356496
+     ]
+    ],
+    "delta": 14374801,
+    "delta_pct": 0.9993906962547622,
+    "noise": 230000,
+    "noise_ratio": 62.49913478260869,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "sampling",
+   "backend": "qjit",
+   "wires": 18,
+   "rounds": 20,
+   "name": "sampling/qjit",
+   "gates": {
+    "top": {
+     "gates": 721,
+     "depth": 721
+    },
+    "device": {
+     "gates": 721,
+     "depth": 721
+    },
+    "qjit": {
+     "gates": 721,
+     "depth": 721
+    }
+   },
+   "wall_s": [
+    0.09227192100001957,
+    0.09559605900005863,
+    0.09355929700006982,
+    0.07360177100008514,
+    0.07344351300002927,
+    0.09091904900003556,
+    0.08925938900006258,
+    0.07243835200006288,
+    0.07207388399990577,
+    0.0918349930000204
+   ],
+   "compile_s": 1.3368906850000712,
+   "max_rss_kb": 340684,
+   "max_rss_children_kb": 315596,
+   "bare_qnode_specs": "ok",
+   "imports": {
+    "net": 10452716189,
+    "runs": [
+     10452716189
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 4352467036,
+    "runs": [
+     4351734936,
+     4352467036,
+     4352626808
+    ],
+    "spread_pct": 0.020491183336327972,
+    "noise": 891872,
+    "processes": {
+     "python": 3693855434,
+     "compiler": 657879502,
+     "linker": 100676139,
+     "other": 0
+    }
+   },
+   "compile": {
+    "net": 3751173941,
+    "runs": [
+     3751173941,
+     3751144279,
+     3751364935
+    ],
+    "spread_pct": 0.005882318534692551,
+    "noise": 220656,
+    "compiler_process": [
+     657879502,
+     657892306,
+     657887697
+    ]
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      4395318404,
+      4351734936
+     ]
+    ],
+    "delta": 43583468,
+    "delta_pct": 1.0015193627592762,
+    "noise": 710000,
+    "noise_ratio": 61.385166197183096,
+    "detected": true
+   }
+  }
+ ],
+ "memory": [
+  {
+   "backend": "default",
+   "wires": 25,
+   "max_rss_kb": {
+    "net": 1833924,
+    "runs": [
+     1834092,
+     1833924,
+     1833916
+    ],
+    "spread_pct": 0.009596908050715296,
+    "noise": 176
+   }
+  },
+  {
+   "backend": "lightning",
+   "wires": 25,
+   "max_rss_kb": {
+    "net": 787240,
+    "runs": [
+     787332,
+     787092,
+     787240
+    ],
+    "spread_pct": 0.03048625577968599,
+    "noise": 240
+   }
+  },
+  {
+   "backend": "qjit",
+   "wires": 25,
+   "max_rss_kb": {
+    "net": 1368984,
+    "runs": [
+     1369124,
+     1368984,
+     1368872
+    ],
+    "spread_pct": 0.01840781192475588,
+    "noise": 252
+   }
+  }
+ ],
+ "busy_check": null,
+ "availability": {
+  "packages": {
+   "pennylane": {
+    "builds": 618,
+    "first": {
+     "version": "0.38.0.dev4",
+     "date": "2024-07-29"
+    },
+    "last": {
+     "version": "0.46.0.dev148",
+     "date": "2026-11-07"
+    }
+   },
+   "pennylane-lightning": {
+    "builds": 91,
+    "first": {
+     "version": "0.44.0.dev3",
+     "date": "2025-10-15"
+    },
+    "last": {
+     "version": "0.46.0.dev36",
+     "date": "2026-11-05"
+    }
+   },
+   "pennylane-catalyst": {
+    "builds": 64,
+    "first": {
+     "version": "0.16.0.dev67",
+     "date": "2026-08-08"
+    },
+    "last": {
+     "version": "0.16.0.dev137",
+     "date": "2026-11-07"
+    }
+   }
+  },
+  "newest_catalyst_pins": {
+   "pennylane": "0.46.0.dev147",
+   "pennylane-lightning": "0.46.0.dev34",
+   "pennylane-lightning-kokkos": "0.46.0.dev34"
+  }
+ },
+ "valid": true,
+ "problems": []
+}
