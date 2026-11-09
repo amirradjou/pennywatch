@@ -1,0 +1,27 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev129..catalyst-0.16.0.dev130/variational/qjit/instructions",
+ "name": "0.16.0.dev129--0.16.0.dev130--variational-qjit--instructions",
+ "before": "0.16.0.dev129",
+ "after": "0.16.0.dev130",
+ "cell": "variational/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 7218500018,
+  "after": 7273538986,
+  "change_pct": 0.7624709823752195
+ },
+ "second": {
+  "before": 7224284839,
+  "after": 7272745008,
+  "change_pct": 0.6707953808574906,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": null,
+ "problems": [
+  "explanation: a string is too long or holds unexpected characters"
+ ],
+ "run": "42678019156",
+ "recorded_at": "2026-11-09T19:17:35+00:00"
+}

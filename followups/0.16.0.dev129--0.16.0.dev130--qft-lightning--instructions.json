@@ -1,0 +1,27 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev129..catalyst-0.16.0.dev130/qft/lightning/instructions",
+ "name": "0.16.0.dev129--0.16.0.dev130--qft-lightning--instructions",
+ "before": "0.16.0.dev129",
+ "after": "0.16.0.dev130",
+ "cell": "qft/lightning",
+ "metric": "instructions",
+ "first": {
+  "before": 2256903559,
+  "after": 2275857824,
+  "change_pct": 0.83983495548203
+ },
+ "second": {
+  "before": 2257261052,
+  "after": 2274515404,
+  "change_pct": 0.764393289146248,
+  "host": "AMD EPYC 7763 64-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": null,
+ "problems": [
+  "explanation: a string is too long or holds unexpected characters"
+ ],
+ "run": "42678019156",
+ "recorded_at": "2026-11-09T19:17:35+00:00"
+}

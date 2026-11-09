@@ -1,0 +1,27 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev129..catalyst-0.16.0.dev130/grover/lightning/instructions",
+ "name": "0.16.0.dev129--0.16.0.dev130--grover-lightning--instructions",
+ "before": "0.16.0.dev129",
+ "after": "0.16.0.dev130",
+ "cell": "grover/lightning",
+ "metric": "instructions",
+ "first": {
+  "before": 1411268926,
+  "after": 1430583526,
+  "change_pct": 1.3685981207525006
+ },
+ "second": {
+  "before": 1411444211,
+  "after": 1430566093,
+  "change_pct": 1.3547741987231827,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": null,
+ "problems": [
+  "explanation: a string is too long or holds unexpected characters"
+ ],
+ "run": "42678019156",
+ "recorded_at": "2026-11-09T19:17:35+00:00"
+}
