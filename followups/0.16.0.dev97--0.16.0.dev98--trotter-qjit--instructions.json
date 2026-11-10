@@ -1,0 +1,460 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev97..catalyst-0.16.0.dev98/trotter/qjit/instructions",
+ "name": "0.16.0.dev97--0.16.0.dev98--trotter-qjit--instructions",
+ "before": "0.16.0.dev97",
+ "after": "0.16.0.dev98",
+ "cell": "trotter/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 8162738976,
+  "after": 11343475020,
+  "change_pct": 38.966528923097584
+ },
+ "second": {
+  "before": 8165560688,
+  "after": 11329171962,
+  "change_pct": 38.743344087188056,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "trotter/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev97",
+   "runs": [
+    8170784308,
+    8164833614,
+    8166384324
+   ],
+   "net": 8166384324
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev98",
+   "runs": [
+    11356150054,
+    11327398127,
+    11318630679
+   ],
+   "net": 11327398127
+  },
+  "packages": [
+   "cachetools 7.1.8 ? 7.2.0",
+   "pennylane 0.46.0.dev94 ? 0.46.0.dev100",
+   "pennylane-catalyst 0.16.0.dev97 ? 0.16.0.dev98"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    461188,
+    748038
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    86808,
+    235694
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:name",
+    51128,
+    170536
+   ],
+   [
+    "<frozen abc>:__instancecheck__",
+    128887,
+    231269
+   ],
+   [
+    "~:<built-in method _abc._abc_instancecheck>",
+    128887,
+    231269
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    81950,
+    178481
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    84579,
+    174509
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    352937,
+    437853
+   ],
+   [
+    "pennylane/core/operator/operator2.py:_is_op",
+    0,
+    71570
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    58838,
+    127586
+   ],
+   [
+    "~:<built-in method builtins.iter>",
+    64306,
+    125353
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:__init__",
+    22493,
+    82201
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:parameters",
+    44989,
+    101820
+   ],
+   [
+    "pennylane/pytrees/pytrees.py:flatten",
+    4838,
+    61278
+   ],
+   [
+    "pennylane/core/operator/operator2.py:wires",
+    23294,
+    78782
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    3153244741,
+    4539159776
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    1874670187,
+    2767940525
+   ],
+   [
+    "__tls_get_addr",
+    510624574,
+    751500902
+   ],
+   [
+    "_PyType_Lookup",
+    211207482,
+    333446493
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    132676484,
+    185175689
+   ],
+   [
+    "PyObject_GC_Del",
+    85472440,
+    132231883
+   ],
+   [
+    "_PyObject_GC_New",
+    83490506,
+    129770018
+   ],
+   [
+    "PyObject_GetAttr",
+    56275213,
+    82175637
+   ],
+   [
+    "PyObject_RichCompare",
+    47709649,
+    70532946
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    42198804,
+    64443808
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    47343315,
+    68802099
+   ],
+   [
+    "PyFunction_NewWithQualName",
+    16686616,
+    30884618
+   ],
+   [
+    "PyObject_GetIter",
+    19809416,
+    32800920
+   ],
+   [
+    "__memset_avx2_unaligned_erms",
+    33345255,
+    46169988
+   ],
+   [
+    "_PyObject_GetMethod",
+    19133150,
+    31731312
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 467624,
+     "subject": "fix: 'qp.prod' dispatches to 'Prod2' when all input ops are 'Operator2' (#10113)",
+     "pull_request": 10113,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10113"
+    },
+    {
+     "score": 292523,
+     "subject": "Operators of operators can be used as arguments to traced functions (#10150)",
+     "pull_request": 10150,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10150"
+    },
+    {
+     "score": 20911,
+     "subject": "Capture compatibility of phase-gradient decompositions (#10098)",
+     "pull_request": 10098,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10098"
+    },
+    {
+     "score": 4352,
+     "subject": "Add 'PPR' class for discrete Clifford + T rotations (#10107)",
+     "pull_request": 10107,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10107"
+    },
+    {
+     "score": 1632,
+     "subject": "feat: migrate 'Identity' to 'Operator2' subclass (#10129)",
+     "pull_request": 10129,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10129"
+    },
+    {
+     "score": 1632,
+     "subject": "fix: update 'GlobalPhase''s controlled decomp to be capture compatible (#10149)",
+     "pull_request": 10149,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10149"
+    },
+    {
+     "score": 0,
+     "subject": "Remove FPGA coprocessor from the doc (#10104)",
+     "pull_request": 10104,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10104"
+    },
+    {
+     "score": 0,
+     "subject": "Fix 'QROM' under 'capture' (#10116)",
+     "pull_request": 10116,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10116"
+    },
+    {
+     "score": 0,
+     "subject": "Optimize partial unary state preparation for affine supports (#9947)",
+     "pull_request": 9947,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9947"
+    },
+    {
+     "score": 0,
+     "subject": "Migrate 'MidMeasure' to use 'Operator2' as its base (#10115)",
+     "pull_request": 10115,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10115"
+    },
+    {
+     "score": 0,
+     "subject": "fix: remove apt-get update from rtd-check.yml (#10131)",
+     "pull_request": 10131,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10131"
+    },
+    {
+     "score": 0,
+     "subject": "Use 'Prod2' if operands are all 'Operator2' subclasses (#10124)",
+     "pull_request": 10124,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10124"
+    },
+    {
+     "score": 0,
+     "subject": "Fix pow eigvals (#9802)",
+     "pull_request": 9802,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9802"
+    },
+    {
+     "score": 0,
+     "subject": "Fix Python 3.14 CI failures in test_composite2.py (#10125)",
+     "pull_request": 10125,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10125"
+    },
+    {
+     "score": 0,
+     "subject": "Fix drawing of 'cond' with empty 'op.base.wires' (#10132)",
+     "pull_request": 10132,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10132"
+    },
+    {
+     "score": 0,
+     "subject": "fix: add name property to phase gradient decomp rule factories (#10130)",
+     "pull_request": 10130,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10130"
+    },
+    {
+     "score": 0,
+     "subject": "Reduce shots in default.clifford measurement tests (#10127)",
+     "pull_request": 10127,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10127"
+    },
+    {
+     "score": 0,
+     "subject": "DecompositionRule wraps defining func (#10144)",
+     "pull_request": 10144,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10144"
+    },
+    {
+     "score": 0,
+     "subject": "Update 'qp.math.delete' dispatch to account for JAX kwarg (#10137)",
+     "pull_request": 10137,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10137"
+    },
+    {
+     "score": 0,
+     "subject": "Add 'qp.subcircuit' to create operators out of quantum functions (#10126)",
+     "pull_request": 10126,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10126"
+    },
+    {
+     "score": 0,
+     "subject": "Fix Pow/Pow2 eigvals branch cut on Python 3.14 (#10139)",
+     "pull_request": 10139,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10139"
+    },
+    {
+     "score": 0,
+     "subject": "Add aliases for Select operators (#9639)",
+     "pull_request": 9639,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9639"
+    },
+    {
+     "score": 0,
+     "subject": "Allow indices=None in SumOfSlatersPrep (#10143)",
+     "pull_request": 10143,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10143"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#10117)",
+     "pull_request": 10117,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10117"
+    },
+    {
+     "score": 0,
+     "subject": "fix: bump 'tach' to '0.35.1' (#10147)",
+     "pull_request": 10147,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10147"
+    },
+    {
+     "score": 0,
+     "subject": "Update release workflows with miscellaneous improvements (#10136)",
+     "pull_request": 10136,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10136"
+    },
+    {
+     "score": 0,
+     "subject": "'VibronicHamiltonian' class + 'TrotterVibronic' now uses 'VibronicHamiltonian' (#10138)",
+     "pull_request": 10138,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10138"
+    },
+    {
+     "score": 0,
+     "subject": "Add qp.AliasSampling (alongside LeftQuantumComparator and LeftClassicalComparator) (#10145)",
+     "pull_request": 10145,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10145"
+    },
+    {
+     "score": 0,
+     "subject": "Use MultiX where appropriate (#10154)",
+     "pull_request": 10154,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10154"
+    },
+    {
+     "score": 0,
+     "subject": "Remove trailing whitespace from circuit drawings (#10151)",
+     "pull_request": 10151,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10151"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Decomp/qref decomposable interface (#3161)",
+     "pull_request": 3161,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3161"
+    },
+    {
+     "score": 0,
+     "subject": "Fix ctrl-lowering scf op catch (#3227)",
+     "pull_request": 3227,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3227"
+    },
+    {
+     "score": 0,
+     "subject": "Migrate '--decompose-lowering' to reference semantics (#3224)",
+     "pull_request": 3224,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3224"
+    },
+    {
+     "score": 0,
+     "subject": "Fix gate-set matching for modifier-wrapped names in graph-decomposition (#3229)",
+     "pull_request": 3229,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3229"
+    },
+    {
+     "score": 0,
+     "subject": "fix: bump version of PennyLane to dev100 (#3228)",
+     "pull_request": 3228,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3228"
+    },
+    {
+     "score": 0,
+     "subject": "Enable out-of-tree reuse of dependencies (#3187)",
+     "pull_request": 3187,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3187"
+    },
+    {
+     "score": 0,
+     "subject": "Declare quantum dialect link time dependencies (#3212)",
+     "pull_request": 3212,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3212"
+    },
+    {
+     "score": 0,
+     "subject": "Fix crashes applying register-mode rules for Op2 (#3232)",
+     "pull_request": 3232,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3232"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 30,
+   "pennylane-catalyst": 8
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "4e9cbbae2a27fc1103770751e5cab200c05d3bc5",
+     "before": 8405105137,
+     "after": 11346568405,
+     "pull_request": 10113,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10113",
+     "subject": "fix: 'qp.prod' dispatches to 'Prod2' when all input ops are 'Operator2' (#10113)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 5,
+   "stopped": false,
+   "pennylane_alone": 11356902486,
+   "pennylane_share": 1.0093338279548159
+  }
+ },
+ "problems": [],
+ "run": "42854779413",
+ "recorded_at": "2026-11-10T17:16:43+00:00"
+}
