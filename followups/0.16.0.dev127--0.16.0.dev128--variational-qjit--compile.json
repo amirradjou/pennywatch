@@ -1,0 +1,204 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev127..catalyst-0.16.0.dev128/variational/qjit/compile",
+ "name": "0.16.0.dev127--0.16.0.dev128--variational-qjit--compile",
+ "before": "0.16.0.dev127",
+ "after": "0.16.0.dev128",
+ "cell": "variational/qjit",
+ "metric": "compile",
+ "first": {
+  "before": 5705775330,
+  "after": 5674574052,
+  "change_pct": -0.5468367784470757
+ },
+ "second": {
+  "before": 5706472560,
+  "after": 5673920217,
+  "change_pct": -0.5704459744217187,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "variational/qjit",
+  "metric": "compile",
+  "before": {
+   "stack": "catalyst-0.16.0.dev127",
+   "runs": [
+    5706583903,
+    5705224425,
+    5706157790
+   ],
+   "net": 5706157790
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev128",
+   "runs": [
+    5673915630,
+    5673711458,
+    5674659260
+   ],
+   "net": 5673915630
+  },
+  "packages": [
+   "pennylane-catalyst 0.16.0.dev127 ? 0.16.0.dev128"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'append' of 'list' objects>",
+    25783,
+    25789
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:__len__",
+    1227,
+    1230
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:_key_from_fd",
+    1227,
+    1230
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:get_map",
+    1227,
+    1230
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:select",
+    1226,
+    1229
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_check_timeout",
+    1226,
+    1229
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_remaining_time",
+    1228,
+    1231
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    30614,
+    30617
+   ],
+   [
+    "~:<built-in method posix.read>",
+    1229,
+    1232
+   ],
+   [
+    "~:<method 'poll' of 'select.poll' objects>",
+    1226,
+    1229
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    67323108,
+    55316961
+   ],
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    164473167,
+    157586053
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    15928114,
+    11030437
+   ],
+   [
+    "_int_malloc",
+    128058625,
+    123254330
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    72076830,
+    74503171
+   ],
+   [
+    "ActivityAnalyzer::isValueInactiveFromUsers(TypeResults const&, llvm::Value*, ActivityAnalyzer::UseActivity, llvm::Instruction**)",
+    53285483,
+    51070191
+   ],
+   [
+    "(anonymous namespace)::GreedyPatternRewriteDriver::addSingleOpToWorklist(mlir::Operation*)",
+    36938300,
+    34833817
+   ],
+   [
+    "unlink_chunk.isra.0",
+    6346283,
+    5170650
+   ],
+   [
+    "std::_Rb_tree<std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::_Identity<std::tuple<llvm::User*, llvm::V",
+    14272048,
+    13409459
+   ],
+   [
+    "mlir::PatternApplicator::matchAndRewrite(mlir::Operation*, mlir::PatternRewriter&, llvm::function_ref<bool (mlir::Pattern const&)>, llvm::function_ref<void (mlir::Pattern const&)>, llvm::function_ref<",
+    21429172,
+    22150889
+   ],
+   [
+    "std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)",
+    28752236,
+    28117876
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::StringAttrStorage, llvm::StringRef, mlir::NoneType>(llvm::function_ref<voi",
+    5085624,
+    5632226
+   ],
+   [
+    "malloc_consolidate",
+    16227790,
+    15737604
+   ],
+   [
+    "???",
+    619114723,
+    619589843
+   ],
+   [
+    "AddNodeIDNode(llvm::FoldingSetNodeID&, llvm::SDNode const*)",
+    3151425,
+    2766819
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "The decomposition solver uses a generalized Dijkstra's algorithm (#3334)",
+     "pull_request": 3334,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3334"
+    },
+    {
+     "score": 0,
+     "subject": "[Backline] Variable-length frames on every transport, and one decoder contract (#3379)",
+     "pull_request": 3379,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3379"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/modifier state (#3382)",
+     "pull_request": 3382,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3382"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 3
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "43064885637",
+ "recorded_at": "2026-11-11T17:27:05+00:00"
+}
