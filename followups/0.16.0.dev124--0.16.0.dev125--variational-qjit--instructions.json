@@ -1,0 +1,275 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev124..catalyst-0.16.0.dev125/variational/qjit/instructions",
+ "name": "0.16.0.dev124--0.16.0.dev125--variational-qjit--instructions",
+ "before": "0.16.0.dev124",
+ "after": "0.16.0.dev125",
+ "cell": "variational/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 7294028960,
+  "after": 7236841489,
+  "change_pct": -0.7840313126478182
+ },
+ "second": {
+  "before": 7291634111,
+  "after": 7234607762,
+  "change_pct": -0.7820791352376183,
+  "host": "AMD EPYC 7763 64-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "variational/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev124",
+   "runs": [
+    7290957535,
+    7291031619,
+    7291681207
+   ],
+   "net": 7291031619
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev125",
+   "runs": [
+    7233856131,
+    7234725606,
+    7235584975
+   ],
+   "net": 7234725606
+  },
+  "packages": [
+   "pennylane 0.46.0.dev133 ? 0.46.0.dev135",
+   "pennylane-catalyst 0.16.0.dev124 ? 0.16.0.dev125"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'append' of 'list' objects>",
+    25199,
+    25419
+   ],
+   [
+    "pennylane/math/utils.py:is_abstract",
+    138,
+    0
+   ],
+   [
+    "pennylane/math/utils.py:is_tracer",
+    0,
+    138
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:__len__",
+    935,
+    1045
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:_key_from_fd",
+    935,
+    1045
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:get_map",
+    935,
+    1045
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:select",
+    934,
+    1044
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_check_timeout",
+    934,
+    1044
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_remaining_time",
+    936,
+    1046
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    30322,
+    30432
+   ],
+   [
+    "~:<built-in method posix.read>",
+    937,
+    1047
+   ],
+   [
+    "~:<method 'poll' of 'select.poll' objects>",
+    934,
+    1044
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    226891825,
+    156107410
+   ],
+   [
+    "ActivityAnalyzer::isValueInactiveFromUsers(TypeResults const&, llvm::Value*, ActivityAnalyzer::UseActivity, llvm::Instruction**)",
+    50625282,
+    57579479
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    73249272,
+    76435358
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    67459403,
+    65618939
+   ],
+   [
+    "bool llvm::DenseMapBase<llvm::DenseMap<mlir::Value, llvm::SetVector<mlir::Value, llvm::SmallVector<mlir::Value, 0u>, llvm::DenseSet<mlir::Value, llvm::DenseMapInfo<mlir::Value, void> >, 0u>, llvm::Den",
+    6141472,
+    5324206
+   ],
+   [
+    "std::_Rb_tree_decrement(std::_Rb_tree_node_base*)",
+    1418842,
+    2122767
+   ],
+   [
+    "???",
+    617154135,
+    616491912
+   ],
+   [
+    "mlir::bufferization::OneShotAnalysisState::findDefinitionsCached(mlir::OpOperand*)",
+    5841932,
+    5242371
+   ],
+   [
+    "(anonymous namespace)::GreedyPatternRewriteDriver::addSingleOpToWorklist(mlir::Operation*)",
+    35856759,
+    35263068
+   ],
+   [
+    "std::_Rb_tree<std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::_Identity<std::tuple<llvm::User*, llvm::V",
+    13259675,
+    13840660
+   ],
+   [
+    "std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)",
+    28066467,
+    27508102
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::StringAttrStorage, llvm::StringRef, mlir::NoneType>(llvm::function_ref<voi",
+    5563217,
+    6049698
+   ],
+   [
+    "AddNodeIDNode(llvm::FoldingSetNodeID&, llvm::SDNode const*)",
+    2840030,
+    3318206
+   ],
+   [
+    "std::pair<llvm::detail::DenseSetPair<mlir::Operation*>*, bool> llvm::DenseMapBase<llvm::DenseMap<mlir::Operation*, llvm::detail::DenseSetEmpty, llvm::DenseMapInfo<mlir::Operation*, void>, llvm::detail",
+    17667352,
+    18095450
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::DenseArrayAttrStorage, mlir::Type&, unsigned long, llvm::ArrayRef<char>&>(",
+    2275528,
+    2700777
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 276,
+     "subject": "chore: rename 'qp.math.is_abstract' to 'is_tracer' (#10374)",
+     "pull_request": 10374,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10374"
+    },
+    {
+     "score": 0,
+     "subject": "Add (almost all) remaining decompositions rules to reproduce 'to_ppr' (#10350)",
+     "pull_request": 10350,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10350"
+    },
+    {
+     "score": 0,
+     "subject": "feat(capture): support abstract wires in terminal measurements (#10364)",
+     "pull_request": 10364,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10364"
+    },
+    {
+     "score": 0,
+     "subject": "Testing utilities for decompositions (#10342)",
+     "pull_request": 10342,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10342"
+    },
+    {
+     "score": 0,
+     "subject": "Remove complex xfail (#10372)",
+     "pull_request": 10372,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10372"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Fix gridsynth for adjoint rotations and rotations in adjoint/control regions (#3330)",
+     "pull_request": 3330,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3330"
+    },
+    {
+     "score": 0,
+     "subject": "Handle None attributes in on-demand Python decomposition (#3385)",
+     "pull_request": 3385,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3385"
+    },
+    {
+     "score": 0,
+     "subject": "Do not drop control values when tracing symbolic control rules (#3365)",
+     "pull_request": 3365,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3365"
+    },
+    {
+     "score": 0,
+     "subject": "Use pennylane testing utilities in tests (#3381)",
+     "pull_request": 3381,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3381"
+    },
+    {
+     "score": 0,
+     "subject": "Enable more complex scatter operations to be lowered (#3356)",
+     "pull_request": 3356,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3356"
+    },
+    {
+     "score": 0,
+     "subject": "Patch upstream mlir scf.if/while canonicalization to not drop attributes (#3389)",
+     "pull_request": 3389,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3389"
+    },
+    {
+     "score": 0,
+     "subject": "chore: use 'is_tracer' rather than 'qp.math.is_abstract' (#3388)",
+     "pull_request": 3388,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3388"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 5,
+   "pennylane-catalyst": 7
+  },
+  "bisect": {
+   "verdict": "PennyLane alone gives -1% of the step, so the cause is elsewhere: another package or the third-party ones.",
+   "pennylane_alone": 7291836822
+  }
+ },
+ "problems": [],
+ "run": "43289651468",
+ "recorded_at": "2026-11-12T19:55:37+00:00"
+}
