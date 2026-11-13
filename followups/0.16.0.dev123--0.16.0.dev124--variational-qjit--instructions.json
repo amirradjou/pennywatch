@@ -1,0 +1,314 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev123..catalyst-0.16.0.dev124/variational/qjit/instructions",
+ "name": "0.16.0.dev123--0.16.0.dev124--variational-qjit--instructions",
+ "before": "0.16.0.dev123",
+ "after": "0.16.0.dev124",
+ "cell": "variational/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 7249493747,
+  "after": 7294028960,
+  "change_pct": 0.614321696855448
+ },
+ "second": {
+  "before": 7245928302,
+  "after": 7287228178,
+  "change_pct": 0.5699735669286229,
+  "host": "INTEL(R) XEON(R) PLATINUM 8573C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "variational/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev123",
+   "runs": [
+    7245097910,
+    7248487513,
+    7245997785
+   ],
+   "net": 7245997785
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev124",
+   "runs": [
+    7286630447,
+    7287547081,
+    7287544415
+   ],
+   "net": 7287544415
+  },
+  "packages": [
+   "pennylane 0.46.0.dev130 ? 0.46.0.dev133",
+   "pennylane-catalyst 0.16.0.dev123 ? 0.16.0.dev124"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'append' of 'list' objects>",
+    24649,
+    24873
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    29964,
+    30159
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:__len__",
+    660,
+    772
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:_key_from_fd",
+    660,
+    772
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:get_map",
+    660,
+    772
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:select",
+    659,
+    771
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_check_timeout",
+    659,
+    771
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_remaining_time",
+    661,
+    773
+   ],
+   [
+    "~:<built-in method posix.read>",
+    662,
+    774
+   ],
+   [
+    "~:<method 'poll' of 'select.poll' objects>",
+    659,
+    771
+   ],
+   [
+    "autoray/autoray.py:infer_backend",
+    2234,
+    2302
+   ],
+   [
+    "pennylane/math/interface_utils.py:_get_interface_of_single_tensor",
+    2168,
+    2236
+   ],
+   [
+    "pennylane/math/interface_utils.py:get_interface",
+    2023,
+    2091
+   ],
+   [
+    "~:<method 'split' of 'str' objects>",
+    2547,
+    2615
+   ],
+   [
+    "~:<method 'replace' of 'str' objects>",
+    292,
+    291
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    185028674,
+    226891825
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    75329541,
+    73249272
+   ],
+   [
+    "bool llvm::DenseMapBase<llvm::DenseMap<mlir::Value, llvm::SetVector<mlir::Value, llvm::SmallVector<mlir::Value, 0u>, llvm::DenseSet<mlir::Value, llvm::DenseMapInfo<mlir::Value, void> >, 0u>, llvm::Den",
+    4422029,
+    6141472
+   ],
+   [
+    "mlir::bufferization::OneShotAnalysisState::findDefinitionsCached(mlir::OpOperand*)",
+    4619408,
+    5841932
+   ],
+   [
+    "ActivityAnalyzer::isValueInactiveFromUsers(TypeResults const&, llvm::Value*, ActivityAnalyzer::UseActivity, llvm::Instruction**)",
+    51629364,
+    50625282
+   ],
+   [
+    "_int_malloc",
+    128620879,
+    129486589
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::StringAttrStorage, llvm::StringRef, mlir::NoneType>(llvm::function_ref<voi",
+    6213323,
+    5563217
+   ],
+   [
+    "???",
+    615465217,
+    616067852
+   ],
+   [
+    "std::_Rb_tree_decrement(std::_Rb_tree_node_base*)",
+    1055428,
+    1418842
+   ],
+   [
+    "mlir::PatternApplicator::matchAndRewrite(mlir::Operation*, mlir::PatternRewriter&, llvm::function_ref<bool (mlir::Pattern const&)>, llvm::function_ref<void (mlir::Pattern const&)>, llvm::function_ref<",
+    21897314,
+    21537600
+   ],
+   [
+    "mlir::bufferization::OneShotAnalysisState::applyOnAliases(mlir::Value, llvm::function_ref<void (mlir::Value)>) const [clone .constprop.3]",
+    5829435,
+    6186330
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    19185268,
+    18854100
+   ],
+   [
+    "std::_Rb_tree<std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::_Identity<std::tuple<llvm::User*, llvm::V",
+    13538981,
+    13259675
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::AffineMapStorage, unsigned int&, unsigned int&, llvm::ArrayRef<mlir::Affin",
+    1812747,
+    1558752
+   ],
+   [
+    "llvm::ValueHandleBase::AddToUseList()",
+    4163783,
+    3916662
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 0,
+     "subject": "Tcdq update docs (#10134)",
+     "pull_request": 10134,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10134"
+    },
+    {
+     "score": 0,
+     "subject": "Add mixed synthesis method to qp.transforms.gridsynth (#10290)",
+     "pull_request": 10290,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10290"
+    },
+    {
+     "score": 0,
+     "subject": "Add qp.estimate to project circuit resources onto a target gate set (#10296)",
+     "pull_request": 10296,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10296"
+    },
+    {
+     "score": 0,
+     "subject": "[Labs] TCDQ qudit memory control (#10337)",
+     "pull_request": 10337,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10337"
+    },
+    {
+     "score": 0,
+     "subject": "fix(capture): distinguish operator tracers from tensor data (#10156)",
+     "pull_request": 10156,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10156"
+    },
+    {
+     "score": 0,
+     "subject": "qp.ctrl of qfuncs keeps work_wire_type (#10355)",
+     "pull_request": 10355,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10355"
+    },
+    {
+     "score": 0,
+     "subject": "[Backline] Accept transports from Catalyst's backend registry (#10353)",
+     "pull_request": 10353,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10353"
+    },
+    {
+     "score": 0,
+     "subject": "Clean up git ignore (#10344)",
+     "pull_request": 10344,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10344"
+    },
+    {
+     "score": 0,
+     "subject": "Fix mixed control values in qjit capture (#10356)",
+     "pull_request": 10356,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10356"
+    },
+    {
+     "score": 0,
+     "subject": "[Labs] TCDQ qudit update dtypes (#10320)",
+     "pull_request": 10320,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10320"
+    },
+    {
+     "score": 0,
+     "subject": "Restore Python truth-value conversion for control values (#10367)",
+     "pull_request": 10367,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10367"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Controlled regions keeps work_wire_type (#3366)",
+     "pull_request": 3366,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3366"
+    },
+    {
+     "score": 0,
+     "subject": "Support dynamic control values in captured qp.ctrl (#3373)",
+     "pull_request": 3373,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3373"
+    },
+    {
+     "score": 0,
+     "subject": "remove keep_intermediate from test (#3380)",
+     "pull_request": 3380,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3380"
+    },
+    {
+     "score": 0,
+     "subject": "[Backline] Transport backend registry (#3362)",
+     "pull_request": 3362,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3362"
+    },
+    {
+     "score": 0,
+     "subject": "Allow passing arguments to 'QJIT.aot_compile' (#3369)",
+     "pull_request": 3369,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3369"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 11,
+   "pennylane-catalyst": 5
+  },
+  "bisect": {
+   "verdict": "PennyLane alone gives 2% of the step, so the cause is elsewhere: another package or the third-party ones.",
+   "pennylane_alone": 7246845865
+  }
+ },
+ "problems": [],
+ "run": "43488115047",
+ "recorded_at": "2026-11-13T19:35:03+00:00"
+}

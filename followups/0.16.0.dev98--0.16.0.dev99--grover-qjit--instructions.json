@@ -1,0 +1,248 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev98..catalyst-0.16.0.dev99/grover/qjit/instructions",
+ "name": "0.16.0.dev98--0.16.0.dev99--grover-qjit--instructions",
+ "before": "0.16.0.dev98",
+ "after": "0.16.0.dev99",
+ "cell": "grover/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 4442739938,
+  "after": 3350090463,
+  "change_pct": -24.5940453469775
+ },
+ "second": {
+  "before": 4443048726,
+  "after": 3349629467,
+  "change_pct": -24.609661663206346,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "grover/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev98",
+   "runs": [
+    4442429153,
+    4443310516,
+    4443007170
+   ],
+   "net": 4443007170
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev99",
+   "runs": [
+    3350359868,
+    3349092785,
+    3349857395
+   ],
+   "net": 3349857395
+  },
+  "packages": [
+   "idna 3.19 ? 3.20",
+   "pennylane-catalyst 0.16.0.dev98 ? 0.16.0.dev99"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'rstrip' of 'str' objects>",
+    38808,
+    378
+   ],
+   [
+    "<frozen importlib._bootstrap>:__enter__",
+    34780,
+    193
+   ],
+   [
+    "<frozen importlib._bootstrap>:__exit__",
+    34780,
+    193
+   ],
+   [
+    "<frozen importlib._bootstrap>:__init__",
+    34768,
+    181
+   ],
+   [
+    "~:<built-in method _imp.acquire_lock>",
+    34780,
+    193
+   ],
+   [
+    "~:<built-in method _imp.release_lock>",
+    34780,
+    193
+   ],
+   [
+    "~:<method 'rpartition' of 'str' objects>",
+    30949,
+    205
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    56078,
+    27896
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    34729,
+    11671
+   ],
+   [
+    "<frozen importlib._bootstrap>:_verbose_message",
+    19385,
+    170
+   ],
+   [
+    "<frozen importlib._bootstrap_external>:_path_join",
+    19375,
+    160
+   ],
+   [
+    "~:<method 'join' of 'str' objects>",
+    19561,
+    346
+   ],
+   [
+    "<frozen importlib._bootstrap_external>:_find_parent_path_names",
+    15447,
+    75
+   ],
+   [
+    "<frozen importlib._bootstrap_external>:_get_parent_path",
+    15447,
+    75
+   ],
+   [
+    "<frozen importlib._bootstrap_external>:_recalculate",
+    15447,
+    75
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    1122373461,
+    646291875
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    576147069,
+    293019272
+   ],
+   [
+    "__tls_get_addr",
+    159179601,
+    90015209
+   ],
+   [
+    "PyObject_GC_Del",
+    27116984,
+    13369227
+   ],
+   [
+    "_PyType_Lookup",
+    47986005,
+    34283480
+   ],
+   [
+    "_PyUnicode_JoinArray",
+    13874242,
+    1777897
+   ],
+   [
+    "_Unwind_Find_FDE",
+    11944259,
+    80566
+   ],
+   [
+    "_PyObject_GC_New",
+    27127096,
+    15436690
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    19979299,
+    9748538
+   ],
+   [
+    "PyObject_Vectorcall",
+    19173301,
+    9085426
+   ],
+   [
+    "PyUnicode_New",
+    14274625,
+    5170817
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    13287705,
+    5856585
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    31181411,
+    24328916
+   ],
+   [
+    "__gxx_personality_v0",
+    6289887,
+    42624
+   ],
+   [
+    "_dl_find_object",
+    6134549,
+    40462
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "MCMs are allowed in special symbolic rules (#3231)",
+     "pull_request": 3231,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3231"
+    },
+    {
+     "score": 0,
+     "subject": "Fix: decomposition rule wire args (#3237)",
+     "pull_request": 3237,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3237"
+    },
+    {
+     "score": 0,
+     "subject": "Fix - 'fixed-decomps' and 'alt-decomps' behaviour in 'graph-decomposition' (#3230)",
+     "pull_request": 3230,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3230"
+    },
+    {
+     "score": 0,
+     "subject": "Do not cache available params during --adjoint-lowering (#3233)",
+     "pull_request": 3233,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3233"
+    },
+    {
+     "score": 0,
+     "subject": "Fix 'runtime_artifacts' walk performance   (#3219)",
+     "pull_request": 3219,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3219"
+    },
+    {
+     "score": 0,
+     "subject": "Decompose Trotter Ops with numeric Hamiltonians as hybrid args (#3235)",
+     "pull_request": 3235,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3235"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 6
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "43488115047",
+ "recorded_at": "2026-11-13T19:35:04+00:00"
+}

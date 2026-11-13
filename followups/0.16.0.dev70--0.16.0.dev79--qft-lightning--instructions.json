@@ -1,0 +1,604 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev70..catalyst-0.16.0.dev79/qft/lightning/instructions",
+ "name": "0.16.0.dev70--0.16.0.dev79--qft-lightning--instructions",
+ "before": "0.16.0.dev70",
+ "after": "0.16.0.dev79",
+ "cell": "qft/lightning",
+ "metric": "instructions",
+ "first": {
+  "before": 1722674391,
+  "after": 2203805642,
+  "change_pct": 27.92932045159775
+ },
+ "second": {
+  "before": 1722678362,
+  "after": 2203305092,
+  "change_pct": 27.89996905992368,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qft/lightning",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev70",
+   "runs": [
+    1722710356,
+    1722610232,
+    1722625327
+   ],
+   "net": 1722625327
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev79",
+   "runs": [
+    2202781687,
+    2203162366,
+    2203359872
+   ],
+   "net": 2203162366
+  },
+  "packages": [
+   "charset-normalizer 3.5.0 ? 3.5.1",
+   "idna 3.18 ? 3.19",
+   "ml-dtypes 0.5.4 ? 0.6.0",
+   "pennylane 0.46.0.dev68 ? 0.46.0.dev79",
+   "pennylane-catalyst 0.16.0.dev70 ? 0.16.0.dev79",
+   "pennylane-lightning 0.46.0.dev21 ? 0.46.0.dev27"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    36063,
+    69774
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    24689,
+    44552
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    876,
+    19248
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:name",
+    536,
+    15232
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    2216,
+    14464
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    842,
+    11881
+   ],
+   [
+    "~:<method 'split' of 'str' objects>",
+    5868,
+    16548
+   ],
+   [
+    "pennylane/core/operator/base.py:hyperparameters",
+    9792,
+    0
+   ],
+   [
+    "pennylane/math/interface_utils.py:_get_interface_of_single_tensor",
+    5860,
+    14089
+   ],
+   [
+    "pennylane/math/interface_utils.py:get_interface",
+    4619,
+    12848
+   ],
+   [
+    "autoray/autoray.py:infer_backend",
+    4002,
+    11002
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    418,
+    7173
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:parameters",
+    536,
+    7272
+   ],
+   [
+    "pennylane/core/operator/operator2.py:<genexpr>",
+    518,
+    6740
+   ],
+   [
+    "~:<built-in method builtins.iter>",
+    566,
+    6690
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    1496489976,
+    1700565917
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    105762071,
+    234887368
+   ],
+   [
+    "__tls_get_addr",
+    29795744,
+    64505903
+   ],
+   [
+    "_PyType_Lookup",
+    11848178,
+    28610131
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    6287485,
+    16689795
+   ],
+   [
+    "PyObject_GC_Del",
+    4669512,
+    10102572
+   ],
+   [
+    "_PyObject_GC_New",
+    4757526,
+    9689886
+   ],
+   [
+    "PyObject_GetAttr",
+    3116895,
+    7290067
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    2341492,
+    6152035
+   ],
+   [
+    "PyObject_RichCompare",
+    2987876,
+    6476392
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    2534540,
+    5412178
+   ],
+   [
+    "PyObject_Vectorcall",
+    1653928,
+    4020392
+   ],
+   [
+    "PyDict_GetItemWithError",
+    1132829,
+    3376929
+   ],
+   [
+    "_PyObject_GenericSetAttrWithDict",
+    1192716,
+    3277607
+   ],
+   [
+    "__memset_avx2_unaligned_erms",
+    2934226,
+    4755957
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 57379,
+     "subject": "Migrate 'PhaseShift' and 'ControlledPhaseShift' to use 'Operator2' as its base class (#9951)",
+     "pull_request": 9951,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9951"
+    },
+    {
+     "score": 56968,
+     "subject": "Port 'X'/'CNOT'/'Toffoli'/'MultiControlledX' to 'Operator2' (#9844)",
+     "pull_request": 9844,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9844"
+    },
+    {
+     "score": 51862,
+     "subject": "Port 'RX' and 'CRX' to 'Operator2' (#9984)",
+     "pull_request": 9984,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9984"
+    },
+    {
+     "score": 48199,
+     "subject": "Port U1, U2, and U3 to Operator2. (#9923)",
+     "pull_request": 9923,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9923"
+    },
+    {
+     "score": 30045,
+     "subject": "Port 'Rot' and 'CRot' to 'Operator2' (#9977)",
+     "pull_request": 9977,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9977"
+    },
+    {
+     "score": 23683,
+     "subject": "feat: port 'GQSP' to 'Operator2' (#9900)",
+     "pull_request": 9900,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9900"
+    },
+    {
+     "score": 23683,
+     "subject": "Update 'Operator2.wires' docstring (#9995)",
+     "pull_request": 9995,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9995"
+    },
+    {
+     "score": 23683,
+     "subject": "Documentation for 'Operator2' (#9658)",
+     "pull_request": 9658,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9658"
+    },
+    {
+     "score": 23683,
+     "subject": "Fix Operator2 canonicalize dynamic values (#10023)",
+     "pull_request": 10023,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10023"
+    },
+    {
+     "score": 9187,
+     "subject": "feat: validate 'Operator2' instances with static/comp args during construction (#9926)",
+     "pull_request": 9926,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9926"
+    },
+    {
+     "score": 9184,
+     "subject": "Port 'BasisState' to 'Operator2' (#9933)",
+     "pull_request": 9933,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9933"
+    },
+    {
+     "score": 9180,
+     "subject": "feat: port 'GlobalPhase' to 'Operator2' (#9964)",
+     "pull_request": 9964,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9964"
+    },
+    {
+     "score": 9180,
+     "subject": "Fix flip_zero_control capture compatibility (#10036)",
+     "pull_request": 10036,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10036"
+    },
+    {
+     "score": 7350,
+     "subject": "Add eager C(U1) -> ControlledPhaseShift lowering (#9981)",
+     "pull_request": 9981,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9981"
+    },
+    {
+     "score": 2595,
+     "subject": "Use ContextVar for capture toggles (#10016)",
+     "pull_request": 10016,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10016"
+    },
+    {
+     "score": 0,
+     "subject": "Updating check in artifact runner (#9989)",
+     "pull_request": 9989,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9989"
+    },
+    {
+     "score": 0,
+     "subject": "AQFT to PL2 (#9987)",
+     "pull_request": 9987,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9987"
+    },
+    {
+     "score": 0,
+     "subject": "BREAKING CHANGE: Make 'BasisEmbedding' a direct alias of 'BasisState' (#9980)",
+     "pull_request": 9980,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9980"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#9996)",
+     "pull_request": 9996,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9996"
+    },
+    {
+     "score": 0,
+     "subject": "Add documentation for 'abstractify' and make it public (#10002)",
+     "pull_request": 10002,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10002"
+    },
+    {
+     "score": 0,
+     "subject": "fix: revert 'doctest: +SKIP' introduced in #9956 (#9957)",
+     "pull_request": 9957,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9957"
+    },
+    {
+     "score": 0,
+     "subject": "Port SumOfSlatersPrep to Operator2 (#9965)",
+     "pull_request": 9965,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9965"
+    },
+    {
+     "score": 0,
+     "subject": "Port PCPhase to Operator2 (#9978)",
+     "pull_request": 9978,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9978"
+    },
+    {
+     "score": 0,
+     "subject": "Migrate 'PauliMeasure' to 'Operator2' (#10005)",
+     "pull_request": 10005,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10005"
+    },
+    {
+     "score": 0,
+     "subject": "Fixing superposition_thc using PL2 PauliX (#10004)",
+     "pull_request": 10004,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10004"
+    },
+    {
+     "score": 0,
+     "subject": "Bugfix: the data module promoting wires to 'float64' (#10012)",
+     "pull_request": 10012,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10012"
+    },
+    {
+     "score": 0,
+     "subject": "Ising ops to Operator2 (#9955)",
+     "pull_request": 9955,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9955"
+    },
+    {
+     "score": 0,
+     "subject": "Cast builtin types for 'angles' to arrays in 'GQSP' (#10018)",
+     "pull_request": 10018,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10018"
+    },
+    {
+     "score": 0,
+     "subject": "Port SingleExcitation to Operator2 (#9944)",
+     "pull_request": 9944,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9944"
+    },
+    {
+     "score": 0,
+     "subject": "Fix sybil doctest failure after Catalyst softens AOT failures to warnings (#10022)",
+     "pull_request": 10022,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10022"
+    }
+   ],
+   "pennylane-lightning": [
+    {
+     "score": 0,
+     "subject": "Correct kernel tuning documentation LQ_ENABLE_KERNEL_OMP flag (#1409)",
+     "pull_request": 1409,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1409"
+    },
+    {
+     "score": 0,
+     "subject": "Changing runners (#1417)",
+     "pull_request": 1417,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1417"
+    },
+    {
+     "score": 0,
+     "subject": "Fix 'PCPhase' use 'compilable_args.dim' (#1420)",
+     "pull_request": 1420,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1420"
+    },
+    {
+     "score": 0,
+     "subject": "Adding codeql yml (#1419)",
+     "pull_request": 1419,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1419"
+    },
+    {
+     "score": 0,
+     "subject": "Remove docs & src references to gbenchmarks (#1412)",
+     "pull_request": 1412,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1412"
+    },
+    {
+     "score": 0,
+     "subject": "Update Lightning performance kernel tuning doc page (#1413)",
+     "pull_request": 1413,
+     "url": "https://github.com/PennyLaneAI/pennylane-lightning/pull/1413"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Remove catalyst benchmark scripts (#3114)",
+     "pull_request": 3114,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3114"
+    },
+    {
+     "score": 0,
+     "subject": "allow using AbstractArray for AOT compilation and specs (#2953)",
+     "pull_request": 2953,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/2953"
+    },
+    {
+     "score": 0,
+     "subject": "add remote executor manager (#3082)",
+     "pull_request": 3082,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3082"
+    },
+    {
+     "score": 0,
+     "subject": "Soften AOT failures to warnings (#3100)",
+     "pull_request": 3100,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3100"
+    },
+    {
+     "score": 0,
+     "subject": "LLL fixes upto Pennylane dev-72 (#3112)",
+     "pull_request": 3112,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3112"
+    },
+    {
+     "score": 0,
+     "subject": "Fix SSH multiplexing silently disabled on macOS (#3119)",
+     "pull_request": 3119,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3119"
+    },
+    {
+     "score": 0,
+     "subject": "Support 'graphOpId' in 'graph-decomposition' (#3046)",
+     "pull_request": 3046,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3046"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/gateset by name (#3052)",
+     "pull_request": 3052,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3052"
+    },
+    {
+     "score": 0,
+     "subject": "Run DCE before to_ppr pass (#3125)",
+     "pull_request": 3125,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3125"
+    },
+    {
+     "score": 0,
+     "subject": "fix: restore LLL compatibility with pennylane 'dev74' and pl-lightning 'dev27' (#3124)",
+     "pull_request": 3124,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3124"
+    },
+    {
+     "score": 0,
+     "subject": "Standardize Resource Analysis JSON Format (#3076)",
+     "pull_request": 3076,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3076"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/generic rule lowering (#3053)",
+     "pull_request": 3053,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3053"
+    },
+    {
+     "score": 0,
+     "subject": "Remove Precompiled Rule Copy (#3133)",
+     "pull_request": 3133,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3133"
+    },
+    {
+     "score": 0,
+     "subject": "Run DCE before --ppm-compilation (#3135)",
+     "pull_request": 3135,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3135"
+    },
+    {
+     "score": 0,
+     "subject": "Forward Catalyst subprocess diagnostics to Python (#3080)",
+     "pull_request": 3080,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3080"
+    },
+    {
+     "score": 0,
+     "subject": "Revert and xfail 'test_ctrl_before_custom_op' (#3137)",
+     "pull_request": 3137,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3137"
+    },
+    {
+     "score": 0,
+     "subject": "Track graph operation IDs in decomposition resource analysis (#3102)",
+     "pull_request": 3102,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3102"
+    },
+    {
+     "score": 0,
+     "subject": "Fix dialects build when using libstdc++ 14 from gcc (#3138)",
+     "pull_request": 3138,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3138"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/lower time rules (#3061)",
+     "pull_request": 3061,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3061"
+    },
+    {
+     "score": 0,
+     "subject": "Remove deprecated PPM specs counting API and MLIR pass (#3081)",
+     "pull_request": 3081,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3081"
+    },
+    {
+     "score": 0,
+     "subject": "fix: update LLL compatibility to 'pennylane' 'dev79' (#3130)",
+     "pull_request": 3130,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3130"
+    },
+    {
+     "score": 0,
+     "subject": "Add backline frontend (#3068)",
+     "pull_request": 3068,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3068"
+    },
+    {
+     "score": 0,
+     "subject": "Add reference semantics control region (#3116)",
+     "pull_request": 3116,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3116"
+    },
+    {
+     "score": 0,
+     "subject": "Add reference semantics ctrl region op to from_plxpr and the python interface (#3131)",
+     "pull_request": 3131,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3131"
+    },
+    {
+     "score": 0,
+     "subject": "Fix the name of remote backline rt nodes on macOS (#3142)",
+     "pull_request": 3142,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3142"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 41,
+   "pennylane-lightning": 6,
+   "pennylane-catalyst": 25
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "ca0bf19d1e98319c5cd994b87c04d5601df79177",
+     "before": 1742643624,
+     "after": 2203703150,
+     "pull_request": 9951,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9951",
+     "subject": "Migrate 'PhaseShift' and 'ControlledPhaseShift' to use 'Operator2' as its base class (#9951)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 5,
+   "stopped": false,
+   "pennylane_alone": 2205360193,
+   "pennylane_share": 1.0045736890637478
+  }
+ },
+ "problems": [],
+ "run": "43488115047",
+ "recorded_at": "2026-11-13T19:35:04+00:00"
+}
