@@ -1,0 +1,351 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev122..catalyst-0.16.0.dev123/qpe/lightning/instructions",
+ "name": "0.16.0.dev122--0.16.0.dev123--qpe-lightning--instructions",
+ "before": "0.16.0.dev122",
+ "after": "0.16.0.dev123",
+ "cell": "qpe/lightning",
+ "metric": "instructions",
+ "first": {
+  "before": 3550668123,
+  "after": 3574114195,
+  "change_pct": 0.6603284561608126
+ },
+ "second": {
+  "before": 3548903845,
+  "after": 3577323424,
+  "change_pct": 0.8007987886186304,
+  "host": "AMD EPYC 7763 64-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qpe/lightning",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev122",
+   "runs": [
+    3548648241,
+    3548971090,
+    3547796900
+   ],
+   "net": 3548648241
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev123",
+   "runs": [
+    3577342486,
+    3577090910,
+    3579372931
+   ],
+   "net": 3577342486
+  },
+  "packages": [
+   "pennylane 0.46.0.dev127 ? 0.46.0.dev130",
+   "pennylane-catalyst 0.16.0.dev122 ? 0.16.0.dev123"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    212977,
+    215572
+   ],
+   [
+    "/usr/local/lib/python3.12/re/__init__.py:_compile",
+    7956,
+    10066
+   ],
+   [
+    "/usr/local/lib/python3.12/re/__init__.py:match",
+    6916,
+    9026
+   ],
+   [
+    "~:<method 'match' of 're.Pattern' objects>",
+    7436,
+    9546
+   ],
+   [
+    "/usr/local/lib/python3.12/functools.py:dispatch",
+    8559,
+    9667
+   ],
+   [
+    "/usr/local/lib/python3.12/functools.py:wrapper",
+    8171,
+    9279
+   ],
+   [
+    "/usr/local/lib/python3.12/weakref.py:__getitem__",
+    8559,
+    9667
+   ],
+   [
+    "~:<built-in method _abc.get_cache_token>",
+    8558,
+    9666
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    33804,
+    34710
+   ],
+   [
+    "pennylane/capture/op_eqns.py:pop_op_eqns",
+    0,
+    754
+   ],
+   [
+    "pennylane/core/operator/operator2.py:pop_op_eqns",
+    754,
+    0
+   ],
+   [
+    "pennylane/capture/hint.py:get_hints",
+    0,
+    483
+   ],
+   [
+    "pennylane/core/operator/operator2.py:_init_subclass_dynamic_property",
+    7752,
+    8218
+   ],
+   [
+    "~:<built-in method builtins.vars>",
+    7783,
+    8249
+   ],
+   [
+    "pennylane/decomposition/utils.py:translate_op_alias",
+    1226,
+    1648
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    1774212209,
+    1786874330
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    848758294,
+    855944824
+   ],
+   [
+    "_int_malloc",
+    12299145,
+    14454486
+   ],
+   [
+    "__tls_get_addr",
+    239705928,
+    241301401
+   ],
+   [
+    "_PyType_Lookup",
+    97605643,
+    98514884
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    52149801,
+    52585018
+   ],
+   [
+    "unlink_chunk.isra.0",
+    2147847,
+    2463487
+   ],
+   [
+    "PyObject_RichCompare",
+    16951079,
+    17212352
+   ],
+   [
+    "_PyUnicode_JoinArray",
+    10026169,
+    10250655
+   ],
+   [
+    "PyObject_Vectorcall",
+    16095426,
+    16287706
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    20216486,
+    20389926
+   ],
+   [
+    "PyCMethod_New",
+    1462865,
+    1613497
+   ],
+   [
+    "PyDict_GetItemWithError",
+    8250013,
+    8397423
+   ],
+   [
+    "PyArg_UnpackTuple",
+    6869881,
+    7012027
+   ],
+   [
+    "_PyObject_GC_New",
+    40755274,
+    40895242
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 3603,
+     "subject": "BREAKING CHANGE: move 'pop_op_eqns' to 'capture' module (#10345)",
+     "pull_request": 10345,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10345"
+    },
+    {
+     "score": 1328,
+     "subject": "Utility to exclude decomposition rules globally (#10329)",
+     "pull_request": 10329,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10329"
+    },
+    {
+     "score": 791,
+     "subject": "Support 'qp.hint' on an operator subclass with 'qp.cond' (#10325)",
+     "pull_request": 10325,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10325"
+    },
+    {
+     "score": 422,
+     "subject": "Recursively unroll nested 'ChangeOpBasis' in decomposition resources (#10351)",
+     "pull_request": 10351,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10351"
+    },
+    {
+     "score": 308,
+     "subject": "Handle input operators with cond and program capture (#10324)",
+     "pull_request": 10324,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10324"
+    },
+    {
+     "score": 0,
+     "subject": "fix: add condition to 'decompose_mcx_with_no_worker' (#10338)",
+     "pull_request": 10338,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10338"
+    },
+    {
+     "score": 0,
+     "subject": "Move 'assert_valid' and '_test_decomposition_rule' to 'pennylane.testing' (#10306)",
+     "pull_request": 10306,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10306"
+    },
+    {
+     "score": 0,
+     "subject": "Port Barrier to PL2 (#10328)",
+     "pull_request": 10328,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10328"
+    },
+    {
+     "score": 0,
+     "subject": "Migrate call sites of testing utilities in tests (#10335)",
+     "pull_request": 10335,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10335"
+    },
+    {
+     "score": 0,
+     "subject": "Add a decomposition of 'Adjoint(TemporaryAND)' to PPMs and 'CZ' (#10310)",
+     "pull_request": 10310,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10310"
+    },
+    {
+     "score": 0,
+     "subject": "Use 'qp.hint' on structural/classical 'qp.cond' statements in some decompositions (#10311)",
+     "pull_request": 10311,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10311"
+    },
+    {
+     "score": 0,
+     "subject": "fix backline password (#10284)",
+     "pull_request": 10284,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10284"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#10347)",
+     "pull_request": 10347,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10347"
+    },
+    {
+     "score": 0,
+     "subject": "Clarify check_hermitian documentation in TrotterProduct (#10326)",
+     "pull_request": 10326,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10326"
+    },
+    {
+     "score": 0,
+     "subject": "Add post device (#10336)",
+     "pull_request": 10336,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10336"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "[Backline] Housekeeping before the transport ABI work: HIP switch, demo tests on by default, executor lifecycle (#3355)",
+     "pull_request": 3355,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3355"
+    },
+    {
+     "score": 0,
+     "subject": "[Backline] Versioned transport backend ABI and capability query (#3357)",
+     "pull_request": 3357,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3357"
+    },
+    {
+     "score": 0,
+     "subject": "[Backline] Share the FPGA backend config parser (#3359)",
+     "pull_request": 3359,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3359"
+    },
+    {
+     "score": 0,
+     "subject": "Bump PL to 0.46.0-dev130 (#3374)",
+     "pull_request": 3374,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3374"
+    },
+    {
+     "score": 0,
+     "subject": "Add the post device pipeline for R.A. with level \"device\" (#3312)",
+     "pull_request": 3312,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3312"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 15,
+   "pennylane-catalyst": 5
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "5b879bb129fc190dcbc8ccae5e21af8a859465d5",
+     "before": 3548648241,
+     "after": 3570545980,
+     "pull_request": 10329,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10329",
+     "subject": "Utility to exclude decomposition rules globally (#10329)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 4,
+   "stopped": false,
+   "pennylane_alone": 3582783224,
+   "pennylane_share": 1.1896107738677215
+  }
+ },
+ "problems": [],
+ "run": "43622372501",
+ "recorded_at": "2026-11-14T18:53:03+00:00"
+}
