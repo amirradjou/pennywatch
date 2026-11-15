@@ -1,0 +1,218 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev121..catalyst-0.16.0.dev122/variational/qjit/instructions",
+ "name": "0.16.0.dev121--0.16.0.dev122--variational-qjit--instructions",
+ "before": "0.16.0.dev121",
+ "after": "0.16.0.dev122",
+ "cell": "variational/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 7198568367,
+  "after": 7252185775,
+  "change_pct": 0.7448343235273742
+ },
+ "second": {
+  "before": 7194020419,
+  "after": 7245474171,
+  "change_pct": 0.715229440607458,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "variational/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev121",
+   "runs": [
+    7192622242,
+    7194812122,
+    7193699364
+   ],
+   "net": 7193699364
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev122",
+   "runs": [
+    7244786928,
+    7245254389,
+    7245349305
+   ],
+   "net": 7245254389
+  },
+  "packages": [
+   "cachetools 7.2.2 ? 7.2.4",
+   "certifi 2026.7.22 ? 2026.10.19",
+   "pennylane-catalyst 0.16.0.dev121 ? 0.16.0.dev122"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'append' of 'list' objects>",
+    23949,
+    24133
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:__len__",
+    310,
+    402
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:_key_from_fd",
+    310,
+    402
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:get_map",
+    310,
+    402
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:select",
+    309,
+    401
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_check_timeout",
+    309,
+    401
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_remaining_time",
+    311,
+    403
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    29614,
+    29706
+   ],
+   [
+    "~:<built-in method posix.read>",
+    312,
+    404
+   ],
+   [
+    "~:<method 'poll' of 'select.poll' objects>",
+    309,
+    401
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    153454156,
+    185028674
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    70129768,
+    75329541
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    63696239,
+    67581269
+   ],
+   [
+    "_int_malloc",
+    126716115,
+    128628865
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    13560180,
+    15177672
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::StringAttrStorage, llvm::StringRef, mlir::NoneType>(llvm::function_ref<voi",
+    4737379,
+    6201993
+   ],
+   [
+    "mlir::WalkResult mlir::AttrTypeWalker::walkImpl<mlir::Attribute, std::vector<std::function<mlir::WalkResult (mlir::Attribute)>, std::allocator<std::function<mlir::WalkResult (mlir::Attribute)> > > >(m",
+    5961387,
+    7119443
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    18419016,
+    19212344
+   ],
+   [
+    "AddNodeIDNode(llvm::FoldingSetNodeID&, llvm::SDNode const*)",
+    3509659,
+    2878798
+   ],
+   [
+    "unlink_chunk.isra.0",
+    5815548,
+    6334917
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::AffineMapStorage, unsigned int&, unsigned int&, llvm::ArrayRef<mlir::Affin",
+    1361240,
+    1812747
+   ],
+   [
+    "ActivityAnalyzer::isValueInactiveFromUsers(TypeResults const&, llvm::Value*, ActivityAnalyzer::UseActivity, llvm::Instruction**)",
+    51208184,
+    51629364
+   ],
+   [
+    "???",
+    615095657,
+    615460943
+   ],
+   [
+    "malloc_consolidate",
+    15888596,
+    16238416
+   ],
+   [
+    "llvm::SmallPtrSetImplBase::insert_imp_big(void const*)",
+    11459804,
+    11120963
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Add mixed diagonal synthesis method to gridsynth (#3314)",
+     "pull_request": 3314,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3314"
+    },
+    {
+     "score": 0,
+     "subject": "Add mixed fallback synthesis method to gridsynth (#3327)",
+     "pull_request": 3327,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3327"
+    },
+    {
+     "score": 0,
+     "subject": "fix backline password (#3309)",
+     "pull_request": 3309,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3309"
+    },
+    {
+     "score": 0,
+     "subject": "Add the transport's checked __call functions back (#3364)",
+     "pull_request": 3364,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3364"
+    },
+    {
+     "score": 0,
+     "subject": "Reference and value semantic conversion passes only collect symbols once (#3341)",
+     "pull_request": 3341,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3341"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 5
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "43745420510",
+ "recorded_at": "2026-11-15T18:35:41+00:00"
+}
