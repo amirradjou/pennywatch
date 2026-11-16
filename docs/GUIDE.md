@@ -24,10 +24,13 @@ uv run pennywatch run --suite kokkos --stack 0.15.0               # lightning.ko
 | `--cpus` | `0,1` | CPUs to use, one process on each at a time |
 | `--no-busy-check` | off | Skip the run against four spinning processes |
 | `--keep-raw DIR` | off | Keep Cachegrind's output files |
+| `--budget-minutes N` | none | Start no job after N minutes, so a run too slow to finish still ends with a result, rejected with the reason |
 | `--out FILE` | `results/` | Where the JSON goes. A rejected run is saved as `*.rejected.json` |
 
 A run is rejected, and never published, if any circuit gives the wrong answer, any canary goes
-undetected, or any package isn't the locked version.
+undetected, or any package isn't the locked version. A circuit that can't run at all on a build, because
+its first, uncounted run fails, is named in the result with its error and left out, and the rest of the
+build is measured as usual. Nothing of it runs under Valgrind: it would only fail again, 30 times slower.
 
 ## Reading results
 
@@ -84,13 +87,15 @@ This re-measures the cell on both builds, then lists what merged between them:
 | CI | every pull request | Lint and tests |
 | Measure | by hand, or a push to `measure/spread-*` | The suite on several runners at once, to see how far they agree |
 | History | by hand, or a push to `measure/history` | The last eight stable releases; by hand with `suite: kokkos`, their `lightning.kokkos` parts |
-| Nightly | 08:23 UTC, or a push to `measure/nightly` | The newest unmeasured dev build, then its `lightning.kokkos` part, published to the `data` branch |
+| Nightly | 08:23 UTC, or a push to `measure/nightly` | Up to three unmeasured dev builds, newest first, each with its `lightning.kokkos` part, published to the `data` branch |
 | Follow-up | after Nightly, or by hand with a `step` | Up to three new steps measured again on fresh runners and explained, recorded in `followups/` on the `data` branch, and an issue here for those that held |
 | Pages | after Nightly and Follow-up, or a push to `main` that changes results or the page | The public page |
 
-`Nightly` with a `limit` above 1 works through older builds, newest first, and that's how the backfill
-runs. Only its publish job can write, it runs nothing from TestPyPI, and it treats everything the
-measuring job uploaded as hostile.
+A night takes up to three builds, so one that lands on TestPyPI after its night's run is measured the
+next night. By hand, a larger `limit` works through older builds, newest first, and that's how the
+backfill ran. Each run has a time budget inside the job's limit, so a build too slow to finish is recorded,
+rejected with the reason, rather than cancelled and tried again every night. Only its publish job can
+write, it runs nothing from TestPyPI, and it treats everything the measuring job uploaded as hostile.
 
 GitHub turns a schedule off after 60 days with no activity in a public repo. If the page stops gaining
 builds, turn `Nightly` back on in the Actions tab.

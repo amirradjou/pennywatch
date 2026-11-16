@@ -75,6 +75,27 @@ From 0.45.1 to 0.46.0.dev142, in instructions: `qpe/lightning` +622%, `qpe/defau
 [explanations](explanations.md). `Operator2.__init__` calls `Signature.bind`, and the profile shows the new calls in
 `inspect.py`. The migration is still in progress and hasn't reached a stable release, so this is a snapshot.
 
+## Catalyst 0.16.0.dev141 turned on program capture under `qjit`, and four of the six circuits stopped running
+
+`qjit`'s `capture` argument now defaults to `True` (it was `"global"`, which deferred to
+`qp.capture.enabled()`), so a plain `qjit` traces through the new frontend in `catalyst/from_plxpr`.
+PennyLane and Lightning are the same builds in dev140 and dev141 (0.46.0.dev149 and 0.46.0.dev34), so the
+change is Catalyst's alone. Every `qjit` cell ran on dev140. On dev141:
+
+| Cell | What happens |
+|---|---|
+| `trotter/qjit` | `TypeError: The given operator must be a PennyLane ~.Sum or ~.SProd, got JitTracer<AbstractOperator()>`: the Hamiltonian is built inside the circuit, so `TrotterProduct` receives a traced operator |
+| `qpe/qjit` | The compiler aborts: `GraphSolverFailedError: Decomposition rule not found for operator 'QuantumPhaseEstimation…'` |
+| `grover/qjit` | At 6 wires the compiler aborts the same way, for `GroverOperator`. At 18 wires it is killed at the 3 GiB limit after 11 to 13 minutes |
+| `variational/qjit` | `catalyst.grad` of the captured QNode raises `NotImplementedError` from `_qnode_jvp` |
+| `qft/qjit` | Runs, at 2.66 times the instructions: 6.385 billion against 2.400. Compiling went from 1.111 to 5.123 billion, so nearly all of the 3.99 billion extra is compile cost |
+| `sampling/qjit` | Runs |
+
+The same failures came on dev142 and dev143. The `qft/qjit` counts are the medians of three layouts from
+the runners on 2026-11-11 and 2026-11-12. The errors were reproduced on a laptop with the full output.
+`qjit(capture=False)` still gives the old frontend. pennywatch measures the default, so from dev141 the four
+cells are named as unable to run, and the rest of each build is measured as usual.
+
 ## Lightning's peak memory fell by 44% at PennyLane 0.41: expectation values stopped copying the state
 
 At 25 wires on `lightning.qubit`, from 1,232 MiB at Catalyst 0.10.0 to 690 MiB at 0.11.0, and from 1,759 to 1,217 MiB

@@ -229,8 +229,9 @@ def combine(results: list[dict]) -> list[dict]:
             combined.append(parts[0])
             continue
         merged = dict(parts[0])
-        merged["cells"], merged["memory"] = [], []
+        merged["cells"], merged["memory"], merged["unavailable"] = [], [], {}
         for part in parts:
+            merged["unavailable"] |= part.get("unavailable") or {}
             names = {cell["name"] for cell in merged["cells"]}
             merged["cells"] += [cell for cell in part["cells"] if cell["name"] not in names]
             backends = {entry["backend"] for entry in merged["memory"]}

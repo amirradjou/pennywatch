@@ -131,16 +131,22 @@ QPE stays small because `default.qubit` builds a dense matrix for its inverse QF
 |---|---|---|---|
 | M0 | The instrument | `pennywatch run` reproduces the table above from code in a pinned image. Three circuits on three stacks. The canary is detected every time. Runs on two different days agree within 0.05%. The same suite on GitHub Actions: spread between runners measured and written down, and the comparison method chosen from it | **Done.** The full suite on the laptop on 2026-11-06 and 2026-11-07 agrees to 0.025% at worst. Peak memory moved up to 0.35%, under its 0.5% threshold |
 | M1 | History | All six circuits on the last eight stable releases, with an API adapter. Every step of 0.5% or more re-measured and listed with its numbers | **Done.** 8 releases, 144 of 144 canaries, 166 steps in [the list](HISTORY.md). Measured again on a laptop, all 166 came back the same way round and 159 the same size; the list says why the other 7 didn't. `lightning.kokkos`, added on 2026-11-08 as a part of its own: 46 of 46 canaries on each of two sets of runners, and all 34 of its steps confirmed |
-| M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | Built, and proven once from TestPyPI to the `data` branch. Scheduled from 2026-11-08, and the backfill of 64 builds started on 2026-11-07: see below |
+| M2 | Nightly | A scheduled Action measures each new dev build. Backfilled to 2026-08-08. Fourteen nights in a row unattended, any gap explained by TestPyPI rather than by pennywatch | Built and backfilled: 61 dev builds measured from 0.16.0.dev67, and 4 rejected with the reason. The nights from 2026-11-12 to 11-16 were lost to pennywatch, so the fourteen start again on 2026-11-17: see below |
 | M3 | Explanation | For at least three real changes from M1 or M2, it names the responsible pull request or a candidate list, checked by reading the diff or bisecting. Wrong answers counted and published | **Done.** 7 real changes in [explanations](explanations.md), with the wrong answers counted |
 | M4 | Public page | The repo is public under MIT, with a static page showing each metric's history and what changed, credits, and the limits below. The Action's cost is under GitHub's free allowance | **Done.** Public since 2026-11-07 under MIT, which also makes Actions free, with [the page](https://amirradjou.github.io/pennywatch/) built by Actions |
 | M5 | Upstream | At least one finding reported by hand and judged valid by the maintainers, or a fix merged | Not started, and by hand only. Candidates are in [findings](findings.md) |
 
 ### What's left
 
-- **M2.** The backfill measures every dev build on TestPyPI, 64 of them, about 55 hours of runner time
-  spread across six runners at a time. Then fourteen nights unattended, to 2026-11-21. A night with no new
-  build is a gap explained by TestPyPI.
+- **M2.** Fourteen nights unattended, from 2026-11-17 to 2026-11-30. A night with no new build is a gap
+  explained by TestPyPI. The first count, from 2026-11-08, broke on 2026-11-12, and the cause was
+  pennywatch's: Catalyst 0.16.0.dev141 turned on program capture under `qjit` and four circuits stopped
+  running ([findings](findings.md)). Grover's ran out of memory natively, its counted runs under Valgrind
+  each took the hour's limit anyway, and the job was cancelled with nothing uploaded, five nights running.
+  A build that landed after its night's run, dev139, was also never reached, because a night took only
+  the newest. Now a cell that can't run is named and the rest of the build measured, nothing of it runs
+  under Valgrind, each run has a time budget inside the job's limit, and a night takes up to three
+  builds.
 - **M5.** By hand only: see [Reporting upstream](#reporting-upstream).
 
 ## Limits

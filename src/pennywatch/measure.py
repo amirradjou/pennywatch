@@ -4,6 +4,7 @@ import hashlib
 import os
 import platform
 import queue
+import re
 import shutil
 import subprocess
 import sys
@@ -28,7 +29,12 @@ CANARY_FRACTION = 0.01
 # On a small circuit 1% rounds to a gate or two, which the noise can hide.
 CANARY_MIN_GATES = 3
 TIMING_REPEATS = 10
-OUTPUT_TAIL_BYTES = 4096
+# Enough to reach the message of a C++ exception above the stack dump that follows it: about 7.6 KB
+# from the end on Catalyst 0.16's compiler.
+OUTPUT_TAIL_BYTES = 32768
+# A job that never started, or was stopped, because the run's time budget had run out. Not a sign
+# that the cell can't run.
+OUT_OF_TIME = "the run's time budget ran out"
 HARNESS_DIR = Path(__file__).parent / "harness"
 
 # Valgrind's own settings are part of the instrument. --trace-children takes in Catalyst's compiler,
@@ -126,6 +132,29 @@ def validate_outcome(outcome: Outcome) -> str | None:
     return None
 
 
+_CPP_THROW = re.compile(r"terminate called after throwing an instance of '(?:[\w:]*::)?(\w+)'")
+_CPP_WHAT = re.compile(r"^\s*what\(\):\s*(.+)$")
+# The exception line of a Python traceback, also after a prefix such as "exit 1: ".
+_PYTHON_EXCEPTION = re.compile(
+    r"(?:^|: )((?:[A-Za-z_]\w*\.)*[A-Za-z_]\w*(?:Error|Exception|Exit|Interrupt)\b.*)$"
+)
+
+
+def failure_reason(output: str) -> str:
+    """The line of a failed process's output that says why it failed. The last line rarely does: JAX
+    adds a note after the exception, and the compiler a stack dump after its own."""
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    # A C++ exception's message, named by its type from the line before it where that's there.
+    for number in range(len(lines) - 1, -1, -1):
+        if match := _CPP_WHAT.match(lines[number]):
+            thrown = _CPP_THROW.search(lines[number - 1]) if number else None
+            return f"{thrown[1]}: {match[1]}" if thrown else match[1]
+    for line in reversed(lines):
+        if match := _PYTHON_EXCEPTION.search(line):
+            return match[1]
+    return lines[-1] if lines else "no output"
+
+
 def run_keeping_tail(argv: list[str], timeout: float) -> tuple[int, str]:
     """Run a command and keep only the end of its output: the code under test decides how much it
     prints, and the host's memory shouldn't depend on that."""
@@ -161,6 +190,7 @@ class Runner:
         overlay: Path | None = None,
         keep_functions: bool = False,
         kokkos: Path | None = None,
+        deadline: float | None = None,
     ):
         self.image = image
         self.stack_dir = stack_dir
@@ -168,6 +198,7 @@ class Runner:
         self.cpus = cpus
         self.overlay = overlay
         self.kokkos = kokkos
+        self.deadline = deadline  # time.monotonic() by which every job has to have finished
         self.keep_functions = keep_functions
         self.source = workspace / "src"
         package = self.source / "pennywatch"
@@ -208,14 +239,22 @@ class Runner:
             *command,
         ]
         started = time.monotonic()
+        timeout = JOB_TIMEOUT_S
+        if self.deadline is not None:
+            timeout = min(timeout, max(1.0, self.deadline - started))
         try:
-            code, tail = run_keeping_tail(argv, JOB_TIMEOUT_S)
+            code, tail = run_keeping_tail(argv, timeout)
         except subprocess.TimeoutExpired:
             subprocess.run(["docker", "kill", name], capture_output=True, check=False)
-            return Outcome(job, error=f"timed out after {JOB_TIMEOUT_S} s")
+            cut_short = timeout < JOB_TIMEOUT_S
+            return Outcome(job, error=OUT_OF_TIME if cut_short else f"timed out after {timeout} s")
         outcome = Outcome(job, elapsed_s=time.monotonic() - started)
+        if code == 137:
+            # Killed. A timeout is handled above, so it was the kernel, at the memory limit.
+            outcome.error = f"exit 137: killed, most likely at the {container.MEMORY_LIMIT} limit"
+            return outcome
         if code != 0:
-            outcome.error = f"exit {code}: {tail.strip()[-400:]}"
+            outcome.error = f"exit {code}: {failure_reason(tail)[:400]}"
             return outcome
         outcome.sentinel = untrusted.read_sentinel(output / "sentinel.json")
         if job.mode not in UNCOUNTED_MODES:
@@ -225,14 +264,18 @@ class Runner:
         return outcome
 
     def run_all(self, jobs: list[Job]) -> dict[Job, Outcome]:
-        return run_on_slots(jobs, self.cpus, self.execute)
+        return run_on_slots(jobs, self.cpus, self.execute, self.deadline)
 
 
 def run_on_slots(
-    jobs: list[Job], cpus: list[int], execute: Callable[[Job, int], Outcome]
+    jobs: list[Job],
+    cpus: list[int],
+    execute: Callable[[Job, int], Outcome],
+    deadline: float | None = None,
 ) -> dict[Job, Outcome]:
     """Run jobs in parallel with each holding one CPU. Counts don't depend on load, so parallel runs
-    are safe, and the limit is there for the laptop's sake."""
+    are safe, and the limit is there for the laptop's sake. A job whose turn comes after `deadline`
+    isn't started, so a run that's too slow still ends with a result that says so."""
     free = queue.SimpleQueue()
     for cpu in cpus:
         free.put(cpu)
@@ -243,7 +286,10 @@ def run_on_slots(
         cpu = free.get()
         try:
             container.wait_for_memory()
-            outcome = execute(job, cpu)
+            if deadline is not None and time.monotonic() >= deadline:
+                outcome = Outcome(job, error=OUT_OF_TIME)
+            else:
+                outcome = execute(job, cpu)
         except Exception as error:  # noqa: BLE001 - one bad job must not lose the others
             outcome = Outcome(job, error=f"{type(error).__name__}: {error}")
         finally:
@@ -459,10 +505,14 @@ def run_suite(
     judge_canaries: bool = True,
     part: str | None = None,
     drop_unrunnable: bool = False,
+    budget_s: float | None = None,
 ) -> dict:
     """Measure cells on one stack. With `drop_unrunnable`, a cell whose first, native run can't
     execute at all is left out and named, rather than failing the result: an older backend that
-    lacks an operation has nothing to measure. Every other fault still fails it."""
+    lacks an operation, or a dev build that broke one, has nothing to measure. Every other fault
+    still fails it. With `budget_s`, jobs still waiting when it runs out fail rather than start, so
+    a slow build ends in a result that says why, not in a cancelled job that leaves nothing."""
+    deadline = None if budget_s is None else time.monotonic() + budget_s
     image = container.ensure_image()
     if not stack.lock_path.exists():
         stacks.write_lock(stack, image)
@@ -480,7 +530,7 @@ def run_suite(
     workspace = Path(tempfile.mkdtemp(prefix="run-", dir=stacks.cache_dir()))
     workspace.chmod(0o755)
     try:
-        runner = Runner(image, stack_dir, workspace, cpus, kokkos=kokkos_dir)
+        runner = Runner(image, stack_dir, workspace, cpus, kokkos=kokkos_dir, deadline=deadline)
         outcomes, unavailable = _measure(
             runner, cells, repeats, busy_check, memory_wires, backends, drop_unrunnable
         )
@@ -589,27 +639,31 @@ def _measure(
     unavailable = {}
     if drop_unrunnable:
         for cell in cells:
-            outcome = outcomes[native_job(cell)]
-            if outcome.error:
-                last_line = outcome.error.strip().splitlines()[-1]
-                unavailable[cell.name] = untrusted.clean_name(last_line)
+            error = outcomes[native_job(cell)].error
+            # Running out of time says nothing about the cell, so that still fails the run.
+            if error and error != OUT_OF_TIME:
+                unavailable[cell.name] = untrusted.clean_name(failure_reason(error))
                 del outcomes[native_job(cell)]
         cells = [cell for cell in cells if cell.name not in unavailable]
         if not cells:
             raise stacks.StackUnavailable(f"no cell can run: {next(iter(unavailable.values()))}")
 
-    jobs = plan_baselines(cells)
-    for cell in cells:
+    # A cell whose native run can't be used would fail again under Valgrind, about 30 times slower:
+    # one that ran out of memory natively after 12 minutes took the hour's limit on every repeat.
+    # Its native outcome stays, and fails the run.
+    runnable = [cell for cell in cells if not validate_outcome(outcomes[native_job(cell)])]
+    jobs = plan_baselines(runnable)
+    for cell in runnable:
         sentinel = outcomes[native_job(cell)].sentinel
         device_gates = sentinel["gates"]["device"]["gates"] if sentinel else 100
         jobs += plan_cell_jobs(cell, repeats, device_gates)
-    if busy_check:
+    if busy_check and reference_cell(cells) in runnable:
         jobs.append(_busy_jobs(reference_cell(cells))[0])
     outcomes |= runner.run_all(jobs)
 
     retries = [
         job
-        for cell in cells
+        for cell in runnable
         for job in canary_retries(
             cell, [job for job in outcomes if _belongs_to(job, cell)], outcomes, repeats
         )
@@ -623,9 +677,11 @@ def _busy_summary(outcomes: dict[Job, Outcome], cells: list[Cell]) -> dict | Non
     quiet = _counts(
         outcomes, [job for job in outcomes if _belongs_to(job, cell) and job.role == "full"]
     )
-    busy_counts = outcomes[busy_full].counts
-    quiet_wall = (outcomes[native_job(cell)].sentinel or {}).get("wall_s")
-    busy_wall = (outcomes[busy_native].sentinel or {}).get("wall_s")
+    # Any of these can be missing, for a reference cell that couldn't run.
+    missing = Outcome(busy_full)
+    busy_counts = outcomes.get(busy_full, missing).counts
+    quiet_wall = (outcomes.get(native_job(cell), missing).sentinel or {}).get("wall_s")
+    busy_wall = (outcomes.get(busy_native, missing).sentinel or {}).get("wall_s")
     if not (quiet and busy_counts and quiet_wall and busy_wall):
         return None
     return {

@@ -1,9 +1,10 @@
 name: Nightly
 
 # Measures each new Catalyst dev build and publishes the results to the `data` branch. New builds
-# land on TestPyPI between 04:00 and 06:30 UTC. `limit` above 1 also works through older builds,
-# newest first, which is how the backfill runs. Each build takes up to an hour, against the 2,000
-# free minutes a private repo gets each month, and public repos don't count them.
+# usually land on TestPyPI between 04:00 and 06:30 UTC, but not always: 0.16.0.dev139 came at 18:22,
+# after that night's run, and with one build a night, newest first, it would never have been reached.
+# So a night takes up to three, which also works through any backlog, newest first. Each build takes
+# up to an hour on a runner of its own, and public repos don't count the minutes.
 on:
   schedule:
     - cron: "23 8 * * *"
@@ -11,7 +12,7 @@ on:
     inputs:
       limit:
         description: Builds to measure in this run
-        default: "1"
+        default: "3"
   # A workflow can't be dispatched until it's on the default branch, so pushing here also starts it.
   push:
     branches: ["measure/nightly"]
@@ -45,7 +46,7 @@ jobs:
       - name: Find builds without results
         id: pending
         env:
-          LIMIT: ${{ inputs.limit || '1' }}
+          LIMIT: ${{ inputs.limit || '3' }}
         run: |
           versions=$(uv run --quiet pennywatch pending --data data --limit "$LIMIT")
           echo "$versions"
@@ -56,7 +57,9 @@ jobs:
     if: needs.plan.outputs.versions != '[]'
     name: measure (${{ matrix.version }})
     runs-on: ubuntu-24.04
-    # Up to 65 minutes for the main run on the slower CPUs, then about 20 for lightning.kokkos.
+    # Up to 65 minutes for the main run on the slower CPUs, then about 20 for lightning.kokkos. Each
+    # run has a budget well inside the job's limit, so that a build too slow to finish still ends in a
+    # result that says why: a cancelled job uploads nothing, and the build would be tried every night.
     timeout-minutes: 150
     strategy:
       fail-fast: false
@@ -73,17 +76,17 @@ jobs:
       - name: Measure
         run: >-
           uv run pennywatch run --stack "$VERSION" --suite full --repeats 3 --no-busy-check
-          --out "measured/catalyst-$VERSION.json"
+          --budget-minutes 100 --out "measured/catalyst-$VERSION.json"
       # A part with a verdict of its own: if kokkos can't be measured, the main run still counts.
       - name: Measure lightning.kokkos
         if: ${{ !cancelled() }}
         continue-on-error: true
         run: >-
           uv run pennywatch run --stack "$VERSION" --suite kokkos --repeats 3 --no-busy-check
-          --out "measured/catalyst-$VERSION.kokkos.json"
+          --budget-minutes 35 --out "measured/catalyst-$VERSION.kokkos.json"
       - name: Keep the lock file with the result
         if: always()
-        run: cp "stacks/catalyst-$VERSION.pylock.toml" measured/ || true
+        run: mkdir -p measured && cp "stacks/catalyst-$VERSION.pylock.toml" measured/ || true
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

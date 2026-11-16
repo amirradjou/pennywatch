@@ -46,6 +46,11 @@ def _parser() -> argparse.ArgumentParser:
         help="CPUs to use, one process on each at a time (default: %(default)s)",
     )
     run.add_argument("--no-busy-check", action="store_true", help="skip the busy-machine runs")
+    run.add_argument(
+        "--budget-minutes",
+        type=float,
+        help="stop starting jobs after this long, so the run still ends with a result",
+    )
     run.add_argument("--out", type=Path, help="where to write the JSON (default: results/)")
     run.add_argument("--keep-raw", type=Path, help="also keep Cachegrind's files in this directory")
 
@@ -167,10 +172,12 @@ def run_command(args: argparse.Namespace) -> int:
             memory_wires=None if args.cells else MEMORY_WIRES.get(args.suite),
             # Too small for 1% extra gates to clear the noise, and its numbers mean nothing anyway.
             judge_canaries=args.suite != "smoke",
-            # A part, such as kokkos's, has a verdict of its own, and a circuit an older build of
-            # its backend can't run is named rather than failing the rest.
+            # A part, such as kokkos's, has a verdict of its own.
             part=PARTS.get(args.suite),
-            drop_unrunnable=args.suite in PARTS,
+            # A circuit that can't run at all is named rather than failing the rest: an older kokkos
+            # lacks an operation, and Catalyst 0.16.0.dev141 broke four of the six under qjit.
+            drop_unrunnable=True,
+            budget_s=None if args.budget_minutes is None else args.budget_minutes * 60,
         )
     except stacks.StackUnavailable as error:
         result = measure.unavailable_result(stack, str(error), PARTS.get(args.suite))

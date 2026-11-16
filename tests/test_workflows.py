@@ -83,3 +83,20 @@ def test_a_branch_that_starts_one_measuring_workflow_starts_no_other():
 def test_published_results_always_use_several_memory_layouts(name):
     text = next(path for path in WORKFLOWS if path.name == name).read_text()
     assert "--repeats 3" in text
+
+
+def test_every_nightly_run_has_a_budget_that_ends_well_before_the_job_is_cancelled():
+    # A cancelled job uploads nothing, and the build it was measuring would be tried every night.
+    text = _text("nightly.yml")
+    runs = re.findall(r"pennywatch run [^\n]*\n[^\n]*", text)
+    budgets = [float(re.search(r"--budget-minutes (\d+)", run)[1]) for run in runs]
+    assert len(budgets) == len(runs) == 2
+    limit = int(re.search(r"timeout-minutes: (\d+)", text)[1])
+    # Room for setting up, building the image and installing the stacks.
+    assert sum(budgets) <= limit - 10
+
+
+def test_a_night_also_measures_builds_that_arrived_after_an_earlier_night():
+    # 0.16.0.dev139 landed after its night's run, and one build a night, newest first, never
+    # reached it.
+    assert "inputs.limit || '3'" in _text("nightly.yml")

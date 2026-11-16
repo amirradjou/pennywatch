@@ -7,6 +7,7 @@ import pytest
 
 from pennywatch import measure
 from pennywatch.cachegrind import Counts
+from pennywatch.harness import expected
 from pennywatch.measure import Job, Outcome
 from pennywatch.suite import SUITES, Cell
 
@@ -248,6 +249,108 @@ def test_a_job_that_cannot_get_memory_fails_and_the_others_carry_on(monkeypatch)
     assert "memory" in outcomes[jobs[0]].error
 
 
+def test_no_job_starts_once_the_budget_has_run_out():
+    jobs = [full_job(repeat=repeat) for repeat in range(3)]
+
+    def execute(job, cpu):
+        raise AssertionError("must not start")
+
+    outcomes = measure.run_on_slots(jobs, [0], execute, deadline=time.monotonic() - 1)
+    assert {outcome.error for outcome in outcomes.values()} == {measure.OUT_OF_TIME}
+
+
+# The ends of what Catalyst 0.16.0.dev141 printed when it failed, trimmed.
+PYTHON_FAILURE = """\
+  File "/stack/lib/python3.12/site-packages/pennylane/templates/subroutines/time_evolution/trotter.py", line 273, in __init__
+    raise TypeError(
+TypeError: The given operator must be a PennyLane ~.Sum or ~.SProd, got JitTracer<AbstractOperator()>
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+"""  # noqa: E501
+COMPILER_FAILURE = """\
+  Operator: Toffoli{}{wires:3}{}
+terminate called after throwing an instance of 'DecompGraph::Core::GraphSolverFailedError'
+  what():  Decomposition rule not found for operator 'GroverOperator{}{wires:6}{}'
+PLEASE submit a bug report and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.\tProgram arguments: catalyst --tool all /tmp/circuit0am6tjmv/tmp1otlaf2q.mlir
+Stack dump without symbol names
+11 catalyst       0x000000000559be80
+12 catalyst       0x00000000055a632b DecompGraph::Solver::DecompositionSolver::solve() + 4491
+38 catalyst       0x0000000005587c6e _start + 46
+"""
+
+
+REASONS = [
+    (
+        PYTHON_FAILURE,
+        "TypeError: The given operator must be a PennyLane ~.Sum or ~.SProd, "
+        "got JitTracer<AbstractOperator()>",
+    ),
+    ("Traceback:\nNotImplementedError\n----\nFor simplicity, JAX", "NotImplementedError"),
+    (
+        COMPILER_FAILURE,
+        "GraphSolverFailedError: Decomposition rule not found for operator "
+        "'GroverOperator{}{wires:6}{}'",
+    ),
+    ("exit 1: pennylane.UndefinedError: no rule", "pennylane.UndefinedError: no rule"),
+    ("something went wrong\nand this is all it said\n\n", "and this is all it said"),
+    ("", "no output"),
+]
+
+
+@pytest.mark.parametrize(("output", "reason"), REASONS)
+def test_the_reason_for_a_failure_is_the_line_that_says_why(output, reason):
+    assert measure.failure_reason(output) == reason
+
+
+def _fake_docker(monkeypatch, result):
+    seen = {}
+
+    def fake(argv, timeout):
+        seen["timeout"] = timeout
+        if isinstance(result, BaseException):
+            raise result
+        return result
+
+    monkeypatch.setattr(measure, "run_keeping_tail", fake)
+    monkeypatch.setattr(measure.subprocess, "run", lambda *args, **kwargs: None)
+    return seen
+
+
+def test_a_failed_job_says_why_and_not_just_how_its_output_ended(monkeypatch, tmp_path):
+    _fake_docker(monkeypatch, (1, COMPILER_FAILURE))
+    runner = measure.Runner("image", tmp_path, tmp_path, [0])
+    outcome = runner.execute(measure.native_job(QJIT), 0)
+    assert outcome.error.startswith("exit 1: GraphSolverFailedError: Decomposition rule not found")
+
+
+def test_a_job_killed_by_the_kernel_is_put_down_to_the_memory_limit(monkeypatch, tmp_path):
+    _fake_docker(monkeypatch, (137, ""))
+    runner = measure.Runner("image", tmp_path, tmp_path, [0])
+    outcome = runner.execute(measure.native_job(QJIT), 0)
+    assert (
+        outcome.error
+        == f"exit 137: killed, most likely at the {measure.container.MEMORY_LIMIT} limit"
+    )
+
+
+def test_a_job_gets_the_full_hour_when_the_budget_allows(monkeypatch, tmp_path):
+    seen = _fake_docker(monkeypatch, subprocess.TimeoutExpired("docker", 3600))
+    runner = measure.Runner("image", tmp_path, tmp_path, [0], deadline=time.monotonic() + 10_000)
+    outcome = runner.execute(full_job(), 0)
+    assert seen["timeout"] == measure.JOB_TIMEOUT_S
+    assert outcome.error == f"timed out after {measure.JOB_TIMEOUT_S} s"
+
+
+def test_a_job_the_budget_cuts_short_says_so_rather_than_that_it_was_slow(monkeypatch, tmp_path):
+    seen = _fake_docker(monkeypatch, subprocess.TimeoutExpired("docker", 5))
+    runner = measure.Runner("image", tmp_path, tmp_path, [0], deadline=time.monotonic() + 5)
+    outcome = runner.execute(full_job(), 0)
+    assert seen["timeout"] <= 5
+    assert outcome.error == measure.OUT_OF_TIME
+
+
 def _git_repository(path):
     def git(*arguments):
         subprocess.run(
@@ -392,21 +495,33 @@ def test_memory_is_planned_only_for_the_backends_asked_for():
 
 
 class _Runner:
-    """Answers every job; the native run of the cells named in `broken` exits with an error."""
+    """Answers every job rightly, except the native run of the cells named in `broken`, which exits
+    with an error, in `late`, which the time budget stopped, and in `wrong`, which gets the answer
+    wrong."""
 
-    def __init__(self, broken=()):
-        self.broken = set(broken)
+    def __init__(self, broken=(), late=(), wrong=()):
+        self.broken, self.late, self.wrong = set(broken), set(late), set(wrong)
 
     def run_all(self, jobs):
         outcomes = {}
         for job in jobs:
             name = f"{job.circuit}/{job.backend}"
-            if job.mode == "native" and name in self.broken:
+            native = job.mode == "native"
+            if native and name in self.broken:
                 outcomes[job] = Outcome(job, error="exit 1: Traceback\nDecompositionUndefinedError")
+            elif native and name in self.late:
+                outcomes[job] = Outcome(job, error=measure.OUT_OF_TIME)
             else:
-                sentinel = {"gates": {"device": {"gates": 700}}, "versions": {}}
+                answer = expected.EXPECTED[job.circuit](job.wires, job.rounds)
+                if native and name in self.wrong:
+                    answer = [-value for value in answer]
+                sentinel = {"gates": {"device": {"gates": 700}}, "versions": {}, "result": answer}
                 outcomes[job] = Outcome(job, counts=Counts(python=1000), sentinel=sentinel)
         return outcomes
+
+
+def _counted(outcomes, circuit):
+    return [job for job in outcomes if job.circuit == circuit and job.mode != "native"]
 
 
 def test_a_cell_an_older_backend_cant_run_is_named_and_left_out():
@@ -416,6 +531,7 @@ def test_a_cell_an_older_backend_cant_run_is_named_and_left_out():
     )
     assert unavailable == {"grover/kokkos": "DecompositionUndefinedError"}
     assert not any(job.circuit == "grover" for job in outcomes)
+    assert _counted(outcomes, "qft")
 
 
 def test_without_leave_to_drop_a_crashed_cell_stays_and_fails_the_run():
@@ -425,6 +541,46 @@ def test_without_leave_to_drop_a_crashed_cell_stays_and_fails_the_run():
     )
     assert unavailable == {}
     assert outcomes[measure.native_job(grover)].error
+    assert measure.problems_with(outcomes, {})
+
+
+def test_a_cell_whose_native_run_failed_is_not_run_under_valgrind():
+    # Catalyst 0.16.0.dev141's Grover ran out of memory natively after 12 minutes, then took the
+    # hour's limit on every counted run, and the job was cancelled with nothing to show.
+    grover = Cell("grover", "qjit", 18, 12)
+    outcomes, _ = measure._measure(
+        _Runner(broken={"grover/qjit"}), [QJIT, grover], 3, False, None, ("qjit",), False
+    )
+    assert _counted(outcomes, "qft")
+    assert not _counted(outcomes, "grover")
+
+
+def test_a_wrong_answer_natively_fails_the_run_without_valgrind_and_is_never_dropped():
+    grover = Cell("grover", "qjit", 18, 12)
+    outcomes, unavailable = measure._measure(
+        _Runner(wrong={"grover/qjit"}), [QJIT, grover], 3, False, None, ("qjit",), True
+    )
+    assert unavailable == {}
+    assert not _counted(outcomes, "grover")
+    assert any("wrong answer" in problem for problem in measure.problems_with(outcomes, {}))
+
+
+def test_a_cell_the_budget_stopped_is_not_called_unrunnable():
+    grover = Cell("grover", "qjit", 18, 12)
+    outcomes, unavailable = measure._measure(
+        _Runner(late={"grover/qjit"}), [QJIT, grover], 3, False, None, ("qjit",), True
+    )
+    assert unavailable == {}
+    assert not _counted(outcomes, "grover")
+    assert outcomes[measure.native_job(grover)].error == measure.OUT_OF_TIME
+
+
+def test_the_busy_check_is_skipped_when_its_cell_cannot_run():
+    outcomes, _ = measure._measure(
+        _Runner(broken={"qft/lightning"}), [QFT, QJIT], 1, True, None, ("lightning", "qjit"), False
+    )
+    assert not any(job.busy and job.mode != "native" for job in outcomes)
+    assert measure._busy_summary(outcomes, [QFT, QJIT]) is None
 
 
 def test_a_part_where_no_cell_can_run_cant_be_measured():
