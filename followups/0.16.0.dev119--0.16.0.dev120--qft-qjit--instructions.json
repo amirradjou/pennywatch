@@ -1,0 +1,309 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev119..catalyst-0.16.0.dev120/qft/qjit/instructions",
+ "name": "0.16.0.dev119--0.16.0.dev120--qft-qjit--instructions",
+ "before": "0.16.0.dev119",
+ "after": "0.16.0.dev120",
+ "cell": "qft/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 2479861359,
+  "after": 2394497124,
+  "change_pct": -3.4422986869888157
+ },
+ "second": {
+  "before": 2479796888,
+  "after": 2394788788,
+  "change_pct": -3.4280267231305594,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qft/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev119",
+   "runs": [
+    2479824261,
+    2479881114,
+    2479793006
+   ],
+   "net": 2479824261
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev120",
+   "runs": [
+    2395021372,
+    2394201799,
+    2394742675
+   ],
+   "net": 2394742675
+  },
+  "packages": [
+   "cachetools 7.2.1 ? 7.2.2",
+   "pennylane 0.46.0.dev125 ? 0.46.0.dev127",
+   "pennylane-catalyst 0.16.0.dev119 ? 0.16.0.dev120"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    44812,
+    42878
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    9965,
+    8217
+   ],
+   [
+    "~:<method 'get' of 'mappingproxy' objects>",
+    1717,
+    5
+   ],
+   [
+    "~:<built-in method builtins.hasattr>",
+    2705,
+    1773
+   ],
+   [
+    "~:<built-in method builtins.issubclass>",
+    1120,
+    549
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:__setattr__",
+    495,
+    0
+   ],
+   [
+    "~:<built-in method builtins.getattr>",
+    7819,
+    7326
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    10199,
+    9710
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:__init__",
+    487,
+    0
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:__setitem__",
+    366,
+    0
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:_is_internal_class",
+    366,
+    0
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:_is_private",
+    366,
+    0
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:_is_sunder",
+    366,
+    0
+   ],
+   [
+    "~:<method 'setter' of 'property' objects>",
+    496,
+    154
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:_is_dunder",
+    341,
+    0
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    355717490,
+    297690735
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    132358260,
+    125204680
+   ],
+   [
+    "__tls_get_addr",
+    43304578,
+    38278392
+   ],
+   [
+    "_PyType_Lookup",
+    13627865,
+    11988223
+   ],
+   [
+    "_PyCode_New",
+    1497850,
+    608695
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    9770618,
+    9015996
+   ],
+   [
+    "_PyObject_GC_New",
+    6569474,
+    5945126
+   ],
+   [
+    "(anonymous namespace)::GreedyPatternRewriteDriver::addSingleOpToWorklist(mlir::Operation*)",
+    9045688,
+    8584830
+   ],
+   [
+    "PyFunction_NewWithQualName",
+    2398449,
+    1978331
+   ],
+   [
+    "PyObject_GC_Del",
+    5885896,
+    5511939
+   ],
+   [
+    "PyObject_GetAttr",
+    3376244,
+    3002816
+   ],
+   [
+    "PyUnicode_New",
+    2918407,
+    2564382
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    6025241,
+    5678229
+   ],
+   [
+    "PyDict_GetItemWithError",
+    2034347,
+    1707668
+   ],
+   [
+    "_PyCode_Validate",
+    541000,
+    221335
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 1,
+     "subject": "Dispatch catalyst decomposition (#10304)",
+     "pull_request": 10304,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10304"
+    },
+    {
+     "score": 0,
+     "subject": "fix: define 'QROM.arg_specs[\"bitstrings\"]' as 'Bool' rather than 'Int'  (#10189)",
+     "pull_request": 10189,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10189"
+    },
+    {
+     "score": 0,
+     "subject": "perf: improve 'pop_op_eqns' performance and update 'remove_from_program' signature (#10298)",
+     "pull_request": 10298,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10298"
+    },
+    {
+     "score": 0,
+     "subject": "Remove 'labs.templates.half_signed_out_multiplier' (#10314)",
+     "pull_request": 10314,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10314"
+    },
+    {
+     "score": 0,
+     "subject": "Add a gridsynth-based decomposition of 'PhaseGradientStatePrep' (#10264)",
+     "pull_request": 10264,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10264"
+    },
+    {
+     "score": 0,
+     "subject": "adding GQSP shift (#10305)",
+     "pull_request": 10305,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10305"
+    },
+    {
+     "score": 0,
+     "subject": "Wrap every test in 'local_decomps' (#10333)",
+     "pull_request": 10333,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10333"
+    },
+    {
+     "score": 0,
+     "subject": "[Labs] TCDQ qudit sparse gates (#10317)",
+     "pull_request": 10317,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10317"
+    },
+    {
+     "score": 0,
+     "subject": "Suppor arbitrary CABI runtime-call (#10182)",
+     "pull_request": 10182,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10182"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Fix 'fixed_decomps' bug with parantheses-containing in graph decomposer (#3336)",
+     "pull_request": 3336,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3336"
+    },
+    {
+     "score": 0,
+     "subject": "More passes preserve compiler hints (#3291)",
+     "pull_request": 3291,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3291"
+    },
+    {
+     "score": 0,
+     "subject": "Fix macOS 27 build bug (#3335)",
+     "pull_request": 3335,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3335"
+    },
+    {
+     "score": 0,
+     "subject": "Update to PL's 0.46.0-dev126 (#3343)",
+     "pull_request": 3343,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3343"
+    },
+    {
+     "score": 0,
+     "subject": "Support runtime call for arbitrary CABI (#3253)",
+     "pull_request": 3253,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3253"
+    },
+    {
+     "score": 0,
+     "subject": "A controller can be dispatched independently without coprocessor (#3255)",
+     "pull_request": 3255,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3255"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 9,
+   "pennylane-catalyst": 6
+  },
+  "bisect": {
+   "verdict": "PennyLane alone gives -1% of the step, so the cause is elsewhere: another package or the third-party ones.",
+   "pennylane_alone": 2480752429
+  }
+ },
+ "problems": [],
+ "run": "43957129511",
+ "recorded_at": "2026-11-16T21:24:49+00:00"
+}
