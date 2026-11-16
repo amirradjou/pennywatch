@@ -2,7 +2,8 @@
 
 from dataclasses import dataclass
 
-# The backends of the main run. Their numbers stand or fall together: one failure rejects them all.
+# The backends of the main run. Their numbers stand or fall together: one failure rejects them all,
+# except a circuit that can't run at all on a build, which is named and left out.
 MAIN_BACKENDS = ("default", "lightning", "qjit")
 # lightning.kokkos, on OpenMP with one thread, is measured in a run of its own with its own verdict,
 # so a kokkos that can't run doesn't take the other three down with it.

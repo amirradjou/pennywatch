@@ -209,3 +209,27 @@ def test_what_a_person_checked_replaces_what_the_tool_said(tmp_path):
 def test_no_directory_of_explanations_is_no_explanations(tmp_path):
     assert site.load_explanations(tmp_path / "missing") == {}
     assert site.load_explanations(None) == {}
+
+
+def test_cells_the_newest_build_cannot_run_are_listed_with_when_they_stopped():
+    broken = {"trotter/qjit": "TypeError: got JitTracer", "qpe/qjit": "GraphSolverFailedError"}
+    nightly = [
+        result("0.16.0.dev140", 100),
+        result("0.16.0.dev141", 100, unavailable=broken),
+        result("0.16.0.dev142", 100, unavailable={"trotter/qjit": "TypeError: got JitTracer"}),
+        result("0.16.0.dev143", 100, unavailable=broken),
+    ]
+    data = site.page_data([], nightly[::-1], [])
+    assert data["cant_run"] == [
+        {"cell": "qpe/qjit", "since": "0.16.0.dev143", "why": "GraphSolverFailedError"},
+        {"cell": "trotter/qjit", "since": "0.16.0.dev141", "why": "TypeError: got JitTracer"},
+    ]
+
+
+def test_nothing_is_listed_when_the_newest_build_runs_everything():
+    nightly = [
+        result("0.16.0.dev141", 100, unavailable={"qpe/qjit": "x"}),
+        result("0.16.0.dev142", 100),
+    ]
+    assert site.page_data([], nightly, [])["cant_run"] == []
+    assert site.page_data([], [], [])["cant_run"] == []

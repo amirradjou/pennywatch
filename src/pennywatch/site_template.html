@@ -124,6 +124,7 @@ footer { margin-top: 48px; color: var(--ink-2); font-size: 0.875rem; }
 </div>
 <div class="table-wrap"><table id="steps"></table></div>
 <p class="empty" id="no-steps" hidden>No changes in this view.</p>
+<div id="cant-run"></div>
 
 <h2>How it works</h2>
 <ul class="plain">
@@ -398,6 +399,18 @@ function drawTiles() {
   }
 }
 
+function drawCantRun() {
+  if (!DATA.cant_run.length) return;
+  const holder = $("cant-run");
+  holder.append(el("h2", {}, "Can't run on the newest build"));
+  holder.append(el("p", {}, "These circuits fail outright on the newest dev build, so it has no numbers for them. The rest of the build is measured as usual."));
+  const list = el("ul", { class: "plain" });
+  for (const row of DATA.cant_run) {
+    list.append(el("li", {}, `${row.cell}, since ${row.since}: ${row.why}`));
+  }
+  holder.append(list);
+}
+
 function drawGaps() {
   if (!DATA.gaps.length) return;
   const holder = $("gaps");
@@ -426,6 +439,7 @@ stepBetween.addEventListener("change", drawSteps);
 drawTiles();
 drawSteps();
 drawHistory();
+drawCantRun();
 drawGaps();
 </script>
 </body>

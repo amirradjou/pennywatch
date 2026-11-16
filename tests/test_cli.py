@@ -78,6 +78,25 @@ def test_the_smoke_suite_does_not_judge_canaries_and_a_real_suite_does(tmp_path,
     assert seen["judge_canaries"] is True
 
 
+def test_every_suite_names_a_cell_that_cannot_run_rather_than_failing_the_rest(
+    tmp_path, monkeypatch
+):
+    seen = _suite_run_captured(monkeypatch)
+    for suite in ("full", "kokkos"):
+        cli.main(["run", "--suite", suite, "--out", str(tmp_path / f"{suite}.json")])
+        assert seen["drop_unrunnable"] is True
+
+
+def test_the_budget_is_passed_on_in_seconds_and_is_unlimited_by_default(tmp_path, monkeypatch):
+    seen = _suite_run_captured(monkeypatch)
+    cli.main(["run", "--suite", "full", "--out", str(tmp_path / "a.json")])
+    assert seen["budget_s"] is None
+    cli.main(
+        ["run", "--suite", "full", "--budget-minutes", "100", "--out", str(tmp_path / "b.json")]
+    )
+    assert seen["budget_s"] == 6000
+
+
 def test_a_build_that_cannot_be_measured_is_saved_as_rejected_with_the_reason(
     tmp_path, monkeypatch, capsys
 ):

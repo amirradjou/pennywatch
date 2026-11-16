@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pennywatch import history
 from pennywatch.suite import BACKENDS
+from pennywatch.untrusted import clean_name
 
 MIB_PER_KB = 1 / 1024
 CHECKED_FILE = "checked.json"
@@ -173,6 +174,29 @@ def step_rows(steps: list[history.Step], explanations: dict | None = None) -> li
     return rows
 
 
+def cant_run(nightly: list[dict]) -> list[dict]:
+    """The cells the newest dev build can't run at all, each with the first of the unbroken line of
+    builds before it that couldn't either, and why."""
+    ordered = history.in_build_order(nightly)
+    if not ordered:
+        return []
+    rows = []
+    for cell, why in sorted((ordered[-1].get("unavailable") or {}).items()):
+        since = ordered[-1]
+        for result in reversed(ordered[:-1]):
+            if cell not in (result.get("unavailable") or {}):
+                break
+            since = result
+        rows.append(
+            {
+                "cell": clean_name(cell),
+                "since": clean_name(since["stack"]["pennylane-catalyst"]),
+                "why": clean_name(why),
+            }
+        )
+    return rows
+
+
 def page_data(
     stable: list[dict],
     nightly: list[dict],
@@ -185,6 +209,7 @@ def page_data(
         "stable": _track(stable),
         "nightly": _track(nightly),
         "steps": step_rows(steps, explanations),
+        "cant_run": cant_run(nightly),
         "gaps": [
             {
                 "build": gap["stack"]["pennylane-catalyst"],

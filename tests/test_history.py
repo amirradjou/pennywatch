@@ -217,6 +217,19 @@ def test_the_parts_of_a_build_read_as_one_result():
     assert "part" not in combined
 
 
+def test_the_cells_each_part_could_not_run_are_kept_together():
+    main = result("0.16.0.dev141", cell(1000)) | {"unavailable": {"grover/qjit": "exit 137"}}
+    kokkos = result("0.16.0.dev141", cell(2000, name="qft/kokkos")) | {
+        "part": "kokkos",
+        "unavailable": {"grover/kokkos": "DecompositionUndefinedError"},
+    }
+    (combined,) = history.combine([main, kokkos])
+    assert combined["unavailable"] == {
+        "grover/qjit": "exit 137",
+        "grover/kokkos": "DecompositionUndefinedError",
+    }
+
+
 def test_a_part_alone_still_counts():
     kokkos = result("0.15.0", cell(2000, name="qft/kokkos")) | {"part": "kokkos"}
     assert history.combine([kokkos]) == [kokkos]
