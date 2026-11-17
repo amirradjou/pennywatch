@@ -1,0 +1,265 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev142..catalyst-0.16.0.dev143/sampling/qjit/instructions",
+ "name": "0.16.0.dev142--0.16.0.dev143--sampling-qjit--instructions",
+ "before": "0.16.0.dev142",
+ "after": "0.16.0.dev143",
+ "cell": "sampling/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 10669339119,
+  "after": 7698934595,
+  "change_pct": -27.84056716980991
+ },
+ "second": {
+  "before": 10668263758,
+  "after": 7697429945,
+  "change_pct": -27.847397480890066,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "sampling/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev142",
+   "runs": [
+    10666708549,
+    10670726621,
+    10668364679
+   ],
+   "net": 10668364679
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev143",
+   "runs": [
+    7698425580,
+    7697470963,
+    7697391495
+   ],
+   "net": 7697470963
+  },
+  "packages": [
+   "pennylane-catalyst 0.16.0.dev142 ? 0.16.0.dev143"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    618467,
+    478776
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    209958,
+    163392
+   ],
+   [
+    "~:<built-in method builtins.getattr>",
+    54278,
+    28166
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    91302,
+    68086
+   ],
+   [
+    "jax/_src/core.py:__init__",
+    55986,
+    37825
+   ],
+   [
+    "~:<built-in method builtins.all>",
+    26123,
+    9321
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    83355,
+    68577
+   ],
+   [
+    "jax/_src/mesh.py:empty",
+    18123,
+    5175
+   ],
+   [
+    "jax/_src/lax/utils.py:<genexpr>",
+    12815,
+    551
+   ],
+   [
+    "jax/_src/core.py:<lambda>",
+    13745,
+    1657
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    58334,
+    46371
+   ],
+   [
+    "~:<built-in method builtins.any>",
+    33317,
+    21451
+   ],
+   [
+    "jax/_src/lax/lax.py:<genexpr>",
+    12056,
+    322
+   ],
+   [
+    "~:<jaxlib.utils.safe_map>",
+    28678,
+    17018
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    54500,
+    43724
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    2940483201,
+    2209550077
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    1708502703,
+    1275825905
+   ],
+   [
+    "__tls_get_addr",
+    484187151,
+    360552761
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    146969499,
+    35915581
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    95240928,
+    26150839
+   ],
+   [
+    "mlir::Attribute mlir::AttrTypeReplacer::cachedReplaceImpl<mlir::Attribute>(mlir::Attribute)",
+    64269430,
+    635889
+   ],
+   [
+    "mlir::NamedAttribute::operator<(mlir::NamedAttribute const&) const",
+    56764107,
+    7416686
+   ],
+   [
+    "mlir::StringAttr::get(mlir::MLIRContext*, llvm::Twine const&)",
+    62174583,
+    16268821
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    79456830,
+    39570567
+   ],
+   [
+    "_PyType_Lookup",
+    181049310,
+    141640854
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    135129970,
+    101885879
+   ],
+   [
+    "std::enable_if<llvm::hashing::detail::is_hashable_data<char const>::value, llvm::hash_code>::type llvm::hashing::detail::hash_combine_range_impl<char const>(char const*, char const*)",
+    41897626,
+    10737538
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::StringAttrStorage, llvm::StringRef, mlir::NoneType>(llvm::function_ref<voi",
+    41014052,
+    9959347
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    37127681,
+    10080037
+   ],
+   [
+    "PyObject_GC_Del",
+    81196847,
+    58986814
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Prune unused decomposition rules before module inlining (#3477)",
+     "pull_request": 3477,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3477"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/precompiled rules (#3057)",
+     "pull_request": 3057,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3057"
+    },
+    {
+     "score": 0,
+     "subject": "Move the verbs transport backends onto WireLink (#3461)",
+     "pull_request": 3461,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3461"
+    },
+    {
+     "score": 0,
+     "subject": "Let a transport controller pace its own rounds (#3463)",
+     "pull_request": 3463,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3463"
+    },
+    {
+     "score": 0,
+     "subject": "Add an HSB controller backend (#3466)",
+     "pull_request": 3466,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3466"
+    },
+    {
+     "score": 0,
+     "subject": "Run the gpu_verbs coprocessor on an NVIDIA GH200 (#3467)",
+     "pull_request": 3467,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3467"
+    },
+    {
+     "score": 0,
+     "subject": "Handle lost request for UC (#3468)",
+     "pull_request": 3468,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3468"
+    },
+    {
+     "score": 0,
+     "subject": "Add a RoCE Balbao controller backend (#3469)",
+     "pull_request": 3469,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3469"
+    },
+    {
+     "score": 0,
+     "subject": "Improve worktree compatibility (#3471)",
+     "pull_request": 3471,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3471"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 9
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "43985181228",
+ "recorded_at": "2026-11-17T00:37:47+00:00"
+}

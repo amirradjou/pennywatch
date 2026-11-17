@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev142..catalyst-0.16.0.dev143/memory/qjit/peak_kb",
+ "name": "0.16.0.dev142--0.16.0.dev143--memory-qjit--peak_kb",
+ "before": "0.16.0.dev142",
+ "after": "0.16.0.dev143",
+ "cell": "memory/qjit",
+ "metric": "peak_kb",
+ "first": {
+  "before": 1397428,
+  "after": 1389212,
+  "change_pct": -0.5879372676087784
+ },
+ "second": {
+  "before": 1397320,
+  "after": 1389756,
+  "change_pct": -0.5413219591789997,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": null,
+ "problems": [],
+ "run": "43985181228",
+ "recorded_at": "2026-11-17T00:37:47+00:00"
+}

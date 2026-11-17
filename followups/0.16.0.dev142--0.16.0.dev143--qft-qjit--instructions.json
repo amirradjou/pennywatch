@@ -1,0 +1,265 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev142..catalyst-0.16.0.dev143/qft/qjit/instructions",
+ "name": "0.16.0.dev142--0.16.0.dev143--qft-qjit--instructions",
+ "before": "0.16.0.dev142",
+ "after": "0.16.0.dev143",
+ "cell": "qft/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 6397383791,
+  "after": 3626097704,
+  "change_pct": -43.31905318700302
+ },
+ "second": {
+  "before": 6396039926,
+  "after": 3625969433,
+  "change_pct": -43.30914949013406,
+  "host": "AMD EPYC 7763 64-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qft/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev142",
+   "runs": [
+    6397051668,
+    6395216204,
+    6396148845
+   ],
+   "net": 6396148845
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev143",
+   "runs": [
+    3625760210,
+    3626759508,
+    3625706402
+   ],
+   "net": 3625760210
+  },
+  "packages": [
+   "pennylane-catalyst 0.16.0.dev142 ? 0.16.0.dev143"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    237469,
+    87219
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    71959,
+    21821
+   ],
+   [
+    "~:<built-in method builtins.getattr>",
+    39340,
+    12210
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    43936,
+    19109
+   ],
+   [
+    "jax/_src/core.py:__init__",
+    24110,
+    4875
+   ],
+   [
+    "~:<built-in method builtins.all>",
+    22502,
+    4819
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    35244,
+    19254
+   ],
+   [
+    "jax/_src/mesh.py:empty",
+    15825,
+    2137
+   ],
+   [
+    "jax/_src/lax/utils.py:<genexpr>",
+    14277,
+    1328
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    24499,
+    11738
+   ],
+   [
+    "~:<built-in method builtins.any>",
+    18054,
+    5387
+   ],
+   [
+    "jax/_src/core.py:<lambda>",
+    15013,
+    2426
+   ],
+   [
+    "~:<jaxlib.utils.safe_map>",
+    16151,
+    3654
+   ],
+   [
+    "jax/_src/lax/lax.py:<genexpr>",
+    13228,
+    864
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    20097,
+    8673
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    1397537580,
+    637079608
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    767143068,
+    304892306
+   ],
+   [
+    "__tls_get_addr",
+    229293094,
+    96718311
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    67840685,
+    12925491
+   ],
+   [
+    "mlir::Attribute mlir::AttrTypeReplacer::cachedReplaceImpl<mlir::Attribute>(mlir::Attribute)",
+    54816601,
+    477309
+   ],
+   [
+    "_PyType_Lookup",
+    83257167,
+    40775482
+   ],
+   [
+    "mlir::NamedAttribute::operator<(mlir::NamedAttribute const&) const",
+    40706022,
+    2184598
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    44736975,
+    7751247
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    59377596,
+    23791135
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    42280163,
+    14293818
+   ],
+   [
+    "mlir::StringAttr::get(mlir::MLIRContext*, llvm::Twine const&)",
+    33513779,
+    7195617
+   ],
+   [
+    "PyObject_GC_Del",
+    39240585,
+    15616058
+   ],
+   [
+    "_PyObject_GC_New",
+    39859276,
+    16348722
+   ],
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    30852375,
+    13289914
+   ],
+   [
+    "nanobind::detail::nb_func_vectorcall_complex(_object*, _object* const*, unsigned long, _object*)",
+    22234334,
+    5951103
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Prune unused decomposition rules before module inlining (#3477)",
+     "pull_request": 3477,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3477"
+    },
+    {
+     "score": 0,
+     "subject": "Decomp/precompiled rules (#3057)",
+     "pull_request": 3057,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3057"
+    },
+    {
+     "score": 0,
+     "subject": "Move the verbs transport backends onto WireLink (#3461)",
+     "pull_request": 3461,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3461"
+    },
+    {
+     "score": 0,
+     "subject": "Let a transport controller pace its own rounds (#3463)",
+     "pull_request": 3463,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3463"
+    },
+    {
+     "score": 0,
+     "subject": "Add an HSB controller backend (#3466)",
+     "pull_request": 3466,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3466"
+    },
+    {
+     "score": 0,
+     "subject": "Run the gpu_verbs coprocessor on an NVIDIA GH200 (#3467)",
+     "pull_request": 3467,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3467"
+    },
+    {
+     "score": 0,
+     "subject": "Handle lost request for UC (#3468)",
+     "pull_request": 3468,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3468"
+    },
+    {
+     "score": 0,
+     "subject": "Add a RoCE Balbao controller backend (#3469)",
+     "pull_request": 3469,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3469"
+    },
+    {
+     "score": 0,
+     "subject": "Improve worktree compatibility (#3471)",
+     "pull_request": 3471,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3471"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 9
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "43985181228",
+ "recorded_at": "2026-11-17T00:37:47+00:00"
+}
