@@ -1,0 +1,388 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev143..catalyst-0.16.0.dev144/imports/default/imports",
+ "name": "0.16.0.dev143--0.16.0.dev144--imports-default--imports",
+ "before": "0.16.0.dev143",
+ "after": "0.16.0.dev144",
+ "cell": "imports/default",
+ "metric": "imports",
+ "first": {
+  "before": 8003865791,
+  "after": 8113590023,
+  "change_pct": 1.3708904530030994
+ },
+ "second": {
+  "before": 8010250742,
+  "after": 8113630582,
+  "change_pct": 1.2905943063423768,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qft/default",
+  "metric": "imports",
+  "before": {
+   "stack": "catalyst-0.16.0.dev143",
+   "runs": [
+    8010247446,
+    8010930350,
+    8010444991
+   ],
+   "net": 8010444991
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev144",
+   "runs": [
+    8113591871,
+    8115088456,
+    8112887731
+   ],
+   "net": 8113591871
+  },
+  "packages": [
+   "ml-dtypes 0.6.0 ? 0.7.0",
+   "numpy 2.5.4 ? 2.5.5",
+   "pennylane 0.46.0.dev149 ? 0.46.0.dev154",
+   "pennylane-catalyst 0.16.0.dev143 ? 0.16.0.dev144"
+  ],
+  "python_functions": [
+   [
+    "pennylane/core/operator/base.py",
+    74279,
+    659
+   ],
+   [
+    "pennylane/core/pauli.py",
+    0,
+    72768
+   ],
+   [
+    "pennylane/data/data_manager.py",
+    47239,
+    22677
+   ],
+   [
+    "pennylane/data/data_manager/progress/_default.py",
+    523,
+    24763
+   ],
+   [
+    "pennylane/templates/subroutines/arithmetic/signed_out_square.py",
+    17291,
+    487
+   ],
+   [
+    "pennylane/templates/subroutines/qchem/fermionic_double_excitation.py",
+    536,
+    17287
+   ],
+   [
+    "pennylane/capture/flatfn.py",
+    207108,
+    211329
+   ],
+   [
+    "pennylane/numpy.py",
+    60418,
+    58335
+   ],
+   [
+    "pennylane/templates/subroutines/qrom.py",
+    2528,
+    1393
+   ],
+   [
+    "pennylane/templates/subroutines/arithmetic/signed_out_multiplier.py",
+    906,
+    1852
+   ],
+   [
+    "pennylane/core/qscript.py",
+    332,
+    1192
+   ],
+   [
+    "pennylane/optimize/reconstruct.py",
+    1016,
+    195
+   ],
+   [
+    "pennylane/math/single_dispatch.py",
+    31802,
+    31120
+   ],
+   [
+    "pennylane/resource/track.py",
+    756,
+    101
+   ],
+   [
+    "pennylane/ops/functions/equal.py",
+    408,
+    1057
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    5014602094,
+    5078685312
+   ],
+   [
+    "__tls_get_addr",
+    332955429,
+    338433792
+   ],
+   [
+    "_PyObject_GC_NewVar",
+    13387328,
+    18398950
+   ],
+   [
+    "_PyDict_Next",
+    12006293,
+    15810739
+   ],
+   [
+    "PyTuple_Pack",
+    358049,
+    3726326
+   ],
+   [
+    "PyUFunc_AddLoop",
+    293188,
+    3630783
+   ],
+   [
+    "resolve_implementation_info(_tagPyUFuncObject*, PyArray_DTypeMeta_tag**, unsigned char, _object**)",
+    143294,
+    3442970
+   ],
+   [
+    "printf_positional",
+    3214693,
+    463593
+   ],
+   [
+    "__strcmp_avx2",
+    2358894,
+    4692926
+   ],
+   [
+    "PyDict_Values",
+    72785,
+    1723094
+   ],
+   [
+    "PyUFunc_AddPromoter",
+    2898,
+    1588146
+   ],
+   [
+    "PyTuple_New",
+    8984758,
+    10435771
+   ],
+   [
+    "__memset_avx2_unaligned_erms",
+    88184874,
+    89474044
+   ],
+   [
+    "PyDict_GetItemWithError",
+    13799431,
+    14888778
+   ],
+   [
+    "PyObject_Hash",
+    4457558,
+    5449374
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 147759,
+     "subject": "refactor(pauli): move 'PauliWord' and 'PauliSentence' into 'pennylane.core' (#10484)",
+     "pull_request": 10484,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10484"
+    },
+    {
+     "score": 126763,
+     "subject": "Clean up pylint suppressions (#10462)",
+     "pull_request": 10462,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10462"
+    },
+    {
+     "score": 1403,
+     "subject": "Align analyze, estimate and track with modern get_compile_pipeline levels (#10452)",
+     "pull_request": 10452,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10452"
+    },
+    {
+     "score": 807,
+     "subject": "refactor(pauli): extract operator conversion into 'pennylane.ops' module (#10483)",
+     "pull_request": 10483,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10483"
+    },
+    {
+     "score": 702,
+     "subject": "Adding hooks for resource extensions (#10438)",
+     "pull_request": 10438,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10438"
+    },
+    {
+     "score": 690,
+     "subject": "Fix doctests after 'capture=True' became default (#10517)",
+     "pull_request": 10517,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10517"
+    },
+    {
+     "score": 120,
+     "subject": "Show TemporaryAND control values and rounded connectors in circuit drawings (#10514)",
+     "pull_request": 10514,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10514"
+    },
+    {
+     "score": 112,
+     "subject": "Fix 'list_decomps' for controlled operator names (#10502)",
+     "pull_request": 10502,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10502"
+    },
+    {
+     "score": 105,
+     "subject": "Fix MPL drawing of conditional operations (#10496)",
+     "pull_request": 10496,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10496"
+    },
+    {
+     "score": 55,
+     "subject": "Fix work wire type bug in 'C(SemiAdder)' with spill-over work wires only (#10506)",
+     "pull_request": 10506,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10506"
+    },
+    {
+     "score": 49,
+     "subject": "Use simplifying 'Pow' instead of '@for_loop' (#10495)",
+     "pull_request": 10495,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10495"
+    },
+    {
+     "score": 47,
+     "subject": "Restore 'DoubleExcitation.num_params' for backwards compatibility. (#10503)",
+     "pull_request": 10503,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10503"
+    },
+    {
+     "score": 23,
+     "subject": "Display adjoint, controlled and pow rules to non-parametric op decompositions (#10434)",
+     "pull_request": 10434,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10434"
+    },
+    {
+     "score": 0,
+     "subject": "Finalize 'exclude_decomps' in 'qp.decompose' (#10500)",
+     "pull_request": 10500,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10500"
+    },
+    {
+     "score": 0,
+     "subject": "Update MPSPrep documentation for lightning.tensor removal (#10505)",
+     "pull_request": 10505,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10505"
+    },
+    {
+     "score": 0,
+     "subject": "add tests for qp.analyze and qp.track targeting PBC (#10417)",
+     "pull_request": 10417,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10417"
+    },
+    {
+     "score": 0,
+     "subject": "Bump gitpython from 3.1.46 to 3.1.50 (#9452)",
+     "pull_request": 9452,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9452"
+    },
+    {
+     "score": 0,
+     "subject": "Bump pillow from 12.2.0 to 13.0.0 (#9874)",
+     "pull_request": 9874,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9874"
+    },
+    {
+     "score": 0,
+     "subject": "Bump gitpython from 3.1.50 to 3.2.1 (#10521)",
+     "pull_request": 10521,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10521"
+    },
+    {
+     "score": 0,
+     "subject": "Bump tornado from 6.5.4 to 6.6 (#10523)",
+     "pull_request": 10523,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10523"
+    },
+    {
+     "score": 0,
+     "subject": "Bump filelock from 3.20.3 to 4.2.1 (#10522)",
+     "pull_request": 10522,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10522"
+    },
+    {
+     "score": 0,
+     "subject": "Soften error handling in autograph for loops (#10515)",
+     "pull_request": 10515,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10515"
+    },
+    {
+     "score": 0,
+     "subject": "qp.estimate hooks to use graph decomposition (#10323)",
+     "pull_request": 10323,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10323"
+    },
+    {
+     "score": 0,
+     "subject": "chore: align pre-commit and CI checks (#10528)",
+     "pull_request": 10528,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10528"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Disambiguate control modifiers in GOIDs (#3479)",
+     "pull_request": 3479,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3479"
+    },
+    {
+     "score": 0,
+     "subject": "Move the Backline doc updates into their own PR (#3475)",
+     "pull_request": 3475,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3475"
+    },
+    {
+     "score": 0,
+     "subject": "Fix controlled decomposition tests for PennyLane dev152 (#3476)",
+     "pull_request": 3476,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3476"
+    },
+    {
+     "score": 0,
+     "subject": "Fix Prod2 graph IDs and legacy AutoGraph test (#3481)",
+     "pull_request": 3481,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3481"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 24,
+   "pennylane-catalyst": 4
+  },
+  "bisect": {
+   "verdict": "PennyLane alone gives 15% of the step, so the cause is elsewhere: another package or the third-party ones.",
+   "pennylane_alone": 8026009343
+  }
+ },
+ "problems": [],
+ "run": "44147822494",
+ "recorded_at": "2026-11-17T18:38:50+00:00"
+}

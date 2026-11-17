@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev143..catalyst-0.16.0.dev144/memory/lightning/peak_kb",
+ "name": "0.16.0.dev143--0.16.0.dev144--memory-lightning--peak_kb",
+ "before": "0.16.0.dev143",
+ "after": "0.16.0.dev144",
+ "cell": "memory/lightning",
+ "metric": "peak_kb",
+ "first": {
+  "before": 788368,
+  "after": 795000,
+  "change_pct": 0.8412315060986747
+ },
+ "second": {
+  "before": 788744,
+  "after": 794852,
+  "change_pct": 0.7743957481768483,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": null,
+ "problems": [],
+ "run": "44147822494",
+ "recorded_at": "2026-11-17T18:38:50+00:00"
+}
