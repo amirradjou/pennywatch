@@ -88,13 +88,16 @@ change is Catalyst's alone. Every `qjit` cell ran on dev140. On dev141:
 | `qpe/qjit` | The compiler aborts: `GraphSolverFailedError: Decomposition rule not found for operator 'QuantumPhaseEstimation…'` |
 | `grover/qjit` | At 6 wires the compiler aborts the same way, for `GroverOperator`. At 18 wires it is killed at the 3 GiB limit after 11 to 13 minutes |
 | `variational/qjit` | `catalyst.grad` of the captured QNode raises `NotImplementedError` from `_qnode_jvp` |
-| `qft/qjit` | Runs, at 2.66 times the instructions: 6.385 billion against 2.400. Compiling went from 1.111 to 5.123 billion, so nearly all of the 3.99 billion extra is compile cost |
+| `qft/qjit` | Runs, at 2.66 times the instructions: 6.388 billion against 2.400. Compiling went from 1.111 to 5.125 billion, so nearly all of the 3.99 billion extra is compile cost |
 | `sampling/qjit` | Runs |
 
-The same failures came on dev142 and dev143. The `qft/qjit` counts are the medians of three layouts from
-the runners on 2026-11-11 and 2026-11-12. The errors were reproduced on a laptop with the full output.
-`qjit(capture=False)` still gives the old frontend. pennywatch measures the default, so from dev141 the four
-cells are named as unable to run, and the rest of each build is measured as usual.
+The same four failures came on dev142 and dev143, with the same PennyLane and Lightning. dev143 took back
+most of the cost: `qft/qjit` came down to 3.626 billion, with compile at 2.344 billion, so about 30% of the
+extra is left. Running the compiled circuit cost 1.26 to 1.29 billion on all four builds, so every change
+here is in compiling. The counts are the medians of three layouts, from the `data` branch. The errors were
+also reproduced on a laptop with the full output. `qjit(capture=False)` still gives the old frontend.
+pennywatch measures the default, so from dev141 the four cells are named as unable to run, and the rest of
+each build is measured as usual.
 
 ## Lightning's peak memory fell by 44% at PennyLane 0.41: expectation values stopped copying the state
 
