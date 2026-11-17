@@ -1,0 +1,555 @@
+{
+ "schema": 2,
+ "started_at": "2026-11-16T23:31:08+00:00",
+ "finished_at": "2026-11-16T23:39:40+00:00",
+ "part": "kokkos",
+ "pennywatch": {
+  "commit": "d19d8024ffaca0691b333c66721d1d21baf9175e",
+  "dirty": false,
+  "harness_sha256": "91a8ffa95635abbfdd96e162c9c960734cb9bc5634acf6d18113d778f08f2382"
+ },
+ "image": {
+  "tag": "pennywatch-image:91b0bb206da3",
+  "valgrind": "valgrind-3.24.0",
+  "gcc": "14.2.0",
+  "python": "Python 3.12.16",
+  "libc": "ldd (Debian GLIBC 2.41-12+deb13u4) 2.41"
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) 6975P-C",
+  "logical_cpus": 4,
+  "kernel": "7.0.0-1014-aws",
+  "github_actions": true
+ },
+ "stack": {
+  "id": "catalyst-0.16.0.dev141",
+  "lock_sha256": "07a25ced50e935f00f7946eeea9a836b6f191a2ac9a0c327330d394ec4fed653",
+  "pennylane": "0.46.0.dev149",
+  "pennylane-lightning": "0.46.0.dev34",
+  "pennylane-catalyst": "0.16.0.dev141",
+  "pennylane-lightning-kokkos": "0.46.0.dev34",
+  "packages": {
+   "appdirs": "1.4.4",
+   "autograd": "1.8.0",
+   "autoray": "0.8.10",
+   "cachetools": "8.0.0",
+   "certifi": "2026.10.23",
+   "charset-normalizer": "3.5.2",
+   "diastatic-malt": "2.15.3",
+   "gast": "0.7.0",
+   "idna": "3.20",
+   "immutabledict": "4.3.1",
+   "jax": "0.7.1",
+   "jaxlib": "0.7.1",
+   "ml-dtypes": "0.6.0",
+   "networkx": "3.7",
+   "numpy": "2.5.4",
+   "opt-einsum": "3.4.0",
+   "ordered-set": "4.1.0",
+   "packaging": "26.3",
+   "pennylane": "0.46.0.dev149",
+   "pennylane-catalyst": "0.16.0.dev141",
+   "pennylane-lightning": "0.46.0.dev34",
+   "requests": "2.34.2",
+   "rustworkx": "0.18.1",
+   "scipy": "1.18.1",
+   "scipy-openblas32": "0.3.31.188.0",
+   "termcolor": "3.3.0",
+   "typing-extensions": "4.16.0",
+   "urllib3": "2.8.0",
+   "xdsl": "0.63.0",
+   "xdsl-jax": "0.5.2"
+  }
+ },
+ "repeats": 3,
+ "cpus": 2,
+ "cells": [
+  {
+   "circuit": "qft",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 1,
+   "name": "qft/kokkos",
+   "gates": {
+    "top": {
+     "gates": 5,
+     "depth": 5
+    },
+    "device": {
+     "gates": 721,
+     "depth": 145
+    }
+   },
+   "wall_s": [
+    0.20528060500009815,
+    0.20117445599998973,
+    0.19979088899981434,
+    0.201114428999972,
+    0.20094300599976123,
+    0.2012298880003982,
+    0.2577594679996764,
+    0.20218081600023652,
+    0.2017845599998509,
+    0.20097435799971208
+   ],
+   "compile_s": 7.17000148142688e-07,
+   "max_rss_kb": 269756,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ValueError: qp.specs no longer supports being applied to a bare QNode; it must be applied to a qjit'd QNode. Instead, apply qp.qjit ",
+   "imports": {
+    "net": 8052524131,
+    "runs": [
+     8052524131
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2702929800,
+    "runs": [
+     2702141846,
+     2702929800,
+     2703557240
+    ],
+    "spread_pct": 0.05236517796355643,
+    "noise": 1415394,
+    "processes": {
+     "python": 2702141846,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      2747278600,
+      2702141846
+     ]
+    ],
+    "delta": 45136754,
+    "delta_pct": 1.6704065357196647,
+    "noise": 400000,
+    "noise_ratio": 112.841885,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "grover",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 12,
+   "name": "grover/kokkos",
+   "gates": {
+    "top": {
+     "gates": 282,
+     "depth": 73
+    },
+    "device": {
+     "gates": 726,
+     "depth": 109
+    }
+   },
+   "wall_s": [
+    0.18744180300018343,
+    0.18414594399973794,
+    0.1836344339999414,
+    0.18365578199973243,
+    0.18387561899999127,
+    0.1841955230001986,
+    0.18422421100012798,
+    0.18494484599978023,
+    0.1846443909998925,
+    0.18474403499976688
+   ],
+   "compile_s": 8.990000424091704e-07,
+   "max_rss_kb": 268768,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ValueError: qp.specs no longer supports being applied to a bare QNode; it must be applied to a qjit'd QNode. Instead, apply qp.qjit ",
+   "imports": {
+    "net": 8052524131,
+    "runs": [
+     8052524131
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 3368330882,
+    "runs": [
+     3368412269,
+     3368330882,
+     3368225055
+    ],
+    "spread_pct": 0.005558064411084184,
+    "noise": 187214,
+    "processes": {
+     "python": 3368412269,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      3413242289,
+      3368412269
+     ]
+    ],
+    "delta": 44830020,
+    "delta_pct": 1.3308946892450593,
+    "noise": 400000,
+    "noise_ratio": 112.07505,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "trotter",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 4,
+   "name": "trotter/kokkos",
+   "gates": {
+    "top": {
+     "gates": 1,
+     "depth": 1
+    },
+    "device": {
+     "gates": 280,
+     "depth": 144
+    }
+   },
+   "wall_s": [
+    1.2323713299997507,
+    1.2429988430003505,
+    1.2431733849998636,
+    1.2608015229998273,
+    1.2326552969998374,
+    1.2326459749997412,
+    1.2301370709997173,
+    1.2537968659999024,
+    1.2400152179998258,
+    1.2313070740001422
+   ],
+   "compile_s": 6.300001587078441e-07,
+   "max_rss_kb": 269300,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ValueError: qp.specs no longer supports being applied to a bare QNode; it must be applied to a qjit'd QNode. Instead, apply qp.qjit ",
+   "imports": {
+    "net": 8052524131,
+    "runs": [
+     8052524131
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 10898188912,
+    "runs": [
+     10905489135,
+     10897525550,
+     10898188912
+    ],
+    "spread_pct": 0.07307255420422465,
+    "noise": 7963585,
+    "processes": {
+     "python": 10905489135,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      10925522244,
+      10905489135
+     ]
+    ],
+    "delta": 20033109,
+    "delta_pct": 0.1836974825430423,
+    "noise": 400000,
+    "noise_ratio": 50.0827725,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "qpe",
+   "backend": "kokkos",
+   "wires": 12,
+   "rounds": 3,
+   "name": "qpe/kokkos",
+   "gates": {
+    "top": {
+     "gates": 8,
+     "depth": 8
+    },
+    "device": {
+     "gates": 652,
+     "depth": 238
+    }
+   },
+   "wall_s": [
+    0.36620066199975554,
+    0.3589258410002003,
+    0.355337899999995,
+    0.3577541489999021,
+    0.3582237979999263,
+    0.3591021379997983,
+    0.4162737219999144,
+    0.3606211540000004,
+    0.35866685100018003,
+    0.3595402770001783
+   ],
+   "compile_s": 6.129998837423045e-07,
+   "max_rss_kb": 265536,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ValueError: qp.specs no longer supports being applied to a bare QNode; it must be applied to a qjit'd QNode. Instead, apply qp.qjit ",
+   "imports": {
+    "net": 8052524131,
+    "runs": [
+     8052524131
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 3555675007,
+    "runs": [
+     3555675007,
+     3556900820,
+     3555568748
+    ],
+    "spread_pct": 0.037463266394638754,
+    "noise": 1332072,
+    "processes": {
+     "python": 3555675007,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      3560768757,
+      3555675007
+     ]
+    ],
+    "delta": 5093750,
+    "delta_pct": 0.14325690593127935,
+    "noise": 400000,
+    "noise_ratio": 12.734375,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "variational",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 4,
+   "name": "variational/kokkos",
+   "gates": {
+    "top": {
+     "gates": 212,
+     "depth": 31
+    },
+    "device": {
+     "gates": 212,
+     "depth": 31
+    }
+   },
+   "wall_s": [
+    0.29686717699996734,
+    0.2927446260000579,
+    0.29295307900019907,
+    0.2926376599998548,
+    0.29228314200008754,
+    0.29216471700010516,
+    0.2924062430001868,
+    0.2922382789997755,
+    0.2927129189997686,
+    0.3376702440000372
+   ],
+   "compile_s": 5.460001375467982e-07,
+   "max_rss_kb": 286560,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ValueError: qp.specs no longer supports being applied to a bare QNode; it must be applied to a qjit'd QNode. Instead, apply qp.qjit ",
+   "imports": {
+    "net": 8052524131,
+    "runs": [
+     8052524131
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 3944211413,
+    "runs": [
+     3944025388,
+     3944211413,
+     3944399090
+    ],
+    "spread_pct": 0.009474694961033012,
+    "noise": 373702,
+    "processes": {
+     "python": 3944025388,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 3,
+    "pairs": [
+     [
+      3963859719,
+      3944025388
+     ]
+    ],
+    "delta": 19834331,
+    "delta_pct": 0.5028956218270672,
+    "noise": 400000,
+    "noise_ratio": 49.5858275,
+    "detected": true
+   }
+  },
+  {
+   "circuit": "sampling",
+   "backend": "kokkos",
+   "wires": 18,
+   "rounds": 20,
+   "name": "sampling/kokkos",
+   "gates": {
+    "top": {
+     "gates": 721,
+     "depth": 721
+    },
+    "device": {
+     "gates": 721,
+     "depth": 721
+    }
+   },
+   "wall_s": [
+    0.18503500700035147,
+    0.18222932200023934,
+    0.1801504569998542,
+    0.181783660000292,
+    0.17964254599974083,
+    0.18141340799957106,
+    0.22946918400020877,
+    0.18128631300032794,
+    0.18111679200001163,
+    0.1803177050001068
+   ],
+   "compile_s": 7.570001798740122e-07,
+   "max_rss_kb": 278560,
+   "max_rss_children_kb": 0,
+   "bare_qnode_specs": "ValueError: qp.specs no longer supports being applied to a bare QNode; it must be applied to a qjit'd QNode. Instead, apply qp.qjit ",
+   "imports": {
+    "net": 8052524131,
+    "runs": [
+     8052524131
+    ],
+    "spread_pct": null,
+    "noise": 0
+   },
+   "instructions": {
+    "net": 2375442793,
+    "runs": [
+     2375492239,
+     2375442793,
+     2375351882
+    ],
+    "spread_pct": 0.005908666814187513,
+    "noise": 140357,
+    "processes": {
+     "python": 2375492239,
+     "compiler": 0,
+     "linker": 0,
+     "other": 0
+    }
+   },
+   "canary": {
+    "extra_gates": 7,
+    "pairs": [
+     [
+      2419970419,
+      2375492239
+     ]
+    ],
+    "delta": 44478180,
+    "delta_pct": 1.8723774075020245,
+    "noise": 400000,
+    "noise_ratio": 111.19545,
+    "detected": true
+   }
+  }
+ ],
+ "memory": [
+  {
+   "backend": "kokkos",
+   "wires": 25,
+   "max_rss_kb": {
+    "net": 788320,
+    "runs": [
+     788172,
+     788320,
+     788348
+    ],
+    "spread_pct": 0.02232595900142074,
+    "noise": 176
+   }
+  }
+ ],
+ "busy_check": null,
+ "availability": {
+  "packages": {
+   "pennylane": {
+    "builds": 624,
+    "first": {
+     "version": "0.38.0.dev4",
+     "date": "2024-07-29"
+    },
+    "last": {
+     "version": "0.46.0.dev154",
+     "date": "2026-11-14"
+    }
+   },
+   "pennylane-lightning": {
+    "builds": 93,
+    "first": {
+     "version": "0.44.0.dev3",
+     "date": "2025-10-15"
+    },
+    "last": {
+     "version": "0.46.0.dev38",
+     "date": "2026-11-12"
+    }
+   },
+   "pennylane-catalyst": {
+    "builds": 56,
+    "first": {
+     "version": "0.16.0.dev86",
+     "date": "2026-09-01"
+    },
+    "last": {
+     "version": "0.16.0.dev143",
+     "date": "2026-11-14"
+    }
+   }
+  },
+  "newest_catalyst_pins": {
+   "pennylane": "0.46.0.dev149",
+   "pennylane-lightning": "0.46.0.dev34",
+   "pennylane-lightning-kokkos": "0.46.0.dev34"
+  }
+ },
+ "valid": true,
+ "problems": []
+}
