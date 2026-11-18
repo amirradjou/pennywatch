@@ -1,0 +1,235 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev140..catalyst-0.16.0.dev141/sampling/qjit/instructions",
+ "name": "0.16.0.dev140--0.16.0.dev141--sampling-qjit--instructions",
+ "before": "0.16.0.dev140",
+ "after": "0.16.0.dev141",
+ "cell": "sampling/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 3581720832,
+  "after": 10646868212,
+  "change_pct": 197.25566875224294
+ },
+ "second": {
+  "before": 3579314338,
+  "after": 10646905386,
+  "change_pct": 197.45656236353724,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "sampling/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev140",
+   "runs": [
+    3581128326,
+    3578648264,
+    3577176022
+   ],
+   "net": 3578648264
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev141",
+   "runs": [
+    10641859910,
+    10649989899,
+    10646899949
+   ],
+   "net": 10646899949
+  },
+  "packages": [
+   "pennylane-catalyst 0.16.0.dev140 ? 0.16.0.dev141"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    262341,
+    618467
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    99203,
+    209958
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    14690,
+    83355
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    35652,
+    91302
+   ],
+   [
+    "jax/_src/core.py:__init__",
+    10952,
+    55986
+   ],
+   [
+    "~:<built-in method builtins.getattr>",
+    11977,
+    54278
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    19923,
+    58334
+   ],
+   [
+    "pennylane/core/operator/operator2.py:<genexpr>",
+    9214,
+    47572
+   ],
+   [
+    "pennylane/pytrees/pytrees.py:flatten",
+    0,
+    34370
+   ],
+   [
+    "~:<method 'items' of 'dict' objects>",
+    5242,
+    35957
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    26402,
+    54500
+   ],
+   [
+    "~:<built-in method builtins.all>",
+    1810,
+    26123
+   ],
+   [
+    "~:<method 'split' of 'str' objects>",
+    30477,
+    53220
+   ],
+   [
+    "~:<built-in method builtins.any>",
+    10748,
+    33317
+   ],
+   [
+    "~:<jaxlib.utils.safe_map>",
+    6169,
+    28678
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    1026543913,
+    2938026317
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    567911827,
+    1708497709
+   ],
+   [
+    "__tls_get_addr",
+    156973859,
+    484048298
+   ],
+   [
+    "_PyType_Lookup",
+    60294520,
+    180802962
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    20199423,
+    128904948
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    41830718,
+    135129505
+   ],
+   [
+    "_int_malloc",
+    14190507,
+    94865158
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    20248551,
+    95942720
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    11011358,
+    79497064
+   ],
+   [
+    "mlir::Attribute mlir::AttrTypeReplacer::cachedReplaceImpl<mlir::Attribute>(mlir::Attribute)",
+    418850,
+    64331863
+   ],
+   [
+    "PyObject_GC_Del",
+    25144517,
+    81196625
+   ],
+   [
+    "mlir::StringAttr::get(mlir::MLIRContext*, llvm::Twine const&)",
+    8344794,
+    62174583
+   ],
+   [
+    "_PyObject_GC_New",
+    26697622,
+    80134184
+   ],
+   [
+    "mlir::NamedAttribute::operator<(mlir::NamedAttribute const&) const",
+    4773913,
+    56764107
+   ],
+   [
+    "free",
+    10756977,
+    59721090
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Turn capture on by default (#3414)",
+     "pull_request": 3414,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3414"
+    },
+    {
+     "score": 0,
+     "subject": "Add simplification for scf.if conditioned pi/2 PPRs (#3435)",
+     "pull_request": 3435,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3435"
+    },
+    {
+     "score": 0,
+     "subject": "refactor(decomposition): group source rules with collected resources (#3441)",
+     "pull_request": 3441,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3441"
+    },
+    {
+     "score": 0,
+     "subject": "Fix Backline demos against PL & Catalyst main branches (#3472)",
+     "pull_request": 3472,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3472"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 4
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "44367316700",
+ "recorded_at": "2026-11-18T18:41:03+00:00"
+}
