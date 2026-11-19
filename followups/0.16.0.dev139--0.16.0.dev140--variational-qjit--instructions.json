@@ -1,0 +1,198 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev139..catalyst-0.16.0.dev140/variational/qjit/instructions",
+ "name": "0.16.0.dev139--0.16.0.dev140--variational-qjit--instructions",
+ "before": "0.16.0.dev139",
+ "after": "0.16.0.dev140",
+ "cell": "variational/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 7307693967,
+  "after": 7222920605,
+  "change_pct": -1.1600562692255392
+ },
+ "second": {
+  "before": 7318728021,
+  "after": 7221871890,
+  "change_pct": -1.3234011527971221,
+  "host": "AMD EPYC 9V45 96-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "variational/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev139",
+   "runs": [
+    7319328340,
+    7318075443,
+    7321782243
+   ],
+   "net": 7319328340
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev140",
+   "runs": [
+    7222510896,
+    7221163763,
+    7226691886
+   ],
+   "net": 7222510896
+  },
+  "packages": [
+   "pennylane-catalyst 0.16.0.dev139 ? 0.16.0.dev140"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'append' of 'list' objects>",
+    26041,
+    25609
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:__len__",
+    1356,
+    1140
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:_key_from_fd",
+    1356,
+    1140
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:get_map",
+    1356,
+    1140
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:select",
+    1355,
+    1139
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_check_timeout",
+    1355,
+    1139
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_remaining_time",
+    1357,
+    1141
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    30743,
+    30527
+   ],
+   [
+    "~:<built-in method posix.read>",
+    1358,
+    1142
+   ],
+   [
+    "~:<method 'poll' of 'select.poll' objects>",
+    1355,
+    1139
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    253554655,
+    150292348
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    62595222,
+    66473092
+   ],
+   [
+    "ActivityAnalyzer::isValueInactiveFromUsers(TypeResults const&, llvm::Value*, ActivityAnalyzer::UseActivity, llvm::Instruction**)",
+    51275154,
+    53704094
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    14013963,
+    15637117
+   ],
+   [
+    "(anonymous namespace)::GreedyPatternRewriteDriver::addSingleOpToWorklist(mlir::Operation*)",
+    36298879,
+    35081669
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    73969973,
+    75073485
+   ],
+   [
+    "bool llvm::DenseMapBase<llvm::DenseMap<mlir::Value, llvm::SetVector<mlir::Value, llvm::SmallVector<mlir::Value, 0u>, llvm::DenseSet<mlir::Value, llvm::DenseMapInfo<mlir::Value, void> >, 0u>, llvm::Den",
+    5265553,
+    4348499
+   ],
+   [
+    "_int_malloc",
+    123921386,
+    124775458
+   ],
+   [
+    "_int_free_chunk",
+    123942448,
+    124673901
+   ],
+   [
+    "mlir::bufferization::OneShotAnalysisState::findDefinitionsCached(mlir::OpOperand*)",
+    5199478,
+    4569840
+   ],
+   [
+    "std::_Rb_tree_decrement(std::_Rb_tree_node_base*)",
+    1637318,
+    1146862
+   ],
+   [
+    "AddNodeIDNode(llvm::FoldingSetNodeID&, llvm::SDNode const*)",
+    3643834,
+    3234285
+   ],
+   [
+    "std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)",
+    27621216,
+    28026687
+   ],
+   [
+    "std::_Rb_tree<std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::tuple<llvm::User*, llvm::Value*, ActivityAnalyzer::UseActivity>, std::_Identity<std::tuple<llvm::User*, llvm::V",
+    13461133,
+    13857331
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    18353991,
+    18679340
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Account for work wires in ResourceAnalysis (#3457)",
+     "pull_request": 3457,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3457"
+    },
+    {
+     "score": 0,
+     "subject": "refactor(decomposition): group shared rule tracing inputs (#3440)",
+     "pull_request": 3440,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3440"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 2
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "44585097014",
+ "recorded_at": "2026-11-19T18:51:00+00:00"
+}
