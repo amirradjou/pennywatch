@@ -1,0 +1,452 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev69..catalyst-0.16.0.dev70/trotter/qjit/instructions",
+ "name": "0.16.0.dev69--0.16.0.dev70--trotter-qjit--instructions",
+ "before": "0.16.0.dev69",
+ "after": "0.16.0.dev70",
+ "cell": "trotter/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 5784554955,
+  "after": 6562074860,
+  "change_pct": 13.441308986578726
+ },
+ "second": {
+  "before": 5782948413,
+  "after": 6565105758,
+  "change_pct": 13.525234692422977,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "trotter/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev69",
+   "runs": [
+    5783357094,
+    5778246313,
+    5787345095
+   ],
+   "net": 5783357094
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev70",
+   "runs": [
+    6582989620,
+    6562570271,
+    6561548521
+   ],
+   "net": 6562570271
+  },
+  "packages": [
+   "charset-normalizer 3.4.9 ? 3.5.0",
+   "pennylane 0.46.0.dev62 ? 0.46.0.dev68",
+   "pennylane-catalyst 0.16.0.dev69 ? 0.16.0.dev70"
+  ],
+  "python_functions": [
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    0,
+    46432
+   ],
+   [
+    "~:<built-in method builtins.isinstance>",
+    286010,
+    330960
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    199453,
+    242905
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    19848,
+    52840
+   ],
+   [
+    "~:<built-in method builtins.iter>",
+    9762,
+    37834
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:name",
+    0,
+    25640
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:parameters",
+    5,
+    25069
+   ],
+   [
+    "pennylane/wires.py:<genexpr>",
+    52878,
+    77942
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    40937,
+    63487
+   ],
+   [
+    "~:<built-in method builtins.setattr>",
+    96619,
+    75563
+   ],
+   [
+    "pennylane/wires.py:__init__",
+    27389,
+    42947
+   ],
+   [
+    "pennylane/core/operator/base.py:wires",
+    61474,
+    46574
+   ],
+   [
+    "pennylane/pytrees/pytrees.py:flatten",
+    0,
+    12876
+   ],
+   [
+    "pennylane/core/operator/meta.py:<genexpr>",
+    0,
+    12676
+   ],
+   [
+    "~:<method 'values' of 'mappingproxy' objects>",
+    0,
+    12536
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    2103381955,
+    2465575446
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    1257403118,
+    1467431052
+   ],
+   [
+    "__tls_get_addr",
+    331209206,
+    399670621
+   ],
+   [
+    "_PyType_Lookup",
+    137532096,
+    165681716
+   ],
+   [
+    "PyObject_GC_Del",
+    51872234,
+    66775612
+   ],
+   [
+    "_PyObject_GC_New",
+    51451496,
+    65601872
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    89325620,
+    99580119
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    24540491,
+    29623281
+   ],
+   [
+    "PyObject_RichCompare",
+    32745529,
+    37567285
+   ],
+   [
+    "PyObject_GetIter",
+    10686627,
+    15419291
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    29746315,
+    34415505
+   ],
+   [
+    "_PyUnicode_JoinArray",
+    4667295,
+    9115640
+   ],
+   [
+    "PyObject_GetAttr",
+    40726098,
+    44995046
+   ],
+   [
+    "PyList_New",
+    12919290,
+    16285728
+   ],
+   [
+    "_PyObject_GetMethod",
+    14057411,
+    17225788
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 111942,
+     "subject": "Migrate 'PauliRot' to use 'Operator2' as its base class (#9897)",
+     "pull_request": 9897,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9897"
+    },
+    {
+     "score": 105870,
+     "subject": "Remove everything related to qudits (#9867)",
+     "pull_request": 9867,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9867"
+    },
+    {
+     "score": 70705,
+     "subject": "Misc Operator2 compatibility updates (#9877)",
+     "pull_request": 9877,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9877"
+    },
+    {
+     "score": 64615,
+     "subject": "Fix op2 reconstruct (#9821)",
+     "pull_request": 9821,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9821"
+    },
+    {
+     "score": 64615,
+     "subject": "Add 'grad_recipe' and 'grad_method' to 'Operator2' (#9756)",
+     "pull_request": 9756,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9756"
+    },
+    {
+     "score": 64615,
+     "subject": "Add 'Operator2.__getattr__' to suppress Pylint 'no-member' errors (#9927)",
+     "pull_request": 9927,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9927"
+    },
+    {
+     "score": 64615,
+     "subject": "Allow AbstractWires to be understood as wire pytree leaves when hashing operator2  (#9920)",
+     "pull_request": 9920,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9920"
+    },
+    {
+     "score": 64615,
+     "subject": "Move fallback behaviour from Operator2.decomposition to Operator2.compute_decomposition (#9910)",
+     "pull_request": 9910,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9910"
+    },
+    {
+     "score": 64615,
+     "subject": "Always use  signature order as argname order in Operator2 (#9937)",
+     "pull_request": 9937,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9937"
+    },
+    {
+     "score": 47345,
+     "subject": "Port 'PauliZ', 'CZ', and 'CCZ' to Operator2 (#9858)",
+     "pull_request": 9858,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9858"
+    },
+    {
+     "score": 41255,
+     "subject": "Port MultiRZ to Operator2 (#9936)",
+     "pull_request": 9936,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9936"
+    },
+    {
+     "score": 6090,
+     "subject": "Port remaining non-parametric ops (H, SWAP, etc) (#9784)",
+     "pull_request": 9784,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9784"
+    },
+    {
+     "score": 6070,
+     "subject": "Port 'PauliY' and 'CY' to 'Operator2' (#9850)",
+     "pull_request": 9850,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9850"
+    },
+    {
+     "score": 6070,
+     "subject": "Add PPM decompositions for 'CNOT', 'CZ', 'Hadamard' (#9865)",
+     "pull_request": 9865,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9865"
+    },
+    {
+     "score": 20,
+     "subject": "Control values of 'Controlled2' are traceable. (#9966)",
+     "pull_request": 9966,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9966"
+    },
+    {
+     "score": 14,
+     "subject": "feat: add '__subclasshook__' to 'StatePrepBase' for smoother migrations (#9976)",
+     "pull_request": 9976,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9976"
+    },
+    {
+     "score": 2,
+     "subject": "feat: port 'RZ' and 'CRZ' to 'Operator2' (#9857)",
+     "pull_request": 9857,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9857"
+    },
+    {
+     "score": 0,
+     "subject": "fix(equal): Treat strict operator subclasses as unequal (#9749)",
+     "pull_request": 9749,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9749"
+    },
+    {
+     "score": 0,
+     "subject": "Remove pennylane.Configuration (#9879)",
+     "pull_request": 9879,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9879"
+    },
+    {
+     "score": 0,
+     "subject": "[Labs] Add optional phase layer to TCDQ qudit circuits (#9826)",
+     "pull_request": 9826,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9826"
+    },
+    {
+     "score": 0,
+     "subject": "Modularize and improve 'SemiAdder' decomposition (#9807)",
+     "pull_request": 9807,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9807"
+    },
+    {
+     "score": 0,
+     "subject": "Port BasisRotation to Operator2 (#9896)",
+     "pull_request": 9896,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9896"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#9861)",
+     "pull_request": 9861,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9861"
+    },
+    {
+     "score": 0,
+     "subject": "Improve 'assert_valid' for legacy ops wrapping nested Op2 (#9898)",
+     "pull_request": 9898,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9898"
+    },
+    {
+     "score": 0,
+     "subject": "Testing decomposition rules with capture (#9902)",
+     "pull_request": 9902,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9902"
+    },
+    {
+     "score": 0,
+     "subject": "Sort resources str produced by decompositions (#9916)",
+     "pull_request": 9916,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9916"
+    },
+    {
+     "score": 0,
+     "subject": "[capture] fix: don't allow 'Operator2' to be returned in conditional branches (#9908)",
+     "pull_request": 9908,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9908"
+    },
+    {
+     "score": 0,
+     "subject": "'pow_rotation' and 'adjoint_rotation' support 'Operator2' (#9909)",
+     "pull_request": 9909,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9909"
+    },
+    {
+     "score": 0,
+     "subject": "feat: add 'pl2do' marker  (#9917)",
+     "pull_request": 9917,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9917"
+    },
+    {
+     "score": 0,
+     "subject": "Add CodeQL Workflow (#9922)",
+     "pull_request": 9922,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9922"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Fix/op2 as observable (#3075)",
+     "pull_request": 3075,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3075"
+    },
+    {
+     "score": 0,
+     "subject": "[MLIR] Add quantum.ctrl region op and ctrl-lowering pass (#3089)",
+     "pull_request": 3089,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3089"
+    },
+    {
+     "score": 0,
+     "subject": "[MLIR] Add nested adjoint/ctrl support to quantum.ctrl and quantum.adjoint regions (#3090)",
+     "pull_request": 3090,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3090"
+    },
+    {
+     "score": 0,
+     "subject": "[MLIR] Support control flow ops in the ctrl-lowering pass (#3096)",
+     "pull_request": 3096,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3096"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 48,
+   "pennylane-catalyst": 4
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "dc0e7268f43c2976e6352cdac076db10a244ed8d",
+     "before": 5778543229,
+     "after": 6163139773,
+     "pull_request": 9850,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9850",
+     "subject": "Port 'PauliY' and 'CY' to 'Operator2' (#9850)"
+    },
+    {
+     "commit": "73b07b6f42147849882c6b70ac411f11f32139cc",
+     "before": 6184074372,
+     "after": 6495914755,
+     "pull_request": 9858,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9858",
+     "subject": "Port 'PauliZ', 'CZ', and 'CCZ' to Operator2 (#9858)"
+    },
+    {
+     "commit": "7297f75810ed43ee15778aa0836f74fc5cbe3e40",
+     "before": 6163363583,
+     "after": 6184300211,
+     "pull_request": 9927,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/9927",
+     "subject": "Add 'Operator2.__getattr__' to suppress Pylint 'no-member' errors (#9927)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 15,
+   "stopped": false,
+   "pennylane_alone": 6561517603,
+   "pennylane_share": 0.9986490628866765
+  }
+ },
+ "problems": [],
+ "run": "44786428365",
+ "recorded_at": "2026-11-20T18:50:07+00:00"
+}

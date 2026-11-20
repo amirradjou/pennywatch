@@ -1,0 +1,282 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev137..catalyst-0.16.0.dev139/variational/qjit/instructions",
+ "name": "0.16.0.dev137--0.16.0.dev139--variational-qjit--instructions",
+ "before": "0.16.0.dev137",
+ "after": "0.16.0.dev139",
+ "cell": "variational/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 7224684059,
+  "after": 7307693967,
+  "change_pct": 1.1489763057056057
+ },
+ "second": {
+  "before": 7219777748,
+  "after": 7308068838,
+  "change_pct": 1.222905927048213,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "variational/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev137",
+   "runs": [
+    7219388317,
+    7218648886,
+    7219801272
+   ],
+   "net": 7219388317
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev139",
+   "runs": [
+    7307360333,
+    7307924858,
+    7308193300
+   ],
+   "net": 7307924858
+  },
+  "packages": [
+   "cachetools 7.3.0 ? 8.0.0",
+   "pennylane 0.46.0.dev147 ? 0.46.0.dev149",
+   "pennylane-catalyst 0.16.0.dev137 ? 0.16.0.dev139"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'append' of 'list' objects>",
+    24357,
+    24195
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:__len__",
+    514,
+    433
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:_key_from_fd",
+    514,
+    433
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:get_map",
+    514,
+    433
+   ],
+   [
+    "/usr/local/lib/python3.12/selectors.py:select",
+    513,
+    432
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_check_timeout",
+    513,
+    432
+   ],
+   [
+    "/usr/local/lib/python3.12/subprocess.py:_remaining_time",
+    515,
+    434
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    29901,
+    29820
+   ],
+   [
+    "~:<built-in method posix.read>",
+    516,
+    435
+   ],
+   [
+    "~:<method 'poll' of 'select.poll' objects>",
+    513,
+    432
+   ],
+   [
+    "<frozen abc>:__subclasscheck__",
+    405,
+    407
+   ],
+   [
+    "~:<built-in method _abc._abc_subclasscheck>",
+    405,
+    407
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    140381257,
+    253554655
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    77963862,
+    62595222
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    20230953,
+    14013963
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    76015733,
+    73969973
+   ],
+   [
+    "ActivityAnalyzer::isValueInactiveFromUsers(TypeResults const&, llvm::Value*, ActivityAnalyzer::UseActivity, llvm::Instruction**)",
+    52852220,
+    51275154
+   ],
+   [
+    "bool llvm::DenseMapBase<llvm::DenseMap<mlir::Value, llvm::SetVector<mlir::Value, llvm::SmallVector<mlir::Value, 0u>, llvm::DenseSet<mlir::Value, llvm::DenseMapInfo<mlir::Value, void> >, 0u>, llvm::Den",
+    4413384,
+    5265553
+   ],
+   [
+    "_int_free_chunk",
+    124622791,
+    123871303
+   ],
+   [
+    "AddNodeIDNode(llvm::FoldingSetNodeID&, llvm::SDNode const*)",
+    2955618,
+    3643834
+   ],
+   [
+    "_int_malloc",
+    124393388,
+    123789305
+   ],
+   [
+    "mlir::bufferization::OneShotAnalysisState::findDefinitionsCached(mlir::OpOperand*)",
+    4615005,
+    5199478
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::AffineBinaryOpExprStorage, unsigned int, mlir::AffineExpr&, mlir::AffineEx",
+    1847232,
+    1353152
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::IntegerAttrStorage, mlir::Type&, llvm::APInt&>(llvm::function_ref<void (ml",
+    1076992,
+    1515182
+   ],
+   [
+    "bool llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>::callback_fn<mlir::StorageUniquer::get<mlir::detail::StringAttrStorage, llvm::StringRef, mlir::NoneType>(llvm::function_ref<voi",
+    5750945,
+    5317346
+   ],
+   [
+    "(anonymous namespace)::GreedyPatternRewriteDriver::addSingleOpToWorklist(mlir::Operation*)",
+    35874489,
+    36298879
+   ],
+   [
+    "???",
+    615589752,
+    615173210
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 0,
+     "subject": "Display decompositions for single-controlled gates (#10433)",
+     "pull_request": 10433,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10433"
+    },
+    {
+     "score": 0,
+     "subject": "Display decompositions for multi-controlled Controlled2 gates (#10453)",
+     "pull_request": 10453,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10453"
+    },
+    {
+     "score": 0,
+     "subject": "Port 'DoubleExcitation' to 'Operator2' (#10463)",
+     "pull_request": 10463,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10463"
+    },
+    {
+     "score": 0,
+     "subject": "Port 'OrbitalRotation' to 'Operator2' (#10482)",
+     "pull_request": 10482,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10482"
+    },
+    {
+     "score": 0,
+     "subject": "test: remove Catalyst work-wire related xfails (#10491)",
+     "pull_request": 10491,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10491"
+    },
+    {
+     "score": 0,
+     "subject": "'qp.decompose' 'exclude_decomps' parameter (#10461)",
+     "pull_request": 10461,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10461"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Remove the 'RegisterDecompRuleResources' pass (#3432)",
+     "pull_request": 3432,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3432"
+    },
+    {
+     "score": 0,
+     "subject": "Resource analysis/expose graph solver (#3349)",
+     "pull_request": 3349,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3349"
+    },
+    {
+     "score": 0,
+     "subject": "Changelog (#3452)",
+     "pull_request": 3452,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3452"
+    },
+    {
+     "score": 0,
+     "subject": "Remember control work wire count when traversing rules (#3453)",
+     "pull_request": 3453,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3453"
+    },
+    {
+     "score": 0,
+     "subject": "Test that an uncontrolled GlobalPhase adds no depth in null.qubit resource tracking (#3455)",
+     "pull_request": 3455,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3455"
+    },
+    {
+     "score": 0,
+     "subject": "'graph-decomposition' 'exclude-decomps' parameter (#3450)",
+     "pull_request": 3450,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3450"
+    },
+    {
+     "score": 0,
+     "subject": "update before graphviz install (#3458)",
+     "pull_request": 3458,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3458"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 6,
+   "pennylane-catalyst": 7
+  },
+  "bisect": {
+   "verdict": "PennyLane alone gives 3% of the step, so the cause is elsewhere: another package or the third-party ones.",
+   "pennylane_alone": 7221883932
+  }
+ },
+ "problems": [],
+ "run": "44786428365",
+ "recorded_at": "2026-11-20T18:50:07+00:00"
+}
