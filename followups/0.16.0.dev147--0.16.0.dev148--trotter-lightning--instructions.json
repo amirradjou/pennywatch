@@ -1,0 +1,430 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev147..catalyst-0.16.0.dev148/trotter/lightning/instructions",
+ "name": "0.16.0.dev147--0.16.0.dev148--trotter-lightning--instructions",
+ "before": "0.16.0.dev147",
+ "after": "0.16.0.dev148",
+ "cell": "trotter/lightning",
+ "metric": "instructions",
+ "first": {
+  "before": 9770946260,
+  "after": 4354717538,
+  "change_pct": -55.431977393763695
+ },
+ "second": {
+  "before": 9770858775,
+  "after": 4355581778,
+  "change_pct": -55.42273326942032,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "trotter/lightning",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev147",
+   "runs": [
+    9771196867,
+    9797173325,
+    9761515219
+   ],
+   "net": 9771196867
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev148",
+   "runs": [
+    4355289964,
+    4355623559,
+    4358216416
+   ],
+   "net": 4355623559
+  },
+  "packages": [
+   "certifi 2026.10.23 ? 2026.11.20",
+   "pennylane 0.46.0.dev154 ? 0.46.0.dev159",
+   "pennylane-catalyst 0.16.0.dev147 ? 0.16.0.dev148"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    710339,
+    183936
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    406337,
+    60239
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    239630,
+    54186
+   ],
+   [
+    "<frozen abc>:__instancecheck__",
+    235367,
+    60060
+   ],
+   [
+    "~:<built-in method _abc._abc_instancecheck>",
+    235367,
+    60060
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    177708,
+    40755
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:name",
+    173728,
+    36889
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    162604,
+    37397
+   ],
+   [
+    "~:<built-in method builtins.iter>",
+    114222,
+    16423
+   ],
+   [
+    "autoray/autoray.py:infer_backend",
+    112521,
+    17501
+   ],
+   [
+    "pennylane/math/interface_utils.py:_get_interface_of_single_tensor",
+    112539,
+    17519
+   ],
+   [
+    "~:<method 'split' of 'str' objects>",
+    115901,
+    21013
+   ],
+   [
+    "~:<method 'items' of 'dict' objects>",
+    108508,
+    16150
+   ],
+   [
+    "pennylane/wires.py:__init__",
+    104382,
+    12585
+   ],
+   [
+    "pennylane/wires.py:__new__",
+    104382,
+    12729
+   ]
+  ],
+  "c_functions": [
+   [
+    "_PyEval_EvalFrameDefault",
+    2548134038,
+    616153245
+   ],
+   [
+    "???",
+    4528003837,
+    3047718599
+   ],
+   [
+    "__tls_get_addr",
+    681857550,
+    168004463
+   ],
+   [
+    "_PyType_Lookup",
+    317800048,
+    86912253
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    166885604,
+    42716533
+   ],
+   [
+    "PyObject_GC_Del",
+    120606980,
+    27859343
+   ],
+   [
+    "_PyObject_GC_New",
+    121608850,
+    29353756
+   ],
+   [
+    "PyObject_GetAttr",
+    76052096,
+    20302118
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    61689992,
+    13811103
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    62109329,
+    14721552
+   ],
+   [
+    "PyObject_RichCompare",
+    66806993,
+    20034971
+   ],
+   [
+    "PyObject_Vectorcall",
+    41445003,
+    10299989
+   ],
+   [
+    "__memset_avx2_unaligned_erms",
+    40566870,
+    10801914
+   ],
+   [
+    "_PyObject_GenericSetAttrWithDict",
+    41841471,
+    13010303
+   ],
+   [
+    "PyObject_GetIter",
+    30921456,
+    6581960
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 455695,
+     "subject": "Update 'ChangeOpBasis' to only accept operator inputs (#10511)",
+     "pull_request": 10511,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10511"
+    },
+    {
+     "score": 375796,
+     "subject": "Remove the graph decomp toggles (#10510)",
+     "pull_request": 10510,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10510"
+    },
+    {
+     "score": 19442,
+     "subject": "Avoid 'work_wires' being discarded by single-control-wire decompositions (#10455)",
+     "pull_request": 10455,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10455"
+    },
+    {
+     "score": 4155,
+     "subject": "Easy ty fixes (#10540)",
+     "pull_request": 10540,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10540"
+    },
+    {
+     "score": 0,
+     "subject": "Bump soupsieve from 2.8.3 to 4.0 (#10524)",
+     "pull_request": 10524,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10524"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#10487)",
+     "pull_request": 10487,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10487"
+    },
+    {
+     "score": 0,
+     "subject": "Fix precision loss of Givens decomposition close to identity (#10518)",
+     "pull_request": 10518,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10518"
+    },
+    {
+     "score": 0,
+     "subject": "Four improvements to 'TrotterVibronic' (#10450)",
+     "pull_request": 10450,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10450"
+    },
+    {
+     "score": 0,
+     "subject": "Displaying decomposition rules - Arithmetic and core subroutines (#10419)",
+     "pull_request": 10419,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10419"
+    },
+    {
+     "score": 0,
+     "subject": "update backline doc for peer= config (#10530)",
+     "pull_request": 10530,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10530"
+    },
+    {
+     "score": 0,
+     "subject": "Label analyze levels as 'After <pass>' (#10493)",
+     "pull_request": 10493,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10493"
+    },
+    {
+     "score": 0,
+     "subject": "Custom Barrier primitive (#10413)",
+     "pull_request": 10413,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10413"
+    },
+    {
+     "score": 0,
+     "subject": "Bump tornado from 6.6 to 6.6.1 (#10532)",
+     "pull_request": 10532,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10532"
+    },
+    {
+     "score": 0,
+     "subject": "Bump virtualenv from 21.14.5 to 21.14.13 (#10526)",
+     "pull_request": 10526,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10526"
+    },
+    {
+     "score": 0,
+     "subject": "Bump certifi from 2026.1.4 to 2026.10.18 (#10527)",
+     "pull_request": 10527,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10527"
+    },
+    {
+     "score": 0,
+     "subject": "Display adjoint, controlled and pow rules to single-qubit parametric op decompositions (#10435)",
+     "pull_request": 10435,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10435"
+    },
+    {
+     "score": 0,
+     "subject": "Fix Barrier changelog PR link (#10539)",
+     "pull_request": 10539,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10539"
+    },
+    {
+     "score": 0,
+     "subject": "Remove PyQuil and Qualtran interoperability from qp.io (#10498)",
+     "pull_request": 10498,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10498"
+    },
+    {
+     "score": 0,
+     "subject": "Add ty dev dependency and configure tool (#10537)",
+     "pull_request": 10537,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10537"
+    },
+    {
+     "score": 0,
+     "subject": "Register two decomps for 'ControlledSequence' (#10529)",
+     "pull_request": 10529,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10529"
+    },
+    {
+     "score": 0,
+     "subject": "making PPM-QROM 'capture=True'-compatible (#10501)",
+     "pull_request": 10501,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10501"
+    },
+    {
+     "score": 0,
+     "subject": "Bump aiohttp from 3.13.3 to 3.14.4 (#10538)",
+     "pull_request": 10538,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10538"
+    },
+    {
+     "score": 0,
+     "subject": "Fix Catalyst single-control spelling (#10548)",
+     "pull_request": 10548,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10548"
+    },
+    {
+     "score": 0,
+     "subject": "Bump fsspec from 2026.1.0 to 2026.6.0 (#10544)",
+     "pull_request": 10544,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10544"
+    },
+    {
+     "score": 0,
+     "subject": "Bump urllib3 from 2.7.0 to 2.8.0 (#10545)",
+     "pull_request": 10545,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10545"
+    },
+    {
+     "score": 0,
+     "subject": "Bump black from 26.3.1 to 26.10.1 (#10543)",
+     "pull_request": 10543,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10543"
+    },
+    {
+     "score": 0,
+     "subject": "Bump multidict from 6.7.1 to 6.9.1 (#10546)",
+     "pull_request": 10546,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10546"
+    },
+    {
+     "score": 0,
+     "subject": "Port CPhaseShift to Operator2 (#10494)",
+     "pull_request": 10494,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10494"
+    },
+    {
+     "score": 0,
+     "subject": "Non-JAX cleanup for QSVT (#10216)",
+     "pull_request": 10216,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10216"
+    },
+    {
+     "score": 0,
+     "subject": "Switch to trusted publishing (#10513)",
+     "pull_request": 10513,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10513"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Remove reference to the graph toggle (Bump PL to 158) (#3473)",
+     "pull_request": 3473,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3473"
+    },
+    {
+     "score": 0,
+     "subject": "[Bump Dep PL-159] Update Catalyst tests for preserved ChangeOpBasis (#3499)",
+     "pull_request": 3499,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3499"
+    },
+    {
+     "score": 0,
+     "subject": "Add 'qref.cast' op to cast between static/dynamic register sizes (#3506)",
+     "pull_request": 3506,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3506"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 32,
+   "pennylane-catalyst": 3
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "58a3d98ceb8d742cd704a28d5d3be79a5f81f11f",
+     "before": 9861017514,
+     "after": 4129238725,
+     "pull_request": 10510,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10510",
+     "subject": "Remove the graph decomp toggles (#10510)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 5,
+   "stopped": false,
+   "pennylane_alone": 4355693826,
+   "pennylane_share": 0.9999870250117571
+  }
+ },
+ "problems": [],
+ "run": "44928951799",
+ "recorded_at": "2026-11-21T17:41:08+00:00"
+}
