@@ -1,0 +1,300 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev148..catalyst-0.16.0.dev149/qpe/qjit/instructions",
+ "name": "0.16.0.dev148--0.16.0.dev149--qpe-qjit--instructions",
+ "before": "0.16.0.dev148",
+ "after": "0.16.0.dev149",
+ "cell": "qpe/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 6569064601,
+  "after": 7023547729,
+  "change_pct": 6.918536437148368
+ },
+ "second": {
+  "before": 6569391763,
+  "after": 7025183745,
+  "change_pct": 6.938115406164429,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qpe/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev148",
+   "runs": [
+    6569378518,
+    6570632543,
+    6568730745
+   ],
+   "net": 6569378518
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev149",
+   "runs": [
+    7025917807,
+    7025275994,
+    7027412759
+   ],
+   "net": 7025917807
+  },
+  "packages": [
+   "charset-normalizer 3.5.2 ? 3.5.3",
+   "pennylane 0.46.0.dev159 ? 0.46.0.dev161",
+   "pennylane-catalyst 0.16.0.dev148 ? 0.16.0.dev149"
+  ],
+  "python_functions": [
+   [
+    "~:<method 'get' of 'dict' objects>",
+    83378,
+    111021
+   ],
+   [
+    "~:<built-in method builtins.isinstance>",
+    246356,
+    269209
+   ],
+   [
+    "~:<built-in method builtins.id>",
+    34615,
+    48739
+   ],
+   [
+    "~:<method 'append' of 'list' objects>",
+    53757,
+    66402
+   ],
+   [
+    "pennylane/pytrees/pytrees.py:flatten",
+    25343,
+    34465
+   ],
+   [
+    "/usr/local/lib/python3.12/copy.py:deepcopy",
+    19371,
+    27631
+   ],
+   [
+    "<frozen abc>:__instancecheck__",
+    25223,
+    31703
+   ],
+   [
+    "~:<built-in method _abc._abc_instancecheck>",
+    25223,
+    31703
+   ],
+   [
+    "pennylane/core/operator/operator2.py:<genexpr>",
+    27554,
+    33884
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    65699,
+    70952
+   ],
+   [
+    "/usr/local/lib/python3.12/copy.py:_deepcopy_atomic",
+    12153,
+    17195
+   ],
+   [
+    "pennylane/pytrees/pytrees.py:flatten_list",
+    10238,
+    14958
+   ],
+   [
+    "~:<built-in method builtins.getattr>",
+    37481,
+    41769
+   ],
+   [
+    "~:<built-in method builtins.next>",
+    28943,
+    33085
+   ],
+   [
+    "/usr/local/lib/python3.12/inspect.py:kind",
+    23438,
+    26989
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    1485019672,
+    1652387785
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    829733859,
+    939191510
+   ],
+   [
+    "__tls_get_addr",
+    242168462,
+    271832393
+   ],
+   [
+    "_PyType_Lookup",
+    95388010,
+    109209082
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    33581850,
+    43628370
+   ],
+   [
+    "_PyObject_GenericGetAttrWithDict",
+    64842121,
+    72487507
+   ],
+   [
+    "mlir::Dialect::handleUseOfUndefinedPromisedInterface(mlir::TypeID, mlir::TypeID, llvm::StringRef)",
+    68494942,
+    73911876
+   ],
+   [
+    "_PyObject_GC_New",
+    41468812,
+    46536272
+   ],
+   [
+    "PyObject_GC_Del",
+    40565894,
+    45579120
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    11530071,
+    15583439
+   ],
+   [
+    "_PyObject_GenericSetAttrWithDict",
+    18690488,
+    22588423
+   ],
+   [
+    "PyObject_GetAttr",
+    25608242,
+    29052325
+   ],
+   [
+    "_PyObject_MakeTpCall",
+    20109394,
+    23194351
+   ],
+   [
+    "_int_malloc",
+    139385170,
+    141741627
+   ],
+   [
+    "_Py_CheckFunctionResult",
+    21423586,
+    23759122
+   ]
+  ],
+  "candidates": {
+   "pennylane": [
+    {
+     "score": 17155,
+     "subject": "Name all decomp rules (#10492)",
+     "pull_request": 10492,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10492"
+    },
+    {
+     "score": 0,
+     "subject": "remove OperationRecorder (#10574)",
+     "pull_request": 10574,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10574"
+    },
+    {
+     "score": 0,
+     "subject": "'qp.estimate' uses Catalyst's 'estimate_decomps CompileOption' (#10572)",
+     "pull_request": 10572,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10572"
+    },
+    {
+     "score": 0,
+     "subject": "Batch 4, update string wires in tests (#10565)",
+     "pull_request": 10565,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10565"
+    },
+    {
+     "score": 0,
+     "subject": "Preserve change-op-basis structure in adjoint rule of 'ChangeOpBasis2' (#10568)",
+     "pull_request": 10568,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10568"
+    },
+    {
+     "score": 0,
+     "subject": "Update test durations (#10576)",
+     "pull_request": 10576,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10576"
+    },
+    {
+     "score": 0,
+     "subject": "Fix allowing positionals in lambdas to new rules (#10575)",
+     "pull_request": 10575,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10575"
+    }
+   ],
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Refresh APT before installing Graphviz in compatibility CI (#3508)",
+     "pull_request": 3508,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3508"
+    },
+    {
+     "score": 0,
+     "subject": "Pin to PL version with new rule names to rebuild pre-compiled rules library (dev161) (#3490)",
+     "pull_request": 3490,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3490"
+    },
+    {
+     "score": 0,
+     "subject": "Generic Measurement Operation (#3439)",
+     "pull_request": 3439,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3439"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane": 7,
+   "pennylane-catalyst": 3
+  },
+  "bisect": {
+   "culprits": [
+    {
+     "commit": "26ffe25eec7275c31238885a08953aebab798e26",
+     "before": 8191126627,
+     "after": 13273685652,
+     "pull_request": 10492,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10492",
+     "subject": "Name all decomp rules (#10492)"
+    },
+    {
+     "commit": "bdcd5279e2936dbae1275d208147cc5e30153b12",
+     "before": 6571042004,
+     "after": 8192484186,
+     "pull_request": 10568,
+     "url": "https://github.com/PennyLaneAI/pennylane/pull/10568",
+     "subject": "Preserve change-op-basis structure in adjoint rule of 'ChangeOpBasis2' (#10568)"
+    }
+   ],
+   "unresolved_commits": [],
+   "measured": 5,
+   "stopped": false,
+   "pennylane_alone": 13277775171,
+   "pennylane_share": 14.694018268819795
+  }
+ },
+ "problems": [],
+ "run": "45271500606",
+ "recorded_at": "2026-11-23T22:45:55+00:00"
+}
