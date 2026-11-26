@@ -1,0 +1,230 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev151..catalyst-0.16.0.dev152/qft/qjit/compile",
+ "name": "0.16.0.dev151--0.16.0.dev152--qft-qjit--compile",
+ "before": "0.16.0.dev151",
+ "after": "0.16.0.dev152",
+ "cell": "qft/qjit",
+ "metric": "compile",
+ "first": {
+  "before": 3379501323,
+  "after": 3399412701,
+  "change_pct": 0.5891809499966276
+ },
+ "second": {
+  "before": 3381102571,
+  "after": 3399260402,
+  "change_pct": 0.5370387504875255,
+  "host": "AMD EPYC 9V74 80-Core Processor"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qft/qjit",
+  "metric": "compile",
+  "before": {
+   "stack": "catalyst-0.16.0.dev151",
+   "runs": [
+    3381962198,
+    3381170314,
+    3379498337
+   ],
+   "net": 3381170314
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev152",
+   "runs": [
+    3401183490,
+    3399000596,
+    3398507191
+   ],
+   "net": 3399000596
+  },
+  "packages": [
+   "cachetools 8.0.2 ? 8.0.3",
+   "pennylane-catalyst 0.16.0.dev151 ? 0.16.0.dev152"
+  ],
+  "python_functions": [
+   [
+    "catalyst/decomposition/decomposition_rules.py:_is_wire_leaf",
+    2052,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_arguments.py:_is_wire_leaf",
+    0,
+    2052
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:<genexpr>",
+    1541,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_arguments.py:<genexpr>",
+    0,
+    972
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:<lambda>",
+    433,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_discovery.py:<genexpr>",
+    0,
+    414
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:prepare_dummy_rule_arguments",
+    300,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_arguments.py:prepare_dummy_rule_arguments",
+    0,
+    300
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:<lambda>",
+    0,
+    283
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:_rule_allocates_work_wires",
+    196,
+    0
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:_rule_is_compatible",
+    196,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:_rule_allocates_work_wires",
+    0,
+    196
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:_rule_is_compatible",
+    0,
+    196
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:rule_to_callable",
+    191,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:rule_to_callable",
+    0,
+    191
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    6735396,
+    15584853
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    2376949,
+    5966936
+   ],
+   [
+    "void mlir::detail::walk<mlir::ForwardIterator>(mlir::Operation*, llvm::function_ref<void (mlir::Operation*)>, mlir::WalkOrder) [clone .constprop.1]",
+    314968,
+    1511045
+   ],
+   [
+    "mlir::detail::AttributeUniquer::initializeAttributeStorage(mlir::AttributeStorage*, mlir::MLIRContext*, mlir::TypeID)",
+    3505406,
+    4507461
+   ],
+   [
+    "(anonymous namespace)::addRuleNode(mlir::func::FuncOp, std::vector<DecompGraph::Core::RuleNode, std::allocator<DecompGraph::Core::RuleNode> >&)",
+    746788,
+    0
+   ],
+   [
+    "(anonymous namespace)::loadDecompositionRules(mlir::ModuleOp, llvm::StringMap<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, llvm::MallocAllocator>&, llvm::StringMap<",
+    213929,
+    740331
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    18084452,
+    18412139
+   ],
+   [
+    "_int_malloc",
+    90006258,
+    90324092
+   ],
+   [
+    "mlir::Op<mlir::func::FuncOp, mlir::OpTrait::OneRegion, mlir::OpTrait::ZeroResults, mlir::OpTrait::ZeroSuccessors, mlir::OpTrait::ZeroOperands, mlir::OpTrait::OpInvariants, mlir::BytecodeOpInterface::T",
+    56113,
+    347845
+   ],
+   [
+    "(anonymous namespace)::ParametricStorageUniquer::getOrCreate(bool, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStora",
+    19672640,
+    19922258
+   ],
+   [
+    "mlir::StringAttr::get(mlir::MLIRContext*, llvm::Twine const&)",
+    9505681,
+    9752127
+   ],
+   [
+    "mlir::NamedAttrList::set(mlir::StringAttr, mlir::Attribute)",
+    19751,
+    249350
+   ],
+   [
+    "std::pair<mlir::NamedAttribute const*, bool> mlir::impl::findAttrSorted<mlir::NamedAttribute const*>(mlir::NamedAttribute const*, mlir::NamedAttribute const*, llvm::StringRef)",
+    422121,
+    630549
+   ],
+   [
+    "mlir::ForwardIterator::makeIterable(mlir::Operation&)",
+    1332457,
+    1518188
+   ],
+   [
+    "(anonymous namespace)::prepareRuleLibrary(mlir::ModuleOp, mlir::ModuleOp, mlir::SymbolTable*)",
+    0,
+    177683
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Measurement op goid (#3504)",
+     "pull_request": 3504,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3504"
+    },
+    {
+     "score": 0,
+     "subject": "Re-enable on-demand rule generation (#3478)",
+     "pull_request": 3478,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3478"
+    },
+    {
+     "score": 0,
+     "subject": "refactor(decomposition): split preparation, discovery, capture, and compilation (#3460)",
+     "pull_request": 3460,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3460"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 3
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "45881828919",
+ "recorded_at": "2026-11-26T19:46:32+00:00"
+}

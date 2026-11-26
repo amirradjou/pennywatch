@@ -1,0 +1,230 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev151..catalyst-0.16.0.dev152/sampling/qjit/compile",
+ "name": "0.16.0.dev151--0.16.0.dev152--sampling-qjit--compile",
+ "before": "0.16.0.dev151",
+ "after": "0.16.0.dev152",
+ "cell": "sampling/qjit",
+ "metric": "compile",
+ "first": {
+  "before": 8151469266,
+  "after": 8196270923,
+  "change_pct": 0.549614499399132
+ },
+ "second": {
+  "before": 8152025048,
+  "after": 8194375807,
+  "change_pct": 0.5195121304293617,
+  "host": "Intel(R) Xeon(R) 6975P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "sampling/qjit",
+  "metric": "compile",
+  "before": {
+   "stack": "catalyst-0.16.0.dev151",
+   "runs": [
+    8149444033,
+    8151085549,
+    8157527538
+   ],
+   "net": 8151085549
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev152",
+   "runs": [
+    8193927729,
+    8194050122,
+    8198683709
+   ],
+   "net": 8194050122
+  },
+  "packages": [
+   "cachetools 8.0.2 ? 8.0.3",
+   "pennylane-catalyst 0.16.0.dev151 ? 0.16.0.dev152"
+  ],
+  "python_functions": [
+   [
+    "catalyst/decomposition/decomposition_rules.py:_is_wire_leaf",
+    1986,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_arguments.py:_is_wire_leaf",
+    0,
+    1986
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:<genexpr>",
+    1465,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_arguments.py:<genexpr>",
+    0,
+    922
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:<lambda>",
+    407,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_discovery.py:<genexpr>",
+    0,
+    388
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:prepare_dummy_rule_arguments",
+    280,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_arguments.py:prepare_dummy_rule_arguments",
+    0,
+    280
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:<lambda>",
+    0,
+    263
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:_rule_allocates_work_wires",
+    185,
+    0
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:_rule_is_compatible",
+    185,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:_rule_allocates_work_wires",
+    0,
+    185
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:_rule_is_compatible",
+    0,
+    185
+   ],
+   [
+    "catalyst/decomposition/decomposition_rules.py:rule_to_callable",
+    180,
+    0
+   ],
+   [
+    "catalyst/decomposition/rule_preparation.py:rule_to_callable",
+    0,
+    180
+   ]
+  ],
+  "c_functions": [
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    19501074,
+    40912960
+   ],
+   [
+    "mlir::StorageUniquer::isParametricStorageInitialized(mlir::TypeID)",
+    7268374,
+    15948732
+   ],
+   [
+    "mlir::detail::TypeIDResolver<catalyst::quantum::DecomposableOp::Trait<mlir::TypeID::get<catalyst::quantum::DecomposableOp::Trait>()::Empty>, void>::resolveTypeID()",
+    0,
+    4934173
+   ],
+   [
+    "AddNodeIDNode(llvm::FoldingSetNodeID&, llvm::SDNode const*)",
+    1710081,
+    3277112
+   ],
+   [
+    "bool llvm::detail::UniqueFunctionBase<bool, mlir::TypeID>::CallImpl<mlir::Op<catalyst::quantum::CustomOp, mlir::OpTrait::ZeroRegions, mlir::OpTrait::VariadicResults, mlir::OpTrait::ZeroSuccessors, mli",
+    40702079,
+    39235678
+   ],
+   [
+    "void mlir::detail::walk<mlir::ForwardIterator>(mlir::Operation*, llvm::function_ref<void (mlir::Operation*)>, mlir::WalkOrder) [clone .constprop.1]",
+    891001,
+    2110246
+   ],
+   [
+    "mlir::detail::AttributeUniquer::initializeAttributeStorage(mlir::AttributeStorage*, mlir::MLIRContext*, mlir::TypeID)",
+    3942967,
+    5133340
+   ],
+   [
+    "(anonymous namespace)::GreedyPatternRewriteDriver::addSingleOpToWorklist(mlir::Operation*)",
+    23542466,
+    24394850
+   ],
+   [
+    "(anonymous namespace)::addRuleNode(mlir::func::FuncOp, std::vector<DecompGraph::Core::RuleNode, std::allocator<DecompGraph::Core::RuleNode> >&)",
+    745644,
+    0
+   ],
+   [
+    "mlir::PatternApplicator::matchAndRewrite(mlir::Operation*, mlir::PatternRewriter&, llvm::function_ref<bool (mlir::Pattern const&)>, llvm::function_ref<void (mlir::Pattern const&)>, llvm::function_ref<",
+    17115723,
+    16426590
+   ],
+   [
+    "llvm::SmallVectorTemplateBase<unsigned int, true>::push_back(unsigned int)",
+    806937,
+    1482087
+   ],
+   [
+    "mlir::MLIRContext::getLoadedDialects()::{lambda(mlir::Dialect* const*, mlir::Dialect* const*)#1}::_FUN(mlir::Dialect* const*, mlir::Dialect* const*)",
+    16189502,
+    15546810
+   ],
+   [
+    "std::pair<tsl::detail_robin_hash::robin_hash<std::pair<void*, void*>, tsl::robin_map<void*, void*, nanobind::detail::ptr_hash, std::equal_to<void*>, std::allocator<std::pair<void*, void*> >, false, ts",
+    6744633,
+    7370301
+   ],
+   [
+    "nanobind::detail::inst_dealloc(_object*)",
+    10118734,
+    10731223
+   ],
+   [
+    "(anonymous namespace)::loadDecompositionRules(mlir::ModuleOp, llvm::StringMap<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, llvm::MallocAllocator>&, llvm::StringMap<",
+    213750,
+    739254
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Measurement op goid (#3504)",
+     "pull_request": 3504,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3504"
+    },
+    {
+     "score": 0,
+     "subject": "Re-enable on-demand rule generation (#3478)",
+     "pull_request": 3478,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3478"
+    },
+    {
+     "score": 0,
+     "subject": "refactor(decomposition): split preparation, discovery, capture, and compilation (#3460)",
+     "pull_request": 3460,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3460"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 3
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "45881828919",
+ "recorded_at": "2026-11-26T19:46:32+00:00"
+}
