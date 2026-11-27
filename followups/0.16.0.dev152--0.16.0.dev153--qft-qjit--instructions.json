@@ -1,0 +1,223 @@
+{
+ "schema": 1,
+ "key": "catalyst-0.16.0.dev152..catalyst-0.16.0.dev153/qft/qjit/instructions",
+ "name": "0.16.0.dev152--0.16.0.dev153--qft-qjit--instructions",
+ "before": "0.16.0.dev152",
+ "after": "0.16.0.dev153",
+ "cell": "qft/qjit",
+ "metric": "instructions",
+ "first": {
+  "before": 4679398009,
+  "after": 4502302482,
+  "change_pct": -3.784579269798975
+ },
+ "second": {
+  "before": 4680722415,
+  "after": 4502277900,
+  "change_pct": -3.812328507842096,
+  "host": "Intel(R) Xeon(R) 6973P-C"
+ },
+ "confirmed": true,
+ "explanation": {
+  "cell": "qft/qjit",
+  "metric": "instructions",
+  "before": {
+   "stack": "catalyst-0.16.0.dev152",
+   "runs": [
+    4679649910,
+    4681415928,
+    4680626554
+   ],
+   "net": 4680626554
+  },
+  "after": {
+   "stack": "catalyst-0.16.0.dev153",
+   "runs": [
+    4501940510,
+    4502675004,
+    4502362004
+   ],
+   "net": 4502362004
+  },
+  "packages": [
+   "pennylane-catalyst 0.16.0.dev152 ? 0.16.0.dev153"
+  ],
+  "python_functions": [
+   [
+    "~:<built-in method builtins.isinstance>",
+    135308,
+    127633
+   ],
+   [
+    "~:<built-in method builtins.len>",
+    32326,
+    30205
+   ],
+   [
+    "~:<built-in method builtins.hash>",
+    12863,
+    11204
+   ],
+   [
+    "jax/_src/core.py:__setattr__",
+    1561,
+    2611
+   ],
+   [
+    "jax/_src/dtypes.py:<genexpr>",
+    1033,
+    2009
+   ],
+   [
+    "~:<method 'get' of 'dict' objects>",
+    70242,
+    69282
+   ],
+   [
+    "jax/_src/array.py:sharding",
+    881,
+    83
+   ],
+   [
+    "jax/_src/numpy/util.py:<genexpr>",
+    959,
+    171
+   ],
+   [
+    "jax/_src/core.py:get_aval",
+    3862,
+    3090
+   ],
+   [
+    "jax/_src/core.py:update_aval_with_sharding",
+    817,
+    64
+   ],
+   [
+    "jax/_src/array.py:_get_aval_array",
+    780,
+    30
+   ],
+   [
+    "/usr/local/lib/python3.12/enum.py:__hash__",
+    2909,
+    2207
+   ],
+   [
+    "jax/_src/core.py:__hash__",
+    2906,
+    2204
+   ],
+   [
+    "~:<method 'items' of 'dict' objects>",
+    19084,
+    18394
+   ],
+   [
+    "jax/_src/pjit.py:<genexpr>",
+    4288,
+    3599
+   ]
+  ],
+  "c_functions": [
+   [
+    "???",
+    949843749,
+    928344239
+   ],
+   [
+    "_PyEval_EvalFrameDefault",
+    500925164,
+    485672916
+   ],
+   [
+    "_int_malloc",
+    91153465,
+    80145370
+   ],
+   [
+    "malloc",
+    40735507,
+    35470213
+   ],
+   [
+    "free",
+    47941104,
+    43173896
+   ],
+   [
+    "__tls_get_addr",
+    148745968,
+    144534629
+   ],
+   [
+    "ClearImpliedBits(llvm::FeatureBitset&, unsigned int, llvm::ArrayRef<llvm::SubtargetFeatureKV>)",
+    9251000,
+    5426832
+   ],
+   [
+    "std::pair<llvm::detail::DenseSetImpl<(anonymous namespace)::ParametricStorageUniquer::HashedStorage, llvm::DenseMap<(anonymous namespace)::ParametricStorageUniquer::HashedStorage, llvm::detail::DenseS",
+    15129859,
+    11345790
+   ],
+   [
+    "SetImpliedBits(llvm::FeatureBitset&, llvm::FeatureBitset const&, llvm::ArrayRef<llvm::SubtargetFeatureKV>)",
+    8465147,
+    5005073
+   ],
+   [
+    "__memcmp_avx2_movbe",
+    18456097,
+    15196460
+   ],
+   [
+    "mlir::detail::StorageUniquerImpl::getOrCreate(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage* (ml",
+    20451874,
+    17233651
+   ],
+   [
+    "mlir::StorageUniquer::getParametricStorageTypeImpl(mlir::TypeID, unsigned int, llvm::function_ref<bool (mlir::StorageUniquer::BaseStorage const*)>, llvm::function_ref<mlir::StorageUniquer::BaseStorage",
+    15584853,
+    12523104
+   ],
+   [
+    "mlir::RegisteredOperationName::insert(std::unique_ptr<mlir::OperationName::Impl, std::default_delete<mlir::OperationName::Impl> >, llvm::ArrayRef<llvm::StringRef>)",
+    13135975,
+    10290938
+   ],
+   [
+    "mlir::RegisteredOperationName* llvm::SmallVectorImpl<mlir::RegisteredOperationName>::insert_one_impl<mlir::RegisteredOperationName>(mlir::RegisteredOperationName*, mlir::RegisteredOperationName&&)",
+    9349376,
+    6709736
+   ],
+   [
+    "_int_free_chunk",
+    23678500,
+    21084287
+   ]
+  ],
+  "candidates": {
+   "pennylane-catalyst": [
+    {
+     "score": 0,
+     "subject": "Fix 'OperatorOp' printer/parser roundtrips (#3522)",
+     "pull_request": 3522,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3522"
+    },
+    {
+     "score": 0,
+     "subject": "perf: avoid allocating grouped wires during rule capture (#3525)",
+     "pull_request": 3525,
+     "url": "https://github.com/PennyLaneAI/catalyst/pull/3525"
+    }
+   ]
+  },
+  "candidate_counts": {
+   "pennylane-catalyst": 2
+  },
+  "bisect": null
+ },
+ "problems": [],
+ "run": "46057584636",
+ "recorded_at": "2026-11-27T19:57:05+00:00"
+}
